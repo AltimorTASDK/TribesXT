@@ -15,18 +15,6 @@ public:
 	static constexpr auto col_count = M;
 	static constexpr auto elem_count = M * N;
 
-	template<T factor>
-	static constexpr matrix scale = std::make_from_tuple<matrix>(
-		for_range_product<N, M>([]<typename... pairs> {
-			return std::make_tuple([] {
-				constexpr auto i = tuple_constant<0, pairs>;
-				constexpr auto j = tuple_constant<1, pairs>;
-				return i == j ? factor : 0;
-			}()...);
-		}));
-
-	static constexpr matrix identity = scale<(T)1>;
-
 	T elems[N * M];
 
 	constexpr matrix() : elems { 0 } {}
@@ -36,12 +24,12 @@ public:
 		static_assert(sizeof...(values) == N * M);
 	}
 
-	constexpr T &operator[](size_t i, size_t j)
+	constexpr T &get(size_t i, size_t j)
 	{
 		return elems[i * M + j];
 	}
 
-	constexpr T operator[](size_t i, size_t j) const
+	constexpr T get(size_t i, size_t j) const
 	{
 		return elems[i * M + j];
 	}
@@ -50,7 +38,7 @@ public:
 	constexpr auto row()
 	{
 		return for_range<M>([&]<size_t ...J> {
-			return std::tie((*this)[i, J]...);
+			return std::tie(get(i, J)...);
 		});
 	}
 
@@ -58,7 +46,7 @@ public:
 	constexpr auto row() const
 	{
 		return for_range<M>([&]<size_t ...J> {
-			return std::make_tuple((*this)[i, J]...);
+			return std::make_tuple(get(i, J)...);
 		});
 	}
 
@@ -80,7 +68,7 @@ public:
 	constexpr auto col()
 	{
 		return for_range<N>([&]<size_t ...I> {
-			return std::tie((*this)[I, j]...);
+			return std::tie(get(I, j)...);
 		});
 	}
 
@@ -88,7 +76,7 @@ public:
 	constexpr auto col() const
 	{
 		return for_range<N>([&]<size_t ...I> {
-			return std::make_tuple((*this)[I, j]...);
+			return std::make_tuple(get(I, j)...);
 		});
 	}
 

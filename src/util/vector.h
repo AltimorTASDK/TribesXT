@@ -66,7 +66,7 @@ public:
 		*this = other;
 	}
 
-	template<typename ...T, typename = std::enable_if_t<sizeof...(T) == elem_count>>
+	template<typename ...T> requires(sizeof...(T) == elem_count)
 	constexpr vec_impl(T ...values)
 	{
 		elems() = std::make_tuple(values...);

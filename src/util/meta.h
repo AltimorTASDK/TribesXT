@@ -72,6 +72,11 @@ struct to_static_function<ReturnType(ThisType::*)(ArgTypes...)> {
 	using type = ReturnType(__thiscall*)(ThisType*, ArgTypes...);
 };
 
+template<typename ReturnType, typename ThisType, typename ...ArgTypes>
+struct to_static_function<ReturnType(ThisType::*)(ArgTypes...) const> {
+	using type = ReturnType(__thiscall*)(const ThisType*, ArgTypes...);
+};
+
 template<typename T>
 using to_static_function_t = to_static_function<T>::type;
 

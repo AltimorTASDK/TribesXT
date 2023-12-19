@@ -100,12 +100,20 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\darkstar\Sim\simContainer.h" />
+    <ClInclude Include="src\darkstar\Sim\simMovement.h" />
+    <ClInclude Include="src\darkstar\Sim\simNetObject.h" />
+    <ClInclude Include="src\darkstar\Sim\simObject.h" />
+    <ClInclude Include="src\plugins\netset\playerXT.h" />
+    <ClInclude Include="src\tribes\constants.h" />
+    <ClInclude Include="src\tribes\gameBase.h" />
     <ClInclude Include="src\tribes\player.h" />
+    <ClInclude Include="src\tribes\shapeBase.h" />
     <ClInclude Include="src\util\platform.h" />
     <ClInclude Include="src\nofix\x86.h" />
     <ClInclude Include="src\nofix\x86Hook.h" />
     <ClInclude Include="src\darkstar\console\console.h" />
-    <ClInclude Include="src\darkstar\Ml\m_point.h" />
+    <ClInclude Include="src\darkstar\Ml\ml.h" />
     <ClInclude Include="src\darkstar\Sim\simConsolePlugin.h" />
     <ClInclude Include="src\darkstar\Sim\simGame.h" />
     <ClInclude Include="src\plugins\netset\netset.h" />
@@ -116,10 +124,12 @@
     <ClInclude Include="src\util\meta.h" />
     <ClInclude Include="src\util\operators.h" />
     <ClInclude Include="src\util\preprocessor.h" />
+    <ClInclude Include="src\util\struct.h" />
     <ClInclude Include="src\util\vector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\plugins\netset\netset.cpp" />
+    <ClCompile Include="src\plugins\netset\playerXT.cpp" />
     <ClCompile Include="src\util\hooks.cpp" />
     <ClCompile Include="src\nofix\x86.cpp" />
     <ClCompile Include="src\nofix\x86Hook.cpp" />

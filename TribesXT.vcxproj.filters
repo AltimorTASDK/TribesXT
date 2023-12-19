@@ -51,7 +51,7 @@
     <ClInclude Include="src\plugins\netset\netset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\darkstar\Ml\m_point.h">
+    <ClInclude Include="src\darkstar\Ml\ml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\hooks.h">
@@ -64,6 +64,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\preprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\struct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\shapeBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\gameBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simMovement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugins\netset\playerXT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simNetObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\util\hooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\netset\playerXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

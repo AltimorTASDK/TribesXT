@@ -6,4 +6,5 @@ void NetSetPlugin::hook_Player_updateMove(Player *player, edx_t, PlayerMove *cur
 {
 	Console->printf("updateMove");
 	get().hooks.Player_updateMove.callOriginal(player, curMove, server);
+	player->setRot(player->getRot() + Point3F(0.f, 0.f, 0.05f));
 }
