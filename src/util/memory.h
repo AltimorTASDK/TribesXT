@@ -38,5 +38,5 @@ struct call_virtual_impl<Index, ReturnType(ThisType::*)(ArgTypes...)> {
 template<size_t Index, typename T>
 inline auto call_virtual(auto *object, auto &&...args)
 {
-	return detail::call_virtual_impl<Index, T>(object, std::forward<decltype(args)>(args)...);
+	return detail::call_virtual_impl<Index, T>::call(object, std::forward<decltype(args)>(args)...);
 }
