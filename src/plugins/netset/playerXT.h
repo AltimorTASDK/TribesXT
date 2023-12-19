@@ -30,29 +30,13 @@ public:
 		Snapshot snapshots[SNAP_HISTORY];
 	} xt;
 
-	Snapshot createSnapshot(uint32_t time) const
-	{
-		return {
-			.tick = msToTicks(time),
-			.yaw = getRot().z,
-			.position = getLinearPosition(),
-			.velocity = getLinearVelocity(),
-			.pitch = viewPitch,
-			.energy = energy,
-			.traction = traction,
-			.jumpSurfaceLastContact = jumpSurfaceLastContact,
-			.pingStatus = getSensorPinged(),
-			.contact = contact,
-			.jetting = jetting,
-			.crouching = crouching
-		};
-	}
-
 	const Snapshot *getSnapshot(uint32_t time) const
 	{
 		const auto &snap = xt.snapshots[msToTicks(time) % SNAP_HISTORY];
 		return snap.tick == msToTicks(time) ? &snap : nullptr;
 	}
+
+	Snapshot createSnapshot(uint32_t time) const;
 
 	void saveSnapshot(uint32_t time)
 	{

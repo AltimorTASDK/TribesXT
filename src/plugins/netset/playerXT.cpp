@@ -1,6 +1,24 @@
 #include "plugins/netset/playerXT.h"
 #include <cstdint>
 
+auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
+{
+	return {
+		.tick = msToTicks(time),
+		.yaw = getRot().z,
+		.position = getLinearPosition(),
+		.velocity = getLinearVelocity(),
+		.pitch = viewPitch,
+		.energy = energy,
+		.traction = traction,
+		.jumpSurfaceLastContact = jumpSurfaceLastContact,
+		.pingStatus = getSensorPinged(),
+		.contact = contact,
+		.jetting = jetting,
+		.crouching = crouching
+	};
+}
+
 bool PlayerXT::loadSnapshot(uint32_t time)
 {
 	const auto *snap = getSnapshot(time);
