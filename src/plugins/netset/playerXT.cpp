@@ -26,6 +26,8 @@ bool PlayerXT::loadSnapshot(uint32_t time)
 	if (snap == nullptr)
 		return false;
 
+	// Corresponds to Player::readPacketData
+
 	setSensorPinged(snap->pingStatus);
 	const auto rot = Point3F(getRot().x, getRot().y, snap->yaw);
 
