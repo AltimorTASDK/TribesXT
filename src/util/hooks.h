@@ -28,7 +28,7 @@ public:
 template<typename HookType, typename OriginalType, typename ...ArgTypes>
 class JmpHook : public detail::JmpHookImpl {
 public:
-	JmpHook(void *target, HookType hook) : JmpHookImpl((std::byte*)target, hook)
+	JmpHook(void *target, HookType hook) : JmpHookImpl((std::byte*)target, (void*)hook)
 	{
 	}
 
@@ -58,6 +58,12 @@ JmpHook(auto, ReturnType(__fastcall *hook)(ThisType*, edx_t, ArgTypes...))
 	-> JmpHook<decltype(hook),
 	           ReturnType(__thiscall*)(ThisType*, ArgTypes...),
 	           ThisType*, ArgTypes...>;
+
+template<typename ReturnType, typename ThisType>
+JmpHook(auto, ReturnType(__fastcall *hook)(ThisType*))
+	-> JmpHook<decltype(hook),
+	           ReturnType(__thiscall*)(ThisType*),
+	           ThisType*>;
 
 template<auto Target, auto Hook>
 	requires requires { JmpHook(Target, Hook); }
