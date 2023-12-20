@@ -3,7 +3,9 @@
 #include "darkstar/Ml/ml.h"
 #include "tribes/constants.h"
 #include "tribes/player.h"
+#include "util/struct.h"
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 
 class PlayerXT : public Player {
@@ -28,7 +30,9 @@ public:
 
 	struct DataXT {
 		Snapshot snapshots[SNAP_HISTORY];
-	} xt;
+	};
+
+	FIELD(0x323C, DataXT, xt);
 
 	const Snapshot *getSnapshot(uint32_t time) const
 	{
