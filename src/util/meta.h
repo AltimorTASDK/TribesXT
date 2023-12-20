@@ -14,9 +14,6 @@
 
 using ssize_t = std::make_signed_t<size_t>;
 
-template<typename T, size_t size>
-using c_array_t = T[size];
-
 template<typename T>
 constexpr auto is_void = std::is_same_v<T, void>;
 
@@ -299,24 +296,15 @@ constexpr auto array_cat(const std::array<T, sizes> &...arrays)
 }
 
 // Wrap string literals so they can be passed as template params
-template<typename T, size_t ...N>
+template<typename T, size_t N>
 struct string_literal {
-	static constexpr auto size = ((N - 1) + ...);
+	static constexpr auto size = N - 1;
 
-	T value[size + 1];
+	T value[N];
 
-	constexpr string_literal(const c_array_t<T, N> &...strings)
+	constexpr string_literal(const T (&string)[N])
 	{
-		if constexpr(sizeof...(N) == 1) {
-			std::copy_n(strings..., size + 1, value);
-		} else {
-			std::copy_n(array_cat(for_range<N - 1>([&]<size_t ...I>(const auto &str) {
-				if constexpr (sizeof...(I) != 0)
-					return std::array { str[I]... };
-				else
-					return std::array<T, 0>();
-			}, strings)..., std::array { T{0} }).begin(), size + 1, value);
-		}
+		std::copy_n(string, N, value);
 	}
 };
 
