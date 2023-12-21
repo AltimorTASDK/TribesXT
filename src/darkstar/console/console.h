@@ -75,6 +75,13 @@ public:
 		using func_t = void(__thiscall*)(CMDConsole*, int, const char*, CMDCallback*, int);
 		((func_t)0x403640)(this, id, name, cb, privilegeLevel);
 	}
+
+	const char *evaluate(const char *string, bool echo = true,
+	                     const char *fileName = nullptr, int privilegeLevel = 0)
+	{
+		using func_t = to_static_function_t<decltype(&CMDConsole::evaluate)>;
+		((func_t)0x403640)(this, string, echo, fileName, privilegeLevel);
+	}
 };
 
 inline auto *&Console = *(CMDConsole**)0x6E284C;
