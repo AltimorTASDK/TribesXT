@@ -25,6 +25,12 @@ constexpr auto sizeof_tuple = std::tuple_size_v<std::remove_reference_t<T>>;
 template<size_t N, typename T>
 constexpr auto tuple_constant = std::tuple_element_t<N, T>::value;
 
+template<size_t N, typename ...T>
+using get_at_index_t = decltype(std::get<N>(std::make_tuple(std::declval<T>()...)));
+
+template<size_t N, auto ...V>
+constexpr auto get_at_index = std::get<N>(std::make_tuple(V...));
+
 // Make a std::integral_constant with deduced type
 template<std::integral auto V>
 using make_integral = std::integral_constant<decltype(V), V>;
@@ -236,6 +242,14 @@ constexpr auto zip(TupleLike auto &&...tuples)
 			return std::make_tuple(std::forward_as_tuple(get<I>(tuples...))...);
 		});
 	}
+}
+
+// Applies a function to each element of a tuple and returns a tuple of the returned values.
+constexpr auto map(auto &&callable, TupleLike auto &&tuple)
+{
+	return [&]<size_t ...I>(std::index_sequence<I...>) {
+		return std::make_tuple(callable.template operator()<I>(std::get<I>(tuple))...);
+	}(std::make_index_sequence<sizeof_tuple<decltype(tuple)>>());
 }
 
 // Given a tuple of tuples, unpack the values of all contained tuples into a single continuous tuple
