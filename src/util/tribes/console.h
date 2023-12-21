@@ -26,7 +26,6 @@ namespace detail {
 inline char scratchBuffer[64];
 
 template<same_as_any<char*, const char*> T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	static_assert(!std::is_same_v<T, char*>, "argv pointers must be const");
@@ -34,21 +33,18 @@ const T parseCommandArgument(const char *arg)
 }
 
 template<std::same_as<int> T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	return atoi(arg);
 }
 
 template<std::same_as<float> T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	return atof(arg);
 }
 
 template<std::same_as<bool> T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	if (stricmp(arg, "True") == 0)
@@ -59,14 +55,12 @@ const T parseCommandArgument(const char *arg)
 }
 
 template<same_as_any<Player*, const Player*, PlayerXT*, const PlayerXT*> T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	return (T)findPlayerObject(arg);
 }
 
 template<same_as_any<Point3F, const Point3F&> T>
-[[msvc::forceinline]]
 const Point3F parseCommandArgument(const char *arg)
 {
 	Point3F p;
@@ -75,7 +69,6 @@ const Point3F parseCommandArgument(const char *arg)
 }
 
 template<same_as_any<EulerF, const EulerF&> T>
-[[msvc::forceinline]]
 const EulerF parseCommandArgument(const char *arg)
 {
 	EulerF e;
@@ -84,61 +77,52 @@ const EulerF parseCommandArgument(const char *arg)
 }
 
 template<typename T>
-[[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
 {
 	static_assert(always_false<T>(), "Unhandled argument type");
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(const char *arg)
+inline const char *handleCommandReturn(const char *arg)
 {
 	return arg;
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(int arg)
+inline const char *handleCommandReturn(int arg)
 {
 	sprintf_s(scratchBuffer, "%d", arg);
 	return scratchBuffer;
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(float arg)
+inline const char *handleCommandReturn(float arg)
 {
 	sprintf_s(scratchBuffer, "%f", arg);
 	return scratchBuffer;
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(bool arg)
+inline const char *handleCommandReturn(bool arg)
 {
 	return arg ? "True" : "False";
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(const Point3F &arg)
+inline const char *handleCommandReturn(const Point3F &arg)
 {
 	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
 	return scratchBuffer;
 }
 
-[[msvc::forceinline]]
-const char *handleCommandReturn(const EulerF &arg)
+inline const char *handleCommandReturn(const EulerF &arg)
 {
 	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
 	return scratchBuffer;
 }
 
 template<typename T>
-[[msvc::forceinline]]
 const char *handleCommandReturn(T &&arg)
 {
 	static_assert(always_false<T>(), "Unhandled return type");
 }
 
 template<bool IsRemote, size_t ArgIndex>
-[[msvc::forceinline]]
 const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...args)
 {
 	if constexpr (!is_void<decltype(handler(std::forward<decltype(args)>(args)...))>) {
@@ -150,7 +134,6 @@ const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...arg
 }
 
 template<bool IsRemote, size_t ArgIndex, typename ArgsHead, typename ...ArgsTail>
-[[msvc::forceinline]]
 const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...args)
 {
 	decltype(auto) arg = parseCommandArgument<ArgsHead>(argv[ArgIndex]);
@@ -176,7 +159,6 @@ const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...arg
 } // namespace detail
 
 template<string_literal Name, auto Handler>
-[[msvc::forceinline]]
 void addCommandXT(CMDConsole *console)
 {
 	console->addCommand(0, Name.value, []<typename R, typename ...Args>(R(*)(Args...)) {
