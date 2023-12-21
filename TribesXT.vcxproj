@@ -108,8 +108,10 @@
     <ClInclude Include="src\darkstar\Sim\simObject.h" />
     <ClInclude Include="src\plugins\netset\playerXT.h" />
     <ClInclude Include="src\tribes\constants.h" />
+    <ClInclude Include="src\tribes\worldGlobals.h" />
     <ClInclude Include="src\tribes\gameBase.h" />
     <ClInclude Include="src\tribes\player.h" />
+    <ClInclude Include="src\tribes\playerPSC.h" />
     <ClInclude Include="src\tribes\shapeBase.h" />
     <ClInclude Include="src\util\platform.h" />
     <ClInclude Include="src\nofix\x86.h" />

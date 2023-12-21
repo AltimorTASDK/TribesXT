@@ -55,13 +55,29 @@ constexpr T lerp(T a, T b, auto c)
 	return a + (b - a) * c;
 }
 
+template<std::floating_point T>
+constexpr T normalize_radians(T deg)
+{
+	while (deg >= math::pi)
+		deg -= 2 * math::pi;
+	while (deg < -math::pi)
+		deg += 2 * math::pi;
+	return deg;
+}
+
+template<typename T> requires (!std::integral<T>)
+constexpr T lerp_radians(T a, T b, auto c)
+{
+	return a + normalize_radians(b - a) * c;
+}
+
 template<typename T>
 constexpr T inv_lerp(T value, T a, T b)
 {
 	if (value <= a)
-		return (T) { 0 };
+		return T{0};
 	else if (value >= b)
-		return (T) { 1 };
+		return T{1};
 	else
 		return (value - a) / (b - a);
 }
@@ -101,9 +117,4 @@ constexpr float deg_to_rad(float x)
 constexpr float rad_to_deg(float x)
 {
 	return x * 180.f / math::pi;
-}
-
-constexpr float angle_difference(float a, float b)
-{
-	return std::fmod(deg_to_rad(a) - deg_to_rad(b) + math::pi, math::tau) - math::pi;
 }

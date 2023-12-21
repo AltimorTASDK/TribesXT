@@ -14,6 +14,8 @@ public:
 
 	// Maps to Player::read/writePacketData fields
 	struct Snapshot {
+		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
+
 		uint32_t tick = -1;
 		float yaw;
 		Point3F position;
@@ -50,5 +52,17 @@ public:
 		xt.snapshots[index] = createSnapshot(time);
 	}
 
+	void invalidatePrediction(uint32_t time)
+	{
+		for (auto &snap : xt.snapshots) {
+			if (snap.tick >= msToTicksRoundUp(time))
+				snap.tick = -1;
+		}
+	}
+
+	void loadSnapshot(const Snapshot &snapshot, bool useMouseInput = false);
 	bool loadSnapshot(uint32_t time);
+	bool loadSnapshotInterpolated(uint32_t time);
+	
+	void clientMove(unsigned int curTime);
 };

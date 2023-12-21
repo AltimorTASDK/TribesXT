@@ -96,6 +96,12 @@
     <ClInclude Include="src\util\tribes\console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\tribes\playerPSC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\worldGlobals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

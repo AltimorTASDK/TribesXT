@@ -3,7 +3,9 @@
 #include "darkstar/Sim/simConsolePlugin.h"
 #include "plugins/netset/playerXT.h"
 #include "util/hooks.h"
+#include "nofix/x86Hook.h"
 
+class BitStream;
 class Player;
 struct PlayerMove;
 
@@ -18,8 +20,10 @@ public:
 
 private:
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT *player);
-	static void __fastcall hook_Player_updateMove(
-		PlayerXT *player, edx_t, PlayerMove *curMove, bool server);
+	static void __fastcall hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server);
+	static void hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime);
+	static void hook_Player_clientProcess_move_asm();
+	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
 
 	struct {
 		struct {
@@ -29,7 +33,11 @@ private:
 			StaticCodePatch<0x4CFDA2, PlayerXT::SIZEOF> allocationSize4;
 			StaticJmpHook<0x4ACE70, hook_Player_ctor> ctor;
 			StaticJmpHook<0x4BA640, hook_Player_updateMove> updateMove;
+			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;
 		} Player;
+		struct {
+			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
+		} PlayerPSC;
 	} hooks;
 
 public:

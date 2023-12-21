@@ -120,4 +120,10 @@ public:
 		using func_t = to_static_function_t<decltype(&Player::setAnimation)>;
 		((func_t)0x4AD1D0)(this, anim);
 	}
+
+	void updateMove(PlayerMove *curMove, bool server)
+	{
+		using func_t = to_static_function_t<decltype(&Player::updateMove)>;
+		((func_t)0x4BA640)(this, curMove, server);
+	}
 };

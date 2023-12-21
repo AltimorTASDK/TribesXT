@@ -53,12 +53,12 @@ public:
 	// Component-wise lerp of two vectors
 	static constexpr vec_impl lerp(const vec_impl &a, const vec_impl &b, auto t)
 	{
-		return a.map(bind_back(std::lerp, t), b.elems());
+		return a.map(::bind_back(std::lerp, t), b.elems());
 	}
 
 	constexpr vec_impl()
 	{
-		foreach(bind_back(operators::eq, elem_type{}));
+		foreach(::bind_back(operators::eq, elem_type{}));
 	}
 
 	constexpr vec_impl(const vec_impl &other)
@@ -175,7 +175,7 @@ public:
 
 	constexpr vec_impl &operator*=(elem_type value)
 	{
-		foreach(bind_back(operators::mul_eq, value));
+		foreach(::bind_back(operators::mul_eq, value));
 		return *this;
 	}
 
@@ -186,7 +186,7 @@ public:
 
 	constexpr vec_impl operator*(elem_type value) const
 	{
-		return map(bind_back(operators::mul, value));
+		return map(::bind_back(operators::mul, value));
 	}
 
 	constexpr vec_impl &operator/=(const vec_impl &other)
@@ -197,7 +197,7 @@ public:
 
 	constexpr vec_impl &operator/=(elem_type value)
 	{
-		foreach(bind_back(operators::div_eq, value));
+		foreach(::bind_back(operators::div_eq, value));
 		return *this;
 	}
 
@@ -208,7 +208,7 @@ public:
 
 	constexpr vec_impl operator/(elem_type value) const
 	{
-		return map(bind_back(operators::div, value));
+		return map(::bind_back(operators::div, value));
 	}
 
 	constexpr bool operator==(const vec_impl &other) const
