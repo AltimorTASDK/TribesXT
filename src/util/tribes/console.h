@@ -23,6 +23,8 @@ inline __declspec(naked) Player *findPlayerObject(const char *name)
 
 namespace detail {
 
+inline char scratchBuffer[64];
+
 template<same_as_any<char*, const char*> T>
 [[msvc::forceinline]]
 const T parseCommandArgument(const char *arg)
@@ -43,6 +45,17 @@ template<std::same_as<float> T>
 const T parseCommandArgument(const char *arg)
 {
 	return atof(arg);
+}
+
+template<std::same_as<bool> T>
+[[msvc::forceinline]]
+const T parseCommandArgument(const char *arg)
+{
+	if (stricmp(arg, "True") == 0)
+		return true;
+	if (stricmp(arg, "False") == 0)
+		return false;
+	return atof(arg) != 0;
 }
 
 template<same_as_any<Player*, const Player*, PlayerXT*, const PlayerXT*> T>
@@ -77,11 +90,63 @@ const T parseCommandArgument(const char *arg)
 	static_assert(always_false<T>(), "Unhandled argument type");
 }
 
+[[msvc::forceinline]]
+const char *handleCommandReturn(const char *arg)
+{
+	return arg;
+}
+
+[[msvc::forceinline]]
+const char *handleCommandReturn(int arg)
+{
+	sprintf_s(scratchBuffer, "%d", arg);
+	return scratchBuffer;
+}
+
+[[msvc::forceinline]]
+const char *handleCommandReturn(float arg)
+{
+	sprintf_s(scratchBuffer, "%f", arg);
+	return scratchBuffer;
+}
+
+[[msvc::forceinline]]
+const char *handleCommandReturn(bool arg)
+{
+	return arg ? "True" : "False";
+}
+
+[[msvc::forceinline]]
+const char *handleCommandReturn(const Point3F &arg)
+{
+	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
+	return scratchBuffer;
+}
+
+[[msvc::forceinline]]
+const char *handleCommandReturn(const EulerF &arg)
+{
+	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
+	return scratchBuffer;
+}
+
+template<typename T>
+[[msvc::forceinline]]
+const char *handleCommandReturn(T &&arg)
+{
+	static_assert(always_false<T>(), "Unhandled return type");
+}
+
 template<bool IsRemote, size_t ArgIndex>
 [[msvc::forceinline]]
 const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...args)
 {
-	return handler(std::forward<decltype(args)>(args)...);
+	if constexpr (!is_void<decltype(handler(std::forward<decltype(args)>(args)...))>) {
+		return handleCommandReturn(handler(std::forward<decltype(args)>(args)...));
+	} else {
+		handler(std::forward<decltype(args)>(args)...);
+		return "";
+	}
 }
 
 template<bool IsRemote, size_t ArgIndex, typename ArgsHead, typename ...ArgsTail>
@@ -92,9 +157,11 @@ const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...arg
 
 	if constexpr (std::is_pointer_v<decltype(arg)>) {
 		if (arg == nullptr) {
-			if constexpr (IsRemote) {
-				Console->printf("%s: Invalid object \"%s\"",
-						argv[0], argv[ArgIndex]);
+			if constexpr (!IsRemote) {
+				Console->printf(
+					CON_YELLOW,
+					"%s: Invalid object \"%s\"",
+					argv[0], argv[ArgIndex]);
 			}
 			return "";
 		}
@@ -109,15 +176,17 @@ const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...arg
 } // namespace detail
 
 template<string_literal Name, auto Handler>
+[[msvc::forceinline]]
 void addCommandXT(CMDConsole *console)
 {
-	const auto callback = []<typename ...Args>(const char*(*)(Args...)) {
+	console->addCommand(0, Name.value, []<typename R, typename ...Args>(R(*)(Args...)) {
 		return [](CMDConsole *console, int id, int argc, const char *argv[]) {
 			constexpr auto isRemote = Name.starts_with("remote");
 
 			if (argc != sizeof...(Args) + 1) {
 				if constexpr (!isRemote) {
 					console->printf(
+						CON_YELLOW,
 						"%s: Wrong number of arguments (should be %d)",
 						argv[0], sizeof...(Args));
 				}
@@ -126,7 +195,5 @@ void addCommandXT(CMDConsole *console)
 
 			return detail::callCommandHandler<isRemote, 1, Args...>(Handler, argv);
 		};
-	}(Handler);
-
-	console->addCommand(0, Name.value, callback);
+	}(Handler));
 }
