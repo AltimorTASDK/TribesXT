@@ -1,5 +1,14 @@
+#include "plugins/netset/netset.h"
 #include "plugins/netset/playerXT.h"
 #include <cstdint>
+#include <new>
+
+PlayerXT *NetSetPlugin::hook_Player_ctor(PlayerXT *player)
+{
+	// Initialize new fields
+	new (&player->xt) PlayerXT::DataXT;
+	return get()->hooks.Player.ctor.callOriginal(player);
+}
 
 auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {

@@ -32,7 +32,9 @@ public:
 		Snapshot snapshots[SNAP_HISTORY];
 	};
 
-	FIELD(0x323C, DataXT, xt);
+	FIELD(Player::SIZEOF, DataXT, xt);
+
+	static constexpr size_t SIZEOF = Player::SIZEOF + sizeof(DataXT);
 
 	const Snapshot *getSnapshot(uint32_t time) const
 	{

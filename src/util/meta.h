@@ -17,6 +17,11 @@ using ssize_t = std::make_signed_t<size_t>;
 template<typename T>
 constexpr auto is_void = std::is_same_v<T, void>;
 
+template<typename...>
+consteval auto always_false() { return false; }
+template<auto...>
+consteval auto always_false() { return false; }
+
 // Like std::tuple_size_v, but accepts reference types
 template<typename T>
 constexpr auto sizeof_tuple = std::tuple_size_v<std::remove_reference_t<T>>;
@@ -30,6 +35,9 @@ using get_at_index_t = decltype(std::get<N>(std::make_tuple(std::declval<T>()...
 
 template<size_t N, auto ...V>
 constexpr auto get_at_index = std::get<N>(std::make_tuple(V...));
+
+template<typename T, typename ...U>
+concept same_as_any = (std::same_as<T, U> || ...);
 
 // Make a std::integral_constant with deduced type
 template<std::integral auto V>
@@ -311,14 +319,31 @@ constexpr auto array_cat(const std::array<T, sizes> &...arrays)
 
 // Wrap string literals so they can be passed as template params
 template<typename T, size_t N>
+struct string_literal;
+
+template<typename T>
+concept any_string_literal = requires(T t) { []<typename T, size_t N>(string_literal<T, N>){}(t); };
+
+template<typename T, size_t N>
 struct string_literal {
-	static constexpr auto size = N - 1;
+	using char_type = T;
+	static constexpr auto length = N - 1;
 
 	T value[N];
 
 	constexpr string_literal(const T (&string)[N])
 	{
 		std::copy_n(string, N, value);
+	}
+
+	template<size_t SubstringN> requires (SubstringN <= N)
+	consteval bool starts_with(const T (&substring)[SubstringN]) const
+	{
+		for (size_t i = 0; i < SubstringN - 1; i++) {
+			if (value[i] != substring[i])
+				return false;
+		}
+		return true;
 	}
 };
 

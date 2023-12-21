@@ -93,6 +93,9 @@
     <ClInclude Include="src\darkstar\Sim\simObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\util\tribes\console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

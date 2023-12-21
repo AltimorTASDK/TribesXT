@@ -22,6 +22,16 @@ public:
 
 class CMDConsole : public CMDCallback {
 public:
+	enum Type {
+		Default,
+		Bool,
+		Int,
+		Float,
+		Double,
+		Unit,
+		Point3F,
+	};
+
 	void printf(const char *format, auto &&...args)
 	{
 		using func_t = void(__stdcall*)(CMDConsole*, const char*, ...);
@@ -32,6 +42,38 @@ public:
 	{
 		using func_t = void(__stdcall*)(CMDConsole*, ConsoleColor, const char*, ...);
 		((func_t)0x403A10)(this, color, format, std::forward<decltype(args)>(args)...);
+	}
+
+	void addVariable(int id, const char *name, Callback cb, const char *value = nullptr)
+	{
+		using func_t = void(__thiscall*)(CMDConsole*, int, const char*,
+		                                 Callback, const char*);
+		((func_t)0x403500)(this, id, name, cb, value);
+	}
+
+	void addVariable(int id, const char *name, CMDCallback *cb, const char *value = nullptr)
+	{
+		using func_t = void(__thiscall*)(CMDConsole*, int, const char*,
+		                                 CMDCallback*, const char*);
+		((func_t)0x403530)(this, id, name, cb, value);
+	}
+
+	void addVariable(int id, const char *name, Type t, void *dp)
+	{
+		using func_t = void(__thiscall*)(CMDConsole*, int, const char*, Type, void*);
+		((func_t)0x403560)(this, id, name, t, dp);
+	}
+
+	void addCommand(int id, const char *name, Callback cb, int privilegeLevel = 0)
+	{
+		using func_t = void(__thiscall*)(CMDConsole*, int, const char*, Callback, int);
+		((func_t)0x403600)(this, id, name, cb, privilegeLevel);
+	}
+
+	void addCommand(int id, const char *name, CMDCallback *cb, int privilegeLevel = 0)
+	{
+		using func_t = void(__thiscall*)(CMDConsole*, int, const char*, CMDCallback*, int);
+		((func_t)0x403640)(this, id, name, cb, privilegeLevel);
 	}
 };
 

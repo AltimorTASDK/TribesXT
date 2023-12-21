@@ -19,6 +19,8 @@ struct PlayerMove {
 
 class Player : public ShapeBase {
 public:
+	static constexpr size_t SIZEOF = 0x323C;
+
 	enum {
 		root,
 		run,
