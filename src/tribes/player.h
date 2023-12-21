@@ -100,6 +100,19 @@ public:
 		ANIM_DIE_GRAB_BACK = diegrabback,
 	};
 
+	struct ItemImageEntry {
+		int state;
+		int typeId;
+		int imageId;
+		int teamId;
+		std::byte pad010[0x18 - 0x10];
+		float delayTime;
+		int fireCount;
+		bool triggerDown;
+		bool ammo;
+		std::byte pad022[0x374 - 0x22];
+	};
+
 	FIELD(0x0FB0, int, updateSkip);
 	FIELD(0x0FB4, int, updateDebt);
 	FIELD(0x0FD0, int, jumpSurfaceLastContact);
@@ -118,6 +131,7 @@ public:
 	FIELD(0x1050, int, mountPoint);
 	FIELD(0x1054, float, forwardAxisMovement);
 	FIELD(0x1058, float, sideAxisMovement);
+	ARRAY_FIELD(0x169C, ItemImageEntry[MaxItemImages], itemImageList);
 
 	const char *scriptThis() const
 	{

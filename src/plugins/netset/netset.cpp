@@ -1,3 +1,4 @@
+#include "tribes/playerPSC.h"
 #include "plugins/netset/playerXT.h"
 #include "plugins/netset/netset.h"
 #include "util/tribes/console.h"
@@ -56,6 +57,15 @@ __declspec(naked) void NetSetPlugin::hook_Player_clientProcess_move_asm()
 	}
 }
 
+uint32_t NetSetPlugin::hook_Player_packUpdate(PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
+{
+	const auto snapshot = player->createSnapshot();
+	player->loadSnapshot(player->lastProcessTime - TICK_MS, true);
+	const auto result = get()->hooks.Player.packUpdate.callOriginal(player, gm, mask, stream);
+	player->loadSnapshot(snapshot, true);
+	return result;
+}
+
 void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 {
 	auto *player = (PlayerXT*)cs.reg.eax;
@@ -63,12 +73,25 @@ void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 	player->saveSnapshot(player->lastProcessTime);
 }
 
+bool NetSetPlugin::hook_PlayerPSC_writePacket(PlayerPSC *psc, edx_t, BitStream *bstream, uint32_t &key)
+{
+	if (!psc->isServer || psc->controlPlayer == nullptr)
+		return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
+
+	auto *player = (PlayerXT*)psc->controlPlayer;
+	const auto snapshot = player->createSnapshot();
+	player->loadSnapshot(player->lastProcessTime - TICK_MS, true);
+	const auto result = get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
+	player->loadSnapshot(snapshot, true);
+	return result;
+}
+
 static PlayerXT::Snapshot testSnapshot;
 
 static void c_remoteSaveSnapshot(PlayerXT *client)
 {
 	Console->printf(CON_GREEN, "remoteSaveSnapshot called");
-	testSnapshot = client->createSnapshot(0);
+	testSnapshot = client->createSnapshot();
 }
 
 static void c_remoteLoadSnapshot(PlayerXT *client)

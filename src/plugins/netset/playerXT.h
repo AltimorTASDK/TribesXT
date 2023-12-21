@@ -28,6 +28,14 @@ public:
 		bool contact;
 		bool jetting;
 		bool crouching;
+
+		struct ItemImageSnapshot {
+			int state;
+			float delayTime;
+			int fireCount;
+			bool triggerDown;
+			bool ammo;
+		} itemImages[MaxItemImages];
 	};
 
 	struct DataXT {
@@ -44,7 +52,7 @@ public:
 		return snap.tick == msToTicks(time) ? &snap : nullptr;
 	}
 
-	Snapshot createSnapshot(uint32_t time) const;
+	Snapshot createSnapshot(uint32_t time = 0) const;
 
 	void saveSnapshot(uint32_t time)
 	{
@@ -60,8 +68,8 @@ public:
 		}
 	}
 
-	void loadSnapshot(const Snapshot &snapshot, bool useMouseInput = false);
-	bool loadSnapshot(uint32_t time);
+	void loadSnapshot(const Snapshot &snapshot, bool images = false, bool useMouse = false);
+	bool loadSnapshot(uint32_t time, bool images = false);
 	bool loadSnapshotInterpolated(uint32_t time);
 	
 	void clientMove(unsigned int curTime);

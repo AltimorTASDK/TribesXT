@@ -9,25 +9,18 @@
 
 auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float t) -> Snapshot
 {
-	return {
-		.tick = b.tick,
-		.yaw = lerp_radians(a.yaw, b.yaw, t),
-		.position = lerp(a.position, b.position, t),
-		.velocity = lerp(a.velocity, b.velocity, t),
-		.pitch = lerp(a.pitch, b.pitch, t),
-		.energy = lerp(a.energy, b.energy, t),
-		.traction = b.traction,
-		.jumpSurfaceLastContact = b.jumpSurfaceLastContact,
-		.pingStatus = b.pingStatus,
-		.contact = b.contact,
-		.jetting = b.jetting,
-		.crouching = b.crouching
-	};
+	auto snapshot = b;
+	snapshot.yaw = lerp_radians(a.yaw, b.yaw, t);
+	snapshot.position = lerp(a.position, b.position, t);
+	snapshot.velocity = lerp(a.velocity, b.velocity, t);
+	snapshot.pitch = lerp(a.pitch, b.pitch, t);
+	snapshot.energy = lerp(a.energy, b.energy, t);
+	return snapshot;
 }
 
 auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {
-	return {
+	auto snapshot = Snapshot {
 		.tick = msToTicks(time),
 		.yaw = getRot().z,
 		.position = getLinearPosition(),
@@ -41,15 +34,25 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 		.jetting = jetting,
 		.crouching = crouching
 	};
+
+	for (auto i = 0; i < MaxItemImages; i++) {
+		snapshot.itemImages[i].state = itemImageList[i].state;
+		snapshot.itemImages[i].delayTime = itemImageList[i].delayTime;
+		snapshot.itemImages[i].fireCount = itemImageList[i].fireCount;
+		snapshot.itemImages[i].triggerDown = itemImageList[i].triggerDown;
+		snapshot.itemImages[i].ammo = itemImageList[i].ammo;
+	}
+
+	return snapshot;
 }
 
 // Corresponds to Player::readPacketData
-void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouseInput)
+void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool images, bool useMouse)
 {
 	auto pitch = snapshot.pitch;
 	auto yaw = snapshot.yaw;
 
-	if (hasFocus && useMouseInput) {
+	if (hasFocus && useMouse) {
 		// Use accumulated mouse input for local player
 		if (const auto *newSnap = getSnapshot(lastProcessTime); newSnap != nullptr) {
 			constexpr auto MaxPitch = deg_to_rad(88);
@@ -85,15 +88,26 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouseInput)
 
 	jumpSurfaceLastContact = snapshot.jumpSurfaceLastContact;
 	interpDoneTime = 0;
+
+	if (!images)
+		return;
+
+	for (auto i = 0; i < MaxItemImages; i++) {
+		itemImageList[i].state = snapshot.itemImages[i].state;
+		itemImageList[i].delayTime = snapshot.itemImages[i].delayTime;
+		itemImageList[i].fireCount = snapshot.itemImages[i].fireCount;
+		itemImageList[i].triggerDown = snapshot.itemImages[i].triggerDown;
+		itemImageList[i].ammo = snapshot.itemImages[i].ammo;
+	}
 }
 
-bool PlayerXT::loadSnapshot(uint32_t time)
+bool PlayerXT::loadSnapshot(uint32_t time, bool images)
 {
 	const auto *snap = getSnapshot(time);
 	if (snap == nullptr)
 		return false;
 
-	loadSnapshot(*snap);
+	loadSnapshot(*snap, images);
 	return true;
 }
 
@@ -108,12 +122,12 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return false;
 
 	if (a == b) {
-		loadSnapshot(*a, true);
+		loadSnapshot(*a, false, true);
 		return true;
 	}
 
 	const auto fraction = (float)(time % TICK_MS) / TICK_MS;
-	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), true);
+	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), false, true);
 	return true;
 }
 
@@ -164,6 +178,8 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 			setImageTriggerUp(0);
 		else if (!lastPlayerMove.trigger && moves->trigger)
 			setImageTriggerDown(0);
+
+		saveSnapshot(lastProcessTime);
 
 		lastPlayerMove = *moves++;
 	}

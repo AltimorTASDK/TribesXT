@@ -102,6 +102,18 @@
     <ClInclude Include="src\tribes\worldGlobals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\darkstar\Core\tVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\netGhostManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Core\bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simEvDecl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

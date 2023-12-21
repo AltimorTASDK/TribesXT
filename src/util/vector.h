@@ -12,7 +12,7 @@ template<typename Base>
 class vec_impl;
 
 template<typename T>
-concept Vector = requires(T t) { []<typename U>(vec_impl<U>){}(t); };
+concept VecImpl = requires(T t) { []<typename U>(vec_impl<U>){}(t); };
 
 template<typename Base>
 class vec_impl : public Base {
@@ -127,7 +127,7 @@ public:
 	}
 
 	// Create a new vector by applying a function to each component
-	template<Vector T = vec_impl>
+	template<VecImpl T = vec_impl>
 	constexpr T map(auto &&callable, FixedTuple<elem_count> auto &&...tuples) const
 	{
 		return T(foreach(callable, tuples...));
