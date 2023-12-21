@@ -67,7 +67,7 @@ const T parseCommandArgument(const char *arg)
 
 template<same_as_any<Point3F, const Point3F&> T>
 [[msvc::forceinline]]
-const T parseCommandArgument(const char *arg)
+const Point3F parseCommandArgument(const char *arg)
 {
 	Point3F p;
 	sscanf(arg, "%f %f %f", &p.x, &p.y, &p.z);
@@ -76,7 +76,7 @@ const T parseCommandArgument(const char *arg)
 
 template<same_as_any<EulerF, const EulerF&> T>
 [[msvc::forceinline]]
-const T parseCommandArgument(const char *arg)
+const EulerF parseCommandArgument(const char *arg)
 {
 	EulerF e;
 	sscanf(arg, "%f %f %f", &e.x, &e.y, &e.z);
