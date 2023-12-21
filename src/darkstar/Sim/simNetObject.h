@@ -15,6 +15,10 @@ protected:
 		MaxNetFlagBit = 15,
 	};
 
+	enum {
+		OrientationMask = 0x2000
+	};
+
 	FIELD(0x54, uint32_t, netFlags);
 
 public:
@@ -36,5 +40,11 @@ public:
 	bool isScopeable() const
 	{
 		return (netFlags & Ghostable) && !(netFlags & ScopeAlways);
+	}
+
+	void setMaskBits(uint32_t orMask)
+	{
+		using func_t = to_static_function_t<decltype(&SimNetObject::setMaskBits)>;
+		((func_t)0x530F80)(this, orMask);
 	}
 };

@@ -82,6 +82,12 @@ public:
 		using func_t = to_static_function_t<decltype(&CMDConsole::evaluate)>;
 		((func_t)0x403640)(this, string, echo, fileName, privilegeLevel);
 	}
+
+	void executef(int argc, auto &&...args)
+	{
+		using func_t = void(__cdecl*)(CMDConsole*, int, ...);
+		((func_t)0x403680)(this, argc, std::forward<decltype(args)>(args)...);
+	}
 };
 
 inline auto *&Console = *(CMDConsole**)0x6E284C;

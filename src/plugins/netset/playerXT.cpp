@@ -117,6 +117,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
+// clientProcess partial reimplementation
 void PlayerXT::clientMove(uint32_t curTime)
 {
 	if (lastProcessTime < curTime) {
@@ -135,4 +136,40 @@ void PlayerXT::clientMove(uint32_t curTime)
 	}
 
 	loadSnapshotInterpolated(curTime);
+}
+
+void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
+{
+	if (dead)
+		return;
+
+	while (moveCount--) {
+		if (updateDebt > 5)
+			break;
+
+		updateDebt++;
+
+		if (moves->useItem != -1) {
+			char buf[16];
+			sprintf_s(buf, "%d", moves->useItem);
+			Console->executef(3, "remoteUseItem", scriptThis(), buf);
+		}
+
+		updateDamage(0.032f);
+		updateMove(moves, true);
+		updateAnimation(0.032f);
+
+		// Update trigger state after move
+		if (lastPlayerMove.trigger && !moves->trigger)
+			setImageTriggerUp(0);
+		else if (!lastPlayerMove.trigger && moves->trigger)
+			setImageTriggerDown(0);
+
+		lastPlayerMove = *moves++;
+	}
+
+	if (mount == nullptr || mountPoint != 1)
+		setMaskBits(OrientationMask);
+
+	updateSkip = 0;
 }

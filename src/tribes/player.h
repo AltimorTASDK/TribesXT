@@ -21,6 +21,8 @@ class Player : public ShapeBase {
 public:
 	static constexpr size_t SIZEOF = 0x323C;
 
+	static constexpr auto MaxItemImages = 8;
+
 	enum {
 		root,
 		run,
@@ -98,6 +100,8 @@ public:
 		ANIM_DIE_GRAB_BACK = diegrabback,
 	};
 
+	FIELD(0x0FB0, int, updateSkip);
+	FIELD(0x0FB4, int, updateDebt);
 	FIELD(0x0FD0, int, jumpSurfaceLastContact);
 	FIELD(0x0FE4, int, lastContactCount);
 	FIELD(0x0FE8, float, viewPitch);
@@ -115,15 +119,52 @@ public:
 	FIELD(0x1054, float, forwardAxisMovement);
 	FIELD(0x1058, float, sideAxisMovement);
 
+	const char *scriptThis() const
+	{
+		static char name[10];
+		sprintf_s(name, "%d", getId());
+		return name;
+	}
+
 	void setAnimation(uint32_t anim)
 	{
 		using func_t = to_static_function_t<decltype(&Player::setAnimation)>;
 		((func_t)0x4AD1D0)(this, anim);
 	}
 
+	void updateImageState(int imageSlot, float dt)
+	{
+		using func_t = to_static_function_t<decltype(&Player::updateImageState)>;
+		((func_t)0x4B3B50)(this, imageSlot, dt);
+	}
+
+	void setImageTriggerUp(int imageSlot)
+	{
+		using func_t = to_static_function_t<decltype(&Player::setImageTriggerUp)>;
+		((func_t)0x4B4130)(this, imageSlot);
+	}
+
+	void setImageTriggerDown(int imageSlot)
+	{
+		using func_t = to_static_function_t<decltype(&Player::setImageTriggerUp)>;
+		((func_t)0x4B41F0)(this, imageSlot);
+	}
+
 	void updateMove(PlayerMove *curMove, bool server)
 	{
 		using func_t = to_static_function_t<decltype(&Player::updateMove)>;
 		((func_t)0x4BA640)(this, curMove, server);
+	}
+
+	void updateDamage(float t)
+	{
+		using func_t = to_static_function_t<decltype(&Player::updateDamage)>;
+		((func_t)0x4D04E0)(this, t);
+	}
+
+	void updateAnimation(float t)
+	{
+		using func_t = to_static_function_t<decltype(&Player::updateAnimation)>;
+		((func_t)0x4AD2F0)(this, t);
 	}
 };

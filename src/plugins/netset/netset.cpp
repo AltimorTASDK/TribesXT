@@ -9,11 +9,31 @@ PlayerXT *NetSetPlugin::hook_Player_ctor(PlayerXT *player)
 	return get()->hooks.Player.ctor.callOriginal(player);
 }
 
+void NetSetPlugin::hook_Player_serverUpdateMove(PlayerXT *player, edx_t, PlayerMove *moves, int moveCount)
+{
+	player->serverUpdateMove(moves, moveCount);
+}
+
 void NetSetPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
+
+	// Update item images after moving instead
+	for (auto i = 0; i < Player::MaxItemImages; i++)
+		player->updateImageState(i, 0.032f);
+
 	player->lastProcessTime += TICK_MS;
 	player->saveSnapshot(player->lastProcessTime);
+}
+
+__declspec(naked) void NetSetPlugin::hook_Player_updateMove_noImages()
+{
+	__asm
+	{
+		// Don't run updateImageState before moving
+		mov eax, 0x4BA66C
+		jmp eax
+	}
 }
 
  void NetSetPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)

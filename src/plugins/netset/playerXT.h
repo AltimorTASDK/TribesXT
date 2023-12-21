@@ -65,4 +65,5 @@ public:
 	bool loadSnapshotInterpolated(uint32_t time);
 	
 	void clientMove(unsigned int curTime);
+	void serverUpdateMove(PlayerMove *moves, int moveCount);
 };
