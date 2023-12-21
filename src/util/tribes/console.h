@@ -80,42 +80,42 @@ const T scriptStringToType(const char *arg)
 	static_assert(always_false<T>(), "Unhandled argument type");
 }
 
-inline const char *scriptToString(const char *arg)
+inline const char *scriptTypeToString(const char *arg)
 {
 	return arg;
 }
 
-inline const char *scriptToString(int arg)
+inline const char *scriptTypeToString(int arg)
 {
 	sprintf_s(scratchBuffer, "%d", arg);
 	return scratchBuffer;
 }
 
-inline const char *scriptToString(float arg)
+inline const char *scriptTypeToString(float arg)
 {
 	sprintf_s(scratchBuffer, "%f", arg);
 	return scratchBuffer;
 }
 
-inline const char *scriptToString(bool arg)
+inline const char *scriptTypeToString(bool arg)
 {
 	return arg ? "True" : "False";
 }
 
-inline const char *scriptToString(const Point3F &arg)
+inline const char *scriptTypeToString(const Point3F &arg)
 {
 	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
 	return scratchBuffer;
 }
 
-inline const char *scriptToString(const EulerF &arg)
+inline const char *scriptTypeToString(const EulerF &arg)
 {
 	sprintf_s(scratchBuffer, "%f %f %f", arg.x, arg.y, arg.z);
 	return scratchBuffer;
 }
 
 template<typename T>
-const char *scriptToString(T &&arg)
+const char *scriptTypeToString(T &&arg)
 {
 	static_assert(always_false<T>(), "Unhandled return type");
 }
@@ -124,7 +124,7 @@ template<bool IsRemote, size_t ArgIndex>
 const char *callCommandHandler(auto &&handler, const char *argv[], auto &&...args)
 {
 	if constexpr (!is_void<decltype(handler(std::forward<decltype(args)>(args)...))>) {
-		return scriptToString(handler(std::forward<decltype(args)>(args)...));
+		return scriptTypeToString(handler(std::forward<decltype(args)>(args)...));
 	} else {
 		handler(std::forward<decltype(args)>(args)...);
 		return "";
