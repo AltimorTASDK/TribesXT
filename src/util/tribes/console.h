@@ -3,11 +3,9 @@
 #include "darkstar/console/console.h"
 #include "plugins/netset/playerXT.h"
 #include "util/meta.h"
-#include "util/platform.h"
+#include <concepts>
 #include <cstdio>
-#include <tuple>
 #include <type_traits>
-#include <utility>
 
 inline __declspec(naked) Player *findPlayerObject(const char *name)
 {
