@@ -51,7 +51,14 @@ private:
 	static bool __fastcall hook_PlayerPSC_writePacket(
 		PlayerPSC*, edx_t, BitStream *bstream, uint32_t &key);
 
+	static bool hook_PacketStream_checkPacketSend_check();
+	static void hook_PacketStream_checkPacketSend_check_asm();
+
 	struct {
+		struct {
+			// Don't skip Player clientProcess when lastProcessTime is currentTime
+			StaticCodePatch<0x4E8E02, "\x90\x90"> skipProcessTimeCheck;
+		} FearGame;
 		struct {
 			StaticCodePatch<0x42F7D9, PlayerXT::SIZEOF> allocationSize1;
 			StaticCodePatch<0x4AE8D7, PlayerXT::SIZEOF> allocationSize2;
@@ -69,6 +76,9 @@ private:
 			StaticJmpHook<0x482E30, hook_PlayerPSC_writePacket> writePacket;
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
 		} PlayerPSC;
+		struct {
+			StaticJmpHook<0x51A2E4, hook_PacketStream_checkPacketSend_check_asm> checkPacketSend_check;
+		} PacketStream;
 	} hooks;
 
 public:

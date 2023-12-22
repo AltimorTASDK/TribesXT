@@ -1,4 +1,5 @@
 #include "tribes/playerPSC.h"
+#include "tribes/worldGlobals.h"
 #include "plugins/netset/playerXT.h"
 #include "plugins/netset/netset.h"
 #include "util/tribes/console.h"
@@ -103,6 +104,29 @@ bool NetSetPlugin::hook_PlayerPSC_writePacket(
 	player->loadSnapshot(snapshot);
 
 	return result;
+}
+
+bool NetSetPlugin::hook_PacketStream_checkPacketSend_check()
+{
+	// Check if server ticked or client produced a move
+	if (wg == &sg)
+		return sg.currentTime != sg.lastTime;
+	else
+		return msToTicks(cg.currentTime - 1) != msToTicks(cg.lastTime - 1);
+}
+
+__declspec(naked) void NetSetPlugin::hook_PacketStream_checkPacketSend_check_asm()
+{
+	__asm {
+		call hook_PacketStream_checkPacketSend_check
+		test al, al
+		je skip
+		mov eax, 0x51A362
+		jmp eax
+	skip:
+		mov eax, 0x51A574
+		jmp eax
+	}
 }
 
 static PlayerXT::Snapshot testSnapshot;
