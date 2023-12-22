@@ -45,9 +45,6 @@ private:
 			StaticJmpHook<0x4BA640, hook_Player_updateMove> updateMove;
 			StaticJmpHook<0x4BA653, hook_Player_updateMove_noImages> updateMove_noImages;
 			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;
-			//
-			// handle ghost update masks
-			//
 			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
 		} Player;
 		struct {
