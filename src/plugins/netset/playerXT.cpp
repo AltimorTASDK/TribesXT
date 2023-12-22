@@ -117,7 +117,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	if (a == nullptr)
 		return false;
 
-	const auto *b = getSnapshot(time + TICK_MS - 1);
+	const auto *b = getSnapshot(time + TickMs - 1);
 	if (b == nullptr)
 		return false;
 
@@ -126,7 +126,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return true;
 	}
 
-	const auto fraction = (float)(time % TICK_MS) / TICK_MS;
+	const auto fraction = (float)(time % TickMs) / TickMs;
 	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), false, true);
 	return true;
 }

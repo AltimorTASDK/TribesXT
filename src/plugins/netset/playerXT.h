@@ -10,7 +10,7 @@
 
 class PlayerXT : public Player {
 public:
-	static constexpr auto SNAP_HISTORY = std::bit_ceil((size_t)(1.0 * TICK_RATE));
+	static constexpr auto SnapHistory = std::bit_ceil((size_t)(1.0 * TickRate));
 
 	// Maps to Player::read/writePacketData fields
 	struct Snapshot {
@@ -39,7 +39,7 @@ public:
 	};
 
 	struct DataXT {
-		Snapshot snapshots[SNAP_HISTORY];
+		Snapshot snapshots[SnapHistory];
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
@@ -48,7 +48,7 @@ public:
 
 	const Snapshot *getSnapshot(uint32_t time) const
 	{
-		const auto &snap = xt.snapshots[msToTicks(time) % SNAP_HISTORY];
+		const auto &snap = xt.snapshots[msToTicks(time) % SnapHistory];
 		return snap.tick == msToTicks(time) ? &snap : nullptr;
 	}
 
@@ -56,7 +56,7 @@ public:
 
 	void saveSnapshot(uint32_t time)
 	{
-		const auto index = msToTicks(time) % SNAP_HISTORY;
+		const auto index = msToTicks(time) % SnapHistory;
 		xt.snapshots[index] = createSnapshot(time);
 	}
 
