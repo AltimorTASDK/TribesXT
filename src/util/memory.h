@@ -33,6 +33,16 @@ struct call_virtual_impl<Index, ReturnType(ThisType::*)(ArgTypes...)> {
 	}
 };
 
+template<size_t Index, typename ReturnType, typename ThisType, typename ...ArgTypes>
+struct call_virtual_impl<Index, ReturnType(ThisType::*)(ArgTypes...) const> {
+	static ReturnType call(const ThisType *object, ArgTypes ...args)
+	{
+		using func_t = ReturnType(__thiscall*)(const ThisType*, ArgTypes...);
+		auto **vtable = *(func_t**)object;
+		return vtable[Index](object, std::forward<ArgTypes>(args)...);
+	}
+};
+
 } // namespace detail
 
 template<size_t Index, typename T>
