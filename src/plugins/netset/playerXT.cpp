@@ -158,8 +158,6 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 		else if (!lastPlayerMove.trigger && moves->trigger)
 			setImageTriggerDown(0);
 
-		saveSnapshot(lastProcessTime);
-
 		lastPlayerMove = *moves++;
 	}
 
