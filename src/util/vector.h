@@ -69,7 +69,7 @@ public:
 	template<typename ...T> requires(sizeof...(T) == elem_count)
 	constexpr vec_impl(T ...values)
 	{
-		elems() = std::make_tuple(values...);
+		elems() = std::make_tuple((elem_type)values...);
 	}
 
 	explicit constexpr vec_impl(elem_tuple &&tuple)

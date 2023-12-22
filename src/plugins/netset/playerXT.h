@@ -17,6 +17,7 @@ public:
 		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
 
 		uint32_t tick = -1;
+		uint32_t time = -1;
 		float yaw;
 		Point3F position;
 		Point3F velocity;
@@ -41,7 +42,12 @@ public:
 	const Snapshot *getSnapshot(uint32_t time) const
 	{
 		const auto &snap = xt.snapshots[msToTicks(time) % SnapHistory];
-		return snap.tick == msToTicks(time) ? &snap : nullptr;
+		if (snap.tick != msToTicks(time))
+			return nullptr;
+		else if (snap.time > time)
+			return getSnapshot(roundMsDownToTick(time) - 1);
+		else
+			return &snap;
 	}
 
 	Snapshot createSnapshot(uint32_t time = 0) const;
@@ -55,8 +61,10 @@ public:
 	void invalidatePrediction(uint32_t time)
 	{
 		for (auto &snap : xt.snapshots) {
-			if (snap.tick >= msToTicksRoundUp(time))
+			if (snap.time >= time) {
 				snap.tick = -1;
+				snap.time = -1;
+			}
 		}
 	}
 
@@ -66,4 +74,9 @@ public:
 	
 	void clientMove(uint32_t curTime);
 	void serverUpdateMove(PlayerMove *moves, int moveCount);
+
+	void ghostSetMove(
+		PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
+		bool newContact, float newRot, float newPitch, int skipCount, bool noInterp,
+		int timeNudge);
 };

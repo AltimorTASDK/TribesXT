@@ -21,6 +21,11 @@ public:
 		return rotation;
 	}
 
+	void setPos(const Point3F &pos)
+	{
+		call_virtual<103, decltype(&ShapeBase::setPos)>(this, pos);
+	}
+
 	void setRot(const Point3F &rot)
 	{
 		call_virtual<104, decltype(&ShapeBase::setRot)>(this, rot);

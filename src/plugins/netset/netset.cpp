@@ -10,9 +10,18 @@ PlayerXT *NetSetPlugin::hook_Player_ctor(PlayerXT *player)
 	return get()->hooks.Player.ctor.callOriginal(player);
 }
 
-void NetSetPlugin::hook_Player_serverUpdateMove(PlayerXT *player, edx_t, PlayerMove *moves, int moveCount)
+void NetSetPlugin::hook_Player_serverUpdateMove(
+	PlayerXT *player, edx_t, PlayerMove *moves, int moveCount)
 {
 	player->serverUpdateMove(moves, moveCount);
+}
+
+void NetSetPlugin::hook_Player_ghostSetMove(
+	PlayerXT *player, edx_t, PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
+	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp)
+{
+	player->ghostSetMove(move, newPos, newVel, newContact, newRot,
+	                     newPitch, skipCount, noInterp, timeNudge);
 }
 
 void NetSetPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
@@ -57,10 +66,12 @@ __declspec(naked) void NetSetPlugin::hook_Player_clientProcess_move_asm()
 	}
 }
 
-uint32_t NetSetPlugin::hook_Player_packUpdate(PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
+uint32_t NetSetPlugin::hook_Player_packUpdate(
+	PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
 {
 	const auto snapshot = player->createSnapshot();
 
+	// Clients expect the state before the most recent move
 	player->loadSnapshot(player->lastProcessTime - TickMs);
 	const auto result = get()->hooks.Player.packUpdate.callOriginal(player, gm, mask, stream);
 	player->loadSnapshot(snapshot);
@@ -70,12 +81,15 @@ uint32_t NetSetPlugin::hook_Player_packUpdate(PlayerXT *player, edx_t, Net::Ghos
 
 void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 {
-	auto *player = (PlayerXT*)cs.reg.eax;
-	player->invalidatePrediction(player->lastProcessTime);
-	player->saveSnapshot(player->lastProcessTime);
+	const auto *psc = (PlayerPSC*)cs.reg.ebx;
+	if (auto *player = (PlayerXT*)psc->controlPlayer; player != nullptr) {
+		player->invalidatePrediction(player->lastProcessTime);
+		player->saveSnapshot(player->lastProcessTime);
+	}
 }
 
-bool NetSetPlugin::hook_PlayerPSC_writePacket(PlayerPSC *psc, edx_t, BitStream *bstream, uint32_t &key)
+bool NetSetPlugin::hook_PlayerPSC_writePacket(
+	PlayerPSC *psc, edx_t, BitStream *bstream, uint32_t &key)
 {
 	if (!psc->isServer || psc->controlPlayer == nullptr)
 		return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
@@ -83,6 +97,7 @@ bool NetSetPlugin::hook_PlayerPSC_writePacket(PlayerPSC *psc, edx_t, BitStream *
 	auto *player = (PlayerXT*)psc->controlPlayer;
 	const auto snapshot = player->createSnapshot();
 
+	// Clients expect the state before the most recent move
 	player->loadSnapshot(player->lastProcessTime - TickMs);
 	const auto result = get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
 	player->loadSnapshot(snapshot);
@@ -108,4 +123,6 @@ void NetSetPlugin::init()
 {
 	addCommandXT<"remoteSaveSnapshot", c_remoteSaveSnapshot>(console);
 	addCommandXT<"remoteLoadSnapshot", c_remoteLoadSnapshot>(console);
+
+	console->addVariable(0, "net::timeNudge", CMDConsole::Int, &timeNudge);
 }

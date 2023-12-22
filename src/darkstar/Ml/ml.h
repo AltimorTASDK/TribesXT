@@ -20,6 +20,10 @@ struct EulerF : vec3 {
 	using vec3::vec3;
 	constexpr EulerF(const vec3 &vec) : vec3(vec) {}
 
+	explicit constexpr EulerF(const Point3F &p) : EulerF(p.x, p.y, p.z)
+	{
+	}
+
 	constexpr RMat3F *makeMatrix(RMat3F *mat) const
 	{
 		using func_t = to_static_function_t<decltype(&EulerF::makeMatrix)>;

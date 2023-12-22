@@ -17,6 +17,8 @@ class PlayerPSC;
 class NetSetPlugin : public SimConsolePlugin {
 	static inline NetSetPlugin *instance;
 
+	static inline int timeNudge = 32;
+
 public:
 	static NetSetPlugin *get()
 	{
@@ -25,14 +27,29 @@ public:
 
 private:
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT*);
-	static void __fastcall hook_Player_serverUpdateMove(PlayerXT*, edx_t, PlayerMove *moves, int moveCount);
-	static void __fastcall hook_Player_updateMove(PlayerXT*, edx_t, PlayerMove *curMove, bool server);
+
+	static void __fastcall hook_Player_serverUpdateMove(
+		PlayerXT*, edx_t, PlayerMove *moves, int moveCount);
+
+	static void __fastcall hook_Player_ghostSetMove(
+		PlayerXT*, edx_t, PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
+		bool newContact, float newRot, float newPitch, int skipCount, bool noInterp);
+
+	static void __fastcall hook_Player_updateMove(
+		PlayerXT*, edx_t, PlayerMove *curMove, bool server);
+
 	static void hook_Player_updateMove_noImages();
+
 	static void hook_Player_clientProcess_move(PlayerXT*, uint32_t curTime);
 	static void hook_Player_clientProcess_move_asm();
-	static uint32_t __fastcall hook_Player_packUpdate(PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
+
+	static uint32_t __fastcall hook_Player_packUpdate(
+		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
+
 	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
-	static bool __fastcall hook_PlayerPSC_writePacket(PlayerPSC*, edx_t, BitStream *bstream, uint32_t &key);
+
+	static bool __fastcall hook_PlayerPSC_writePacket(
+		PlayerPSC*, edx_t, BitStream *bstream, uint32_t &key);
 
 	struct {
 		struct {
@@ -42,6 +59,7 @@ private:
 			StaticCodePatch<0x4CFDA2, PlayerXT::SIZEOF> allocationSize4;
 			StaticJmpHook<0x4ACE70, hook_Player_ctor> ctor;
 			StaticJmpHook<0x4BBB40, hook_Player_serverUpdateMove> serverUpdateMove;
+			StaticJmpHook<0x4BBCA0, hook_Player_ghostSetMove> ghostSetMove;
 			StaticJmpHook<0x4BA640, hook_Player_updateMove> updateMove;
 			StaticJmpHook<0x4BA653, hook_Player_updateMove_noImages> updateMove_noImages;
 			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;

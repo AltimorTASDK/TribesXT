@@ -22,6 +22,7 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {
 	return {
 		.tick = msToTicks(time),
+		.time = time,
 		.yaw = getRot().z,
 		.position = getLinearPosition(),
 		.velocity = getLinearVelocity(),
@@ -56,9 +57,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 
 	if (mount == nullptr) {
 		setLinearVelocity(snapshot.velocity);
-		TMat3F transform;
-		transform.set(EulerF(rot.x, rot.y, rot.z), snapshot.position);
-		setTransform(transform);
+		setTransform({EulerF(rot), snapshot.position});
 	}
 
 	viewPitch = pitch;
@@ -77,7 +76,6 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 		setAnimation(ANIM_STAND);
 
 	jumpSurfaceLastContact = snapshot.jumpSurfaceLastContact;
-	interpDoneTime = 0;
 }
 
 bool PlayerXT::loadSnapshot(uint32_t time)
@@ -96,16 +94,16 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	if (a == nullptr)
 		return false;
 
-	const auto *b = getSnapshot(time + TickMs - 1);
-	if (b == nullptr)
-		return false;
-
-	if (a == b) {
+	if (time == a->time) {
 		loadSnapshot(*a, true);
 		return true;
 	}
 
-	const auto fraction = (float)(time % TickMs) / TickMs;
+	const auto *b = getSnapshot(time + TickMs - 1);
+	if (b == nullptr)
+		return false;
+
+	const auto fraction = (float)(time - a->time) / (b->time - a->time);
 	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), true);
 	return true;
 }
@@ -165,4 +163,33 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 		setMaskBits(OrientationMask);
 
 	updateSkip = 0;
+}
+
+void PlayerXT::ghostSetMove(
+	PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
+	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp,
+	int timeNudge)
+{
+	const auto rot = Point3F(getRot().x, getRot().y, newRot);
+
+	lastPlayerMove = *move;
+	setLinearVelocity(newVel);
+	setPos(newPos);
+	contact = newContact;
+	viewPitch = newPitch;
+	setRot(rot);
+	updateSkip = skipCount;
+
+	if (mount != nullptr) {
+		const auto mountTransform = mount->getObjectMountTransform(mountPoint);
+		setTransform(TMat3F(EulerF(rot), {0, 0, 0}) * mountTransform);
+	}
+
+	// State sent by server is from before the move, so simulate once
+	lastProcessTime = roundMsUpToTick(cg.currentTime) + timeNudge - TickMs;
+	invalidatePrediction(lastProcessTime);
+	saveSnapshot(lastProcessTime);
+	updateMove(move, false);
+
+	Console->printf("currentTime tick %d ms %d", msToTicks(cg.currentTime), cg.currentTime % TickMs);
 }
