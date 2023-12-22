@@ -20,7 +20,7 @@ auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float
 
 auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {
-	auto snapshot = Snapshot {
+	return {
 		.tick = msToTicks(time),
 		.yaw = getRot().z,
 		.position = getLinearPosition(),
@@ -34,20 +34,10 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 		.jetting = jetting,
 		.crouching = crouching
 	};
-
-	for (auto i = 0; i < MaxItemImages; i++) {
-		snapshot.itemImages[i].state = itemImageList[i].state;
-		snapshot.itemImages[i].delayTime = itemImageList[i].delayTime;
-		snapshot.itemImages[i].fireCount = itemImageList[i].fireCount;
-		snapshot.itemImages[i].triggerDown = itemImageList[i].triggerDown;
-		snapshot.itemImages[i].ammo = itemImageList[i].ammo;
-	}
-
-	return snapshot;
 }
 
 // Corresponds to Player::readPacketData
-void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool images, bool useMouse)
+void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 {
 	auto pitch = snapshot.pitch;
 	auto yaw = snapshot.yaw;
@@ -88,26 +78,15 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool images, bool useMouse
 
 	jumpSurfaceLastContact = snapshot.jumpSurfaceLastContact;
 	interpDoneTime = 0;
-
-	if (!images)
-		return;
-
-	for (auto i = 0; i < MaxItemImages; i++) {
-		itemImageList[i].state = snapshot.itemImages[i].state;
-		itemImageList[i].delayTime = snapshot.itemImages[i].delayTime;
-		itemImageList[i].fireCount = snapshot.itemImages[i].fireCount;
-		itemImageList[i].triggerDown = snapshot.itemImages[i].triggerDown;
-		itemImageList[i].ammo = snapshot.itemImages[i].ammo;
-	}
 }
 
-bool PlayerXT::loadSnapshot(uint32_t time, bool images)
+bool PlayerXT::loadSnapshot(uint32_t time)
 {
 	const auto *snap = getSnapshot(time);
 	if (snap == nullptr)
 		return false;
 
-	loadSnapshot(*snap, images);
+	loadSnapshot(*snap);
 	return true;
 }
 
@@ -122,12 +101,12 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return false;
 
 	if (a == b) {
-		loadSnapshot(*a, false, true);
+		loadSnapshot(*a, true);
 		return true;
 	}
 
 	const auto fraction = (float)(time % TickMs) / TickMs;
-	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), false, true);
+	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), true);
 	return true;
 }
 

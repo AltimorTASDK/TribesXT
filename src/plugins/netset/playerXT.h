@@ -28,14 +28,6 @@ public:
 		bool contact;
 		bool jetting;
 		bool crouching;
-
-		struct ItemImageSnapshot {
-			int state;
-			float delayTime;
-			int fireCount;
-			bool triggerDown;
-			bool ammo;
-		} itemImages[MaxItemImages];
 	};
 
 	struct DataXT {
@@ -68,10 +60,10 @@ public:
 		}
 	}
 
-	void loadSnapshot(const Snapshot &snapshot, bool images = false, bool useMouse = false);
-	bool loadSnapshot(uint32_t time, bool images = false);
+	void loadSnapshot(const Snapshot &snapshot, bool useMouse = false);
+	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
 	
-	void clientMove(unsigned int curTime);
+	void clientMove(uint32_t curTime);
 	void serverUpdateMove(PlayerMove *moves, int moveCount);
 };
