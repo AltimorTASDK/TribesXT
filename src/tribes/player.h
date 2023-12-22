@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tribes/shapeBase.h"
+#include "util/math.h"
 #include "util/struct.h"
 
 struct PlayerMove {
@@ -22,6 +23,7 @@ public:
 	static constexpr size_t SIZEOF = 0x323C;
 
 	static constexpr auto MaxItemImages = 8;
+	static constexpr auto MaxPitch = deg_to_rad(88);
 
 	enum {
 		root,
