@@ -55,20 +55,25 @@ constexpr T lerp(T a, T b, auto c)
 	return a + (b - a) * c;
 }
 
+// [0, 2pi)
 template<std::floating_point T>
-constexpr T normalize_radians(T deg)
+constexpr T normalize_radians(T value)
 {
-	while (deg >= math::pi)
-		deg -= 2 * math::pi;
-	while (deg < -math::pi)
-		deg += 2 * math::pi;
-	return deg;
+	const auto result = std::fmod(value, math::tau);
+	return result >= 0 ? result : result + math::tau;
 }
 
-template<typename T> requires (!std::integral<T>)
+// [-pi, pi)
+template<std::floating_point T>
+constexpr T normalize_radians_signed(T value)
+{
+	return normalize_radians(value + math::pi) - math::pi;
+}
+
+template<std::floating_point T>
 constexpr T lerp_radians(T a, T b, auto c)
 {
-	return a + normalize_radians(b - a) * c;
+	return normalize_radians(a + normalize_radians_signed(b - a) * c);
 }
 
 template<typename T>

@@ -47,7 +47,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 		if (const auto *newSnap = getSnapshot(lastProcessTime); newSnap != nullptr) {
 			const auto &curMove = cg.psc->curMove;
 			pitch = clamp(newSnap->pitch + curMove.pitch, -MaxPitch, MaxPitch);
-			yaw = newSnap->yaw + curMove.turnRot;
+			yaw = normalize_radians(newSnap->yaw + curMove.turnRot);
 		}
 	}
 
