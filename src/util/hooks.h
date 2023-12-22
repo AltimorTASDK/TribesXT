@@ -38,7 +38,7 @@ public:
 
 	~CodePatch()
 	{
-		memcpy(target, original, Size);
+		patch_code(target, original, Size);
 	}
 };
 
@@ -94,7 +94,7 @@ public:
 
 	~JmpHookImpl()
 	{
-		memcpy(target, original.get(), size);
+		patch_code(target, original.get(), size);
 	}
 };
 
