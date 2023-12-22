@@ -60,9 +60,11 @@ __declspec(naked) void NetSetPlugin::hook_Player_clientProcess_move_asm()
 uint32_t NetSetPlugin::hook_Player_packUpdate(PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
 {
 	const auto snapshot = player->createSnapshot();
+
 	player->loadSnapshot(player->lastProcessTime - TickMs);
 	const auto result = get()->hooks.Player.packUpdate.callOriginal(player, gm, mask, stream);
 	player->loadSnapshot(snapshot);
+
 	return result;
 }
 
@@ -80,9 +82,11 @@ bool NetSetPlugin::hook_PlayerPSC_writePacket(PlayerPSC *psc, edx_t, BitStream *
 
 	auto *player = (PlayerXT*)psc->controlPlayer;
 	const auto snapshot = player->createSnapshot();
+
 	player->loadSnapshot(player->lastProcessTime - TickMs);
 	const auto result = get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
 	player->loadSnapshot(snapshot);
+
 	return result;
 }
 
