@@ -74,7 +74,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 	auto pitch = snapshot.pitch;
 	auto yaw = snapshot.yaw;
 
-	if (hasFocus && useMouse) {
+	if (useMouse && hasFocus && cg.psc != nullptr) {
 		// Use accumulated mouse input for local player
 		if (const auto *newSnap = getSnapshot(lastProcessTime); newSnap != nullptr) {
 			const auto &curMove = cg.psc->curMove;
