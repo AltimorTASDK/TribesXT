@@ -25,7 +25,7 @@ struct call_virtual_impl;
 
 template<size_t Index, typename ReturnType, typename ThisType, typename ...ArgTypes>
 struct call_virtual_impl<Index, ReturnType(ThisType::*)(ArgTypes...)> {
-	static ReturnType call(ThisType *object, ArgTypes &&...args)
+	static ReturnType call(ThisType *object, ArgTypes ...args)
 	{
 		using func_t = ReturnType(__thiscall*)(ThisType*, ArgTypes...);
 		auto **vtable = *(func_t**)object;
