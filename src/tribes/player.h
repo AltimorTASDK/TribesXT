@@ -152,13 +152,13 @@ public:
 		((func_t)0x4B3B50)(this, imageSlot, dt);
 	}
 
-	void setImageTriggerUp(int imageSlot)
+	void setImageTriggerDown(int imageSlot)
 	{
 		using func_t = to_static_function_t<decltype(&Player::setImageTriggerUp)>;
 		((func_t)0x4B4130)(this, imageSlot);
 	}
 
-	void setImageTriggerDown(int imageSlot)
+	void setImageTriggerUp(int imageSlot)
 	{
 		using func_t = to_static_function_t<decltype(&Player::setImageTriggerUp)>;
 		((func_t)0x4B41F0)(this, imageSlot);
