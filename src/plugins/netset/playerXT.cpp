@@ -216,11 +216,9 @@ void PlayerXT::ghostSetMove(
 	}
 
 	// State sent by server is from before the move, so simulate once
-	lastProcessTime = roundMsUpToTick(cg.currentTime) + timeNudge - TickMs;
+	lastProcessTime = cg.currentTime + timeNudge - TickMs;
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
 	updateMove(move, false);
 	lastPlayerMove = *move;
-
-	Console->printf("currentTime tick %d ms %d", msToTicks(cg.currentTime), cg.currentTime % TickMs);
 }
