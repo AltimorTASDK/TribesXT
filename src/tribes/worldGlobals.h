@@ -13,6 +13,6 @@ public:
 	FIELD(0x1C, PlayerPSC*, psc);
 };
 
-auto &cg = *(WorldGlobals*)0x6D4FA8;
-auto &sg = *(WorldGlobals*)0x6D5020;
-auto *&wg = *(WorldGlobals**)0x747028;
+inline auto &cg = *(WorldGlobals*)0x6D4FA8;
+inline auto &sg = *(WorldGlobals*)0x6D5020;
+inline auto *&wg = *(WorldGlobals**)0x747028;
