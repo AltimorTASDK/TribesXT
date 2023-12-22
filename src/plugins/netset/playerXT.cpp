@@ -21,7 +21,6 @@ auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float
 auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {
 	return {
-		.tick = msToTicks(time),
 		.time = time,
 		.yaw = getRot().z,
 		.position = getLinearPosition(),
@@ -35,6 +34,38 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 		.jetting = jetting,
 		.crouching = crouching
 	};
+}
+
+auto PlayerXT::getSnapshot(uint32_t time) const -> const Snapshot*
+{
+	const auto &snap = xt.snapshots[msToTicks(time) % SnapHistory];
+	return snap.time == time ? &snap : nullptr;
+}
+
+auto PlayerXT::getSnapshotNext(uint32_t time) const -> const Snapshot*
+{
+	const auto startTick = msToTicks(time);
+
+	for (auto tick = startTick; tick < startTick + SnapHistory; tick++) {
+		const auto &snap = xt.snapshots[tick % SnapHistory];
+		if (msToTicks(snap.time) == tick && snap.time >= time)
+			return &snap;
+	}
+
+	return nullptr;
+}
+
+auto PlayerXT::getSnapshotPrev(uint32_t time) const -> const Snapshot*
+{
+	const auto startTick = msToTicks(time);
+
+	for (auto tick = startTick; tick > startTick - SnapHistory; tick--) {
+		const auto &snap = xt.snapshots[tick % SnapHistory];
+		if (msToTicks(snap.time) == tick && snap.time <= time)
+			return &snap;
+	}
+
+	return nullptr;
 }
 
 // Corresponds to Player::readPacketData
@@ -90,16 +121,16 @@ bool PlayerXT::loadSnapshot(uint32_t time)
 
 bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 {
-	const auto *a = getSnapshot(time);
+	const auto *a = getSnapshotPrev(time);
 	if (a == nullptr)
 		return false;
 
-	if (time == a->time) {
+	if (a->time == time) {
 		loadSnapshot(*a, true);
 		return true;
 	}
 
-	const auto *b = getSnapshot(time + TickMs - 1);
+	const auto *b = getSnapshotNext(time);
 	if (b == nullptr)
 		return false;
 
@@ -172,12 +203,11 @@ void PlayerXT::ghostSetMove(
 {
 	const auto rot = Point3F(getRot().x, getRot().y, newRot);
 
-	lastPlayerMove = *move;
 	setLinearVelocity(newVel);
 	setPos(newPos);
+	setRot(rot);
 	contact = newContact;
 	viewPitch = newPitch;
-	setRot(rot);
 	updateSkip = skipCount;
 
 	if (mount != nullptr) {
@@ -190,6 +220,7 @@ void PlayerXT::ghostSetMove(
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
 	updateMove(move, false);
+	lastPlayerMove = *move;
 
 	Console->printf("currentTime tick %d ms %d", msToTicks(cg.currentTime), cg.currentTime % TickMs);
 }

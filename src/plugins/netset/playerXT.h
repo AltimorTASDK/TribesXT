@@ -16,7 +16,6 @@ public:
 	struct Snapshot {
 		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
 
-		uint32_t tick = -1;
 		uint32_t time = -1;
 		float yaw;
 		Point3F position;
@@ -39,18 +38,10 @@ public:
 
 	static constexpr size_t SIZEOF = Player::SIZEOF + sizeof(DataXT);
 
-	const Snapshot *getSnapshot(uint32_t time) const
-	{
-		const auto &snap = xt.snapshots[msToTicks(time) % SnapHistory];
-		if (snap.tick != msToTicks(time))
-			return nullptr;
-		else if (snap.time > time)
-			return getSnapshot(roundMsDownToTick(time) - 1);
-		else
-			return &snap;
-	}
-
 	Snapshot createSnapshot(uint32_t time = 0) const;
+	const Snapshot *getSnapshot(uint32_t time) const;
+	const Snapshot *getSnapshotNext(uint32_t time) const;
+	const Snapshot *getSnapshotPrev(uint32_t time) const;
 
 	void saveSnapshot(uint32_t time)
 	{
@@ -58,19 +49,17 @@ public:
 		xt.snapshots[index] = createSnapshot(time);
 	}
 
-	void invalidatePrediction(uint32_t time)
-	{
-		for (auto &snap : xt.snapshots) {
-			if (snap.time >= time) {
-				snap.tick = -1;
-				snap.time = -1;
-			}
-		}
-	}
-
 	void loadSnapshot(const Snapshot &snapshot, bool useMouse = false);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
+
+	void invalidatePrediction(uint32_t time)
+	{
+		for (auto &snap : xt.snapshots) {
+			if (snap.time >= time)
+				snap.time = -1;
+		}
+	}
 	
 	void clientMove(uint32_t curTime);
 	void serverUpdateMove(PlayerMove *moves, int moveCount);
