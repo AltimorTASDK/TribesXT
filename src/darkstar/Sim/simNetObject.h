@@ -28,10 +28,6 @@ protected:
 		MaxNetFlagBit = 15,
 	};
 
-	enum {
-		OrientationMask = 0x2000
-	};
-
 	FIELD(0x54, BitSet32, netFlags);
 	FIELD(0x60, Vector<Net::GhostRef>, ghosts);
 
