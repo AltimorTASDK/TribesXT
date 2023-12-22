@@ -114,6 +114,9 @@
     <ClInclude Include="src\darkstar\Sim\simEvDecl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\darkstar\Ml\processor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">
