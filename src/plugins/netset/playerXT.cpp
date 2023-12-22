@@ -91,10 +91,10 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 		setTransform({EulerF(rot), snapshot.position});
 	}
 
+	setRot(rot);
 	viewPitch = pitch;
 	energy = snapshot.energy;
 	contact = snapshot.contact;
-	setRot(rot);
 	jetting = snapshot.jetting;
 	traction = snapshot.traction;
 
