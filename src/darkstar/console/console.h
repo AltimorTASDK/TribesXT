@@ -34,13 +34,13 @@ public:
 
 	void printf(const char *format, auto &&...args)
 	{
-		using func_t = void(__stdcall*)(CMDConsole*, const char*, ...);
+		using func_t = void(*)(CMDConsole*, const char*, ...);
 		((func_t)0x4039B0)(this, format, std::forward<decltype(args)>(args)...);
 	}
 
 	void printf(ConsoleColor color, const char *format, auto &&...args)
 	{
-		using func_t = void(__stdcall*)(CMDConsole*, ConsoleColor, const char*, ...);
+		using func_t = void(*)(CMDConsole*, ConsoleColor, const char*, ...);
 		((func_t)0x403A10)(this, color, format, std::forward<decltype(args)>(args)...);
 	}
 
@@ -85,7 +85,7 @@ public:
 
 	void executef(int argc, auto &&...args)
 	{
-		using func_t = void(__cdecl*)(CMDConsole*, int, ...);
+		using func_t = void(*)(CMDConsole*, int, ...);
 		((func_t)0x403680)(this, argc, std::forward<decltype(args)>(args)...);
 	}
 };
