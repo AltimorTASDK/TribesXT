@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 constexpr auto TickMs   = 32u;
 constexpr auto TickSecs = TickMs / 1000.f;
 constexpr auto TickRate = 1000.f / TickMs;
