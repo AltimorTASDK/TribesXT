@@ -2,22 +2,16 @@
 
 #include "darkstar/Sim/simConsolePlugin.h"
 #include "plugins/netset/playerXT.h"
+#include "plugins/netset/playerPSCXT.h"
 #include "util/hooks.h"
 #include "nofix/x86Hook.h"
 
-namespace Net {
-class GhostManager;
-}
-
 class BitStream;
-class Player;
-struct PlayerMove;
-class PlayerPSC;
 
 class NetSetPlugin : public SimConsolePlugin {
 	static inline NetSetPlugin *instance;
 
-	static inline int timeNudge = 32;
+	static inline int timeNudge = 48;
 
 public:
 	static NetSetPlugin *get()
@@ -46,10 +40,18 @@ private:
 	static uint32_t __fastcall hook_Player_packUpdate(
 		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
 
-	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
+	static PlayerPSCXT *__fastcall hook_PlayerPSC_ctor(PlayerPSCXT*, edx_t, bool in_isServer);
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
-		PlayerPSC*, edx_t, BitStream *bstream, uint32_t &key);
+		PlayerPSCXT*, edx_t, BitStream *bstream, uint32_t &key);
+
+	static void __fastcall hook_PlayerPSC_clientCollectInput(
+		PlayerPSCXT*, edx_t, uint32_t startTime, uint32_t endTime);
+
+	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
+	static void __x86Hook hook_PlayerPSC_readPacket_move(CpuState &cs);
+
+	static void __x86Hook hook_PlayerPSC_writePacket_move(CpuState &cs);
 
 	static bool hook_PacketStream_checkPacketSend_check();
 	static void hook_PacketStream_checkPacketSend_check_asm();
@@ -73,8 +75,13 @@ private:
 			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
 		} Player;
 		struct {
+			StaticCodePatch<0x4429F5, PlayerPSCXT::SIZEOF> allocationSize;
+			StaticJmpHook<0x484A10, hook_PlayerPSC_ctor> ctor;
 			StaticJmpHook<0x482E30, hook_PlayerPSC_writePacket> writePacket;
+			StaticJmpHook<0x484E30, hook_PlayerPSC_clientCollectInput> clientCollectInput;
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
+			x86Hook readPacket_move    = {hook_PlayerPSC_readPacket_move,    0x485634, 1};
+			x86Hook writePacket_move   = {hook_PlayerPSC_writePacket_move,   0x483977, 2};
 		} PlayerPSC;
 		struct {
 			StaticJmpHook<0x51A2E4, hook_PacketStream_checkPacketSend_check_asm> checkPacketSend_check;

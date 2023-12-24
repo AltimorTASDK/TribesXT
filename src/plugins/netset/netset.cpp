@@ -1,6 +1,8 @@
+#include "darkstar/Core/bitstream.h"
 #include "tribes/playerPSC.h"
 #include "tribes/worldGlobals.h"
 #include "plugins/netset/playerXT.h"
+#include "plugins/netset/playerPSCXT.h"
 #include "plugins/netset/netset.h"
 #include "util/tribes/console.h"
 
@@ -80,17 +82,15 @@ uint32_t NetSetPlugin::hook_Player_packUpdate(
 	return result;
 }
 
-void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
+PlayerPSCXT *NetSetPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {
-	const auto *psc = (PlayerPSC*)cs.reg.ebx;
-	if (auto *player = (PlayerXT*)psc->controlPlayer; player != nullptr) {
-		player->invalidatePrediction(player->lastProcessTime);
-		player->saveSnapshot(player->lastProcessTime);
-	}
+	// Initialize new fields
+	new (&psc->xt) PlayerPSCXT::DataXT;
+	return get()->hooks.PlayerPSC.ctor.callOriginal(psc, in_isServer);
 }
 
 bool NetSetPlugin::hook_PlayerPSC_writePacket(
-	PlayerPSC *psc, edx_t, BitStream *bstream, uint32_t &key)
+	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t &key)
 {
 	if (!psc->isServer || psc->controlPlayer == nullptr)
 		return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
@@ -104,6 +104,38 @@ bool NetSetPlugin::hook_PlayerPSC_writePacket(
 	player->loadSnapshot(snapshot);
 
 	return result;
+}
+
+void NetSetPlugin::hook_PlayerPSC_clientCollectInput(
+	PlayerPSCXT *psc, edx_t, uint32_t startTime, uint32_t endTime)
+{
+	psc->collectSubtickInput(startTime, endTime);
+	get()->hooks.PlayerPSC.clientCollectInput.callOriginal(psc, startTime, endTime);
+}
+
+void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
+{
+	const auto *psc = (PlayerPSC*)cs.reg.ebx;
+	if (auto *player = (PlayerXT*)psc->controlPlayer; player != nullptr) {
+		player->invalidatePrediction(player->lastProcessTime);
+		player->saveSnapshot(player->lastProcessTime);
+	}
+}
+
+void NetSetPlugin::hook_PlayerPSC_readPacket_move(CpuState &cs)
+{
+	auto *psc = (PlayerPSCXT*)cs.reg.ebx;
+	auto *stream = (BitStream*)cs.reg.ebp;
+	const auto skipCount = *(int*)(cs.reg.esp + 0x38);
+	psc->readSubtick(stream, skipCount);
+}
+
+void NetSetPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
+{
+	auto *psc = (PlayerPSCXT*)cs.reg.ebp;
+	auto *stream = (BitStream*)cs.reg.edi;
+	const auto moveIndex = (int)cs.reg.eax;
+	psc->writeSubtick(stream, moveIndex);
 }
 
 bool NetSetPlugin::hook_PacketStream_checkPacketSend_check()

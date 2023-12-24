@@ -165,7 +165,7 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 	if (dead)
 		return;
 
-	while (moveCount--) {
+	for (auto index = 0; index < moveCount; index++) {
 		if (updateDebt > 5)
 			break;
 
@@ -215,10 +215,12 @@ void PlayerXT::ghostSetMove(
 		setTransform(TMat3F(EulerF(rot), {0, 0, 0}) * mountTransform);
 	}
 
-	// State sent by server is from before the move, so simulate once
-	lastProcessTime = cg.currentTime + timeNudge - TickMs;
+	// Use average time of frame since we don't know when the packet arrived
+	const auto avgTime = (cg.currentTime + cg.lastTime + 1) / 2;
+	lastProcessTime = avgTime + timeNudge - TickMs;
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
+	// State sent by server is from before the move, so simulate once
 	updateMove(move, false);
 	lastPlayerMove = *move;
 }

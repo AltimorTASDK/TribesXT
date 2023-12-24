@@ -3,12 +3,18 @@
 #include "darkstar/Ml/ml.h"
 #include "tribes/constants.h"
 #include "tribes/player.h"
+#include "plugins/netset/playerPSCXT.h"
 #include "util/struct.h"
 #include <bit>
 #include <cstddef>
 #include <cstdint>
 
 class PlayerXT : public Player {
+	// Receive subtick data from PlayerPSCXT
+	using SubtickRecord = PlayerPSCXT::SubtickRecord;
+	static constexpr auto SubtickHistory = PlayerPSCXT::SubtickHistory;
+	static constexpr auto NoSubtick = PlayerPSCXT::NoSubtick;
+
 public:
 	static constexpr auto SnapHistory = std::bit_ceil((size_t)(1.0 * TickRate));
 
@@ -32,6 +38,7 @@ public:
 
 	struct DataXT {
 		Snapshot snapshots[SnapHistory];
+		SubtickRecord subtickRecords[SubtickHistory];
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);

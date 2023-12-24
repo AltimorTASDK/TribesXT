@@ -117,6 +117,15 @@
     <ClInclude Include="src\darkstar\Ml\processor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\plugins\netset\playerPSCXT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Core\bitstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Core\streamio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">
@@ -141,6 +150,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\plugins\netset\playerXT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\netset\playerPSCXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
