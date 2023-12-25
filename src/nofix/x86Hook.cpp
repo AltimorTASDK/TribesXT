@@ -163,8 +163,8 @@ extern "C"
   {
     __asm
     {
-      pushfd                  // [ebp+8] flags
-      pushad                  // [ebp+4] registers
+      pushad                  // [ebp+8] registers
+      pushfd                  // [ebp+4] flags
       push esp                // [px86Reg] ( not explicit )      
     }
   }
@@ -173,8 +173,8 @@ extern "C"
   {
     __asm
     {
-      popad
       popfd
+      popad
     }
   }
 

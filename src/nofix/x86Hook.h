@@ -8,17 +8,6 @@
 
 struct CpuState
 {
-  struct RegisterStruct
-  {
-    DWORD edi;
-    DWORD esi;
-    DWORD ebp;
-    DWORD esp;
-    DWORD ebx;
-    DWORD edx;
-    DWORD ecx;
-    DWORD eax;
-  }reg;
   struct EFlagStruct
   {
     unsigned cf:1; //carry
@@ -35,6 +24,17 @@ struct CpuState
     unsigned of:1; //overflow
     unsigned emp:19;
   }eflag;
+  struct RegisterStruct
+  {
+    DWORD edi;
+    DWORD esi;
+    DWORD ebp;
+    DWORD esp;
+    DWORD ebx;
+    DWORD edx;
+    DWORD ecx;
+    DWORD eax;
+  }reg;
   /*
   struct FpuStruct
   {
