@@ -25,13 +25,7 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 	// Matches clientCollectInput move timing
 	const auto startTick = msToTicks(startTime - 1);
 	const auto endTick = msToTicks(endTime - 1);
-	const auto subtick = (uint8_t)(endTime % TickMs);
-
-	if (endTick != startTick) {
-		xt.lockedInForTick = false;
-		for (auto tick = startTick + 1; tick <= endTick; tick++)
-			xt.subtickRecords[tick % SubtickHistory].subtick = NoSubtick;
-	}
+	const auto subtick = (uint8_t)(startTime % TickMs);
 
 	if (wasTriggerPressedSubtick())
 		xt.heldTriggerSubtick = subtick;
@@ -40,15 +34,23 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 
 	// Check if the player clicked for the first time this tick or held
 	// the trigger for a full tick
-	if (!xt.lockedInForTick && subtick >= xt.heldTriggerSubtick) {
-		xt.lockedInForTick = true;
-		for (auto tick = std::max(startTick + 1, endTick); tick <= endTick; tick++) {
-			xt.subtickRecords[tick % SubtickHistory] = {
-				.subtick = subtick,
-				.pitch = curMove.pitch,
-				.yaw = curMove.turnRot
-			};
+	if (xt.pendingSubtickRecord.subtick == NoSubtick) {
+		if (xt.heldTriggerSubtick != NoSubtick) {
+			if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {
+				xt.pendingSubtickRecord = {
+					.subtick = xt.heldTriggerSubtick,
+					.pitch = curMove.pitch,
+					.yaw = curMove.turnRot
+				};
+			}
 		}
+	}
+
+	if (endTick != startTick) {
+		for (auto tick = startTick + 1; tick <= endTick; tick++)
+			xt.subtickRecords[tick % SubtickHistory] = xt.pendingSubtickRecord;
+
+		xt.pendingSubtickRecord.subtick = NoSubtick;
 	}
 
 	xt.prevFrameTriggerCount = triggerCount;
@@ -72,7 +74,7 @@ void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 
 void PlayerPSCXT::readSubtick(BitStream *stream, int skipCount)
 {
-	SubtickRecord record;
+	auto record = SubtickRecord();
 
 	if (stream->readFlag()) {
 		record.subtick = stream->readInt(TickShift);
@@ -80,8 +82,6 @@ void PlayerPSCXT::readSubtick(BitStream *stream, int skipCount)
 			stream->read(&record.pitch);
 		if (stream->readFlag())
 			stream->read(&record.yaw);
-	} else {
-		record.subtick = NoSubtick;
 	}
 
 	if (skipCount != 0 || moves.size() >= SubtickHistory || controlPlayer == nullptr)

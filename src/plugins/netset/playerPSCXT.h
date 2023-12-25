@@ -8,21 +8,20 @@ class BitStream;
 class PlayerPSCXT : public PlayerPSC {
 public:
 	static constexpr auto SubtickHistory = std::bit_ceil(MaxMoves);
-
-	// Must be >= TickMs to allow omitting checks for NoSubtick
 	static constexpr uint8_t NoSubtick = -1;
 
 	struct SubtickRecord {
-		uint8_t subtick;
+		uint8_t subtick = NoSubtick;
 		float pitch;
 		float yaw;
 	};
 
 	struct DataXT {
+		// Client only
 		SubtickRecord subtickRecords[SubtickHistory];
+		SubtickRecord pendingSubtickRecord;
 		int prevFrameTriggerCount = 0;
 		uint8_t heldTriggerSubtick = NoSubtick;
-		bool lockedInForTick = false;
 	};
 
 	FIELD(PlayerPSC::SIZEOF, DataXT, xt);
