@@ -51,6 +51,6 @@ public:
 
 	bool read(auto *value)
 	{
-		return write(sizeof(*value), value);
+		return read(sizeof(*value), value);
 	}
 };
