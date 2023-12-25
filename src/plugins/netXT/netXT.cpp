@@ -170,24 +170,7 @@ __declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm(
 	}
 }
 
-static PlayerXT::Snapshot testSnapshot;
-
-static void c_remoteSaveSnapshot(PlayerXT *client)
-{
-	Console->printf(CON_GREEN, "remoteSaveSnapshot called");
-	testSnapshot = client->createSnapshot();
-}
-
-static void c_remoteLoadSnapshot(PlayerXT *client)
-{
-	Console->printf(CON_GREEN, "remoteLoadSnapshot called");
-	client->loadSnapshot(testSnapshot);
-}
-
 void NetXTPlugin::init()
 {
-	addCommandXT<"remoteSaveSnapshot", c_remoteSaveSnapshot>(console);
-	addCommandXT<"remoteLoadSnapshot", c_remoteLoadSnapshot>(console);
-
 	console->addVariable(0, "net::timeNudge", CMDConsole::Int, &timeNudge);
 }
