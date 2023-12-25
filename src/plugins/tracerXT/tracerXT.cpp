@@ -55,11 +55,19 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 	// Pull inherited velocity out for tracer calcs
 	const auto velocity = bullet->getLinearVelocity();
 	bullet->setLinearVelocity(velocity - bullet->m_shooterVel);
+
+	// Apply custom length
+	const auto baseLength = bullet->m_pBulletData->tracerLength;
+	bullet->m_pBulletData->tracerLength *= tracerLength;
+
 	get()->hooks.Bullet.onSimRenderQueryImage.callOriginal(bullet, image);
+
+	bullet->m_pBulletData->tracerLength = baseLength;
 	bullet->setLinearVelocity(velocity);
 }
 
 void TracerXTPlugin::init()
 {
 	console->addVariable(0, "tracer::width", CMDConsole::Float, &tracerWidth);
+	console->addVariable(0, "tracer::length", CMDConsole::Float, &tracerLength);
 }

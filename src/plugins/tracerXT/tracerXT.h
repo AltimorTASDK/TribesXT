@@ -12,6 +12,7 @@ class TracerXTPlugin : public SimConsolePlugin {
 	static inline TracerXTPlugin *instance;
 
 	static inline float tracerWidth = 1.0f;
+	static inline float tracerLength = 1.0f;
 
 public:
 	static TracerXTPlugin *get()
@@ -45,7 +46,7 @@ private:
 			// Draw tracers immediately on bullet spawn
 			// mov edx, ebp
 			StaticCodePatch<0x4BF313, "\x89\xEA\x90"> setFirstDrawTime;
-			// Make tracers follow inherited velocity
+			// Make tracers follow inherited velocity and set custom length
 			StaticJmpHook<0x4BF140, hook_Bullet_onSimRenderQueryImage> onSimRenderQueryImage;
 			// Set custom tracer width
 			x86Hook onSimRenderQueryImage_setWidth = {hook_Bullet_onSimRenderQueryImage_setWidth, 0x4BF371, 3};

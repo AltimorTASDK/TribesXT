@@ -6,6 +6,11 @@
 
 class Bullet : public Projectile {
 public:
+	class BulletData {
+	public:
+		FIELD(0xA8, float, tracerLength);
+	};
+
 	class TracerRenderImage {
 	public:
 		FIELD(0x18, Point3F, m_endPoint);
@@ -14,4 +19,5 @@ public:
 
 	FIELD(0x494, uint32_t, m_spawnTime);
 	FIELD(0x498, Point3F, m_spawnPosition);
+	FIELD(0x5D0, BulletData*, m_pBulletData);
 };
