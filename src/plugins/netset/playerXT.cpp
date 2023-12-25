@@ -196,10 +196,6 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 			xt.applySubtick = true;
 			subtickPitch = viewPitch + subtickRecord.pitch;
 			subtickYaw = getRot().z + subtickRecord.yaw;
-			Console->printf("subtick %d %f %f",
-				subtickRecord.subtick,
-				subtickRecord.pitch,
-				subtickRecord.yaw);
 		}
 
 		if (move.useItem != -1) {
