@@ -3,6 +3,7 @@
 #include "tribes/shapeBase.h"
 #include "tribes/worldGlobals.h"
 #include "plugins/tracerXT/tracerXT.h"
+#include "util/math.h"
 #include "nofix/x86Hook.h"
 #include <algorithm>
 #include <bit>
@@ -22,7 +23,7 @@ void TracerXTPlugin::hook_Bullet_TracerRenderImage_render_orientation(CpuState &
 
 void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs)
 {
-	*(float*)(cs.reg.esp + 0x30) = tracerWidth;
+	*(float*)(cs.reg.esp + 0x30) = clamp(tracerWidth, 0.f, 10.f);
 }
 
 void TracerXTPlugin::hook_Bullet_readInitialPacket_setSpawnTime(CpuState &cs)
@@ -58,7 +59,7 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 
 	// Apply custom length
 	const auto baseLength = bullet->m_pBulletData->tracerLength;
-	bullet->m_pBulletData->tracerLength *= tracerLength;
+	bullet->m_pBulletData->tracerLength *= clamp(tracerLength, 0.f, 1000.f);
 
 	get()->hooks.Bullet.onSimRenderQueryImage.callOriginal(bullet, image);
 
