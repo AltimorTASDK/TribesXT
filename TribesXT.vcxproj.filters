@@ -129,6 +129,15 @@
     <ClInclude Include="src\tribes\fear.strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\plugins\tracerXT\tracerXT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\bullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\projectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">
@@ -156,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\plugins\netXT\playerPSCXT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\tracerXT\tracerXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

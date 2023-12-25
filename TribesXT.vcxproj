@@ -115,8 +115,11 @@
     <ClInclude Include="src\darkstar\Sim\simObject.h" />
     <ClInclude Include="src\plugins\netXT\playerPSCXT.h" />
     <ClInclude Include="src\plugins\netXT\playerXT.h" />
+    <ClInclude Include="src\plugins\tracerXT\tracerXT.h" />
+    <ClInclude Include="src\tribes\bullet.h" />
     <ClInclude Include="src\tribes\constants.h" />
     <ClInclude Include="src\tribes\fear.strings.h" />
+    <ClInclude Include="src\tribes\projectile.h" />
     <ClInclude Include="src\tribes\worldGlobals.h" />
     <ClInclude Include="src\tribes\gameBase.h" />
     <ClInclude Include="src\tribes\player.h" />
@@ -145,6 +148,7 @@
     <ClCompile Include="src\plugins\netXT\netXT.cpp" />
     <ClCompile Include="src\plugins\netXT\playerPSCXT.cpp" />
     <ClCompile Include="src\plugins\netXT\playerXT.cpp" />
+    <ClCompile Include="src\plugins\tracerXT\tracerXT.cpp" />
     <ClCompile Include="src\util\hooks.cpp" />
     <ClCompile Include="src\nofix\x86.cpp" />
     <ClCompile Include="src\nofix\x86Hook.cpp" />

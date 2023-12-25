@@ -11,6 +11,7 @@ public:
 	static constexpr uint8_t SensorPingedBase = 24;
 
 	FIELD(0x214, uint32_t, sensorInfoBits);
+	FIELD(0x224, uint32_t, ownerId);
 	FIELD(0x22C, uint32_t, lastProcessTime);
 
 	void setSensorPinged(uint8_t fPinged)
