@@ -94,6 +94,7 @@ using to_static_function_t = to_static_function<T>::type;
 constexpr auto sum_tuple(TupleLike auto &&tuple)
 {
 	return [&]<size_t ...I>(std::index_sequence<I...>) {
+		using std::get;
 		return (get<I>(tuple) + ...);
 	}(std::make_index_sequence<sizeof_tuple<decltype(tuple)>>());
 }
