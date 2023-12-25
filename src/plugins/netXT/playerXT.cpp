@@ -209,7 +209,8 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 		updateAnimation(0.032f);
 
 		if (xt.applySubtick) {
-			const auto tickStart = lastProcessTime - TickMs;
+			// Subtract an extra tick to match the client's interpolated view
+			const auto tickStart = lastProcessTime - TickMs * 2;
 			const auto subtickTime = tickStart + subtickRecord.subtick;
 			loadSnapshotInterpolated(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
