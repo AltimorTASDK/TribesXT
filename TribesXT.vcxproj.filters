@@ -48,7 +48,7 @@
     <ClInclude Include="src\darkstar\Sim\simGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\plugins\netset\netset.h">
+    <ClInclude Include="src\plugins\netXT\netXT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\darkstar\Ml\ml.h">
@@ -78,7 +78,7 @@
     <ClInclude Include="src\darkstar\Sim\simMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\plugins\netset\playerXT.h">
+    <ClInclude Include="src\plugins\netXT\playerXT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\tribes\constants.h">
@@ -117,13 +117,16 @@
     <ClInclude Include="src\darkstar\Ml\processor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\plugins\netset\playerPSCXT.h">
+    <ClInclude Include="src\plugins\netXT\playerPSCXT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\darkstar\Core\bitstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\darkstar\Core\streamio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\fear.strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -143,16 +146,16 @@
     <ClCompile Include="src\alloc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\plugins\netset\netset.cpp">
+    <ClCompile Include="src\plugins\netXT\netXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\util\hooks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\plugins\netset\playerXT.cpp">
+    <ClCompile Include="src\plugins\netXT\playerXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\plugins\netset\playerPSCXT.cpp">
+    <ClCompile Include="src\plugins\netXT\playerPSCXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

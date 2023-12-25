@@ -1,20 +1,20 @@
 #pragma once
 
 #include "darkstar/Sim/simConsolePlugin.h"
-#include "plugins/netset/playerXT.h"
-#include "plugins/netset/playerPSCXT.h"
+#include "plugins/netXT/playerXT.h"
+#include "plugins/netXT/playerPSCXT.h"
 #include "util/hooks.h"
 #include "nofix/x86Hook.h"
 
 class BitStream;
 
-class NetSetPlugin : public SimConsolePlugin {
-	static inline NetSetPlugin *instance;
+class NetXTPlugin : public SimConsolePlugin {
+	static inline NetXTPlugin *instance;
 
 	static inline int timeNudge = 48;
 
 public:
-	static NetSetPlugin *get()
+	static NetXTPlugin *get()
 	{
 		return instance;
 	}
@@ -50,8 +50,8 @@ private:
 
 	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
 	static void __x86Hook hook_PlayerPSC_readPacket_move(CpuState &cs);
-
 	static void __x86Hook hook_PlayerPSC_writePacket_move(CpuState &cs);
+	static void __x86Hook hook_PlayerPSC_onSimActionEvent(CpuState &cs);
 
 	static bool hook_PacketStream_checkPacketSend_check();
 	static void hook_PacketStream_checkPacketSend_check_asm();
@@ -82,6 +82,7 @@ private:
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
 			x86Hook readPacket_move    = {hook_PlayerPSC_readPacket_move,    0x485634, 1};
 			x86Hook writePacket_move   = {hook_PlayerPSC_writePacket_move,   0x483977, 2};
+			x86Hook onSimActionEvent   = {hook_PlayerPSC_onSimActionEvent,   0x483DF4, 2};
 		} PlayerPSC;
 		struct {
 			StaticJmpHook<0x51A2E4, hook_PacketStream_checkPacketSend_check_asm> checkPacketSend_check;
@@ -89,12 +90,12 @@ private:
 	} hooks;
 
 public:
-	NetSetPlugin()
+	NetXTPlugin()
 	{
 		instance = this;
 	}
 
-	~NetSetPlugin()
+	~NetXTPlugin()
 	{
 		instance = nullptr;
 	}

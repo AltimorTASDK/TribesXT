@@ -3,7 +3,7 @@
 #include "darkstar/Ml/ml.h"
 #include "tribes/constants.h"
 #include "tribes/player.h"
-#include "plugins/netset/playerPSCXT.h"
+#include "plugins/netXT/playerPSCXT.h"
 #include "util/struct.h"
 #include <bit>
 #include <cstddef>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "darkstar/console/console.h"
-#include "plugins/netset/playerXT.h"
+#include "plugins/netXT/playerXT.h"
 #include "util/meta.h"
 #include <concepts>
 #include <cstdio>

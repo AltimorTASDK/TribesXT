@@ -1,6 +1,6 @@
 #include "darkstar/console/console.h"
 #include "darkstar/Sim/simGame.h"
-#include "plugins/netset/netset.h"
+#include "plugins/netXT/netXT.h"
 #include <Windows.h>
 
 #define REGISTER_PLUGIN(type) [] { \
@@ -13,7 +13,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 	if (reason != DLL_PROCESS_ATTACH)
 		return FALSE;
 
-	REGISTER_PLUGIN(NetSetPlugin);
+	REGISTER_PLUGIN(NetXTPlugin);
 
 	return TRUE;
 }

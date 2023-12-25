@@ -1,23 +1,41 @@
 #include "darkstar/Core/bitstream.h"
 #include "tribes/constants.h"
+#include "tribes/fear.strings.h"
 #include "tribes/worldGlobals.h"
-#include "plugins/netset/playerPSCXT.h"
-#include "plugins/netset/playerXT.h"
-#include <algorithm>
+#include "plugins/netXT/playerPSCXT.h"
+#include "plugins/netXT/playerXT.h"
 
-bool PlayerPSCXT::wasTriggerPressedSubtick() const
+void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 {
-	// Check if the player clicked between frames, even if they released after
-	if (triggerCount == xt.prevFrameTriggerCount)
-		return false;
-	if (triggerCount == ((xt.prevFrameTriggerCount + 1) & ~1))
-		return false;
-	return true;
-}
+	// currentTime isn't updated yet, so it corresponds to startTime below
+	const auto subtick = (uint8_t)(cg.currentTime % TickMs);
 
-bool PlayerPSCXT::isTriggerReleased() const
-{
-	return !(triggerCount & 1);
+	switch (action) {
+	case IDACTION_FIRE1:
+		if (xt.pendingSubtickRecord.subtick == NoSubtick) {
+			xt.pendingSubtickRecord = {
+				.subtick = subtick,
+				.pitch = curMove.pitch,
+				.yaw = curMove.turnRot
+			};
+		}
+		xt.heldTriggerSubtick = subtick;
+		break;
+
+	case IDACTION_BREAK1:
+		// This counts as shooting if you weren't holding the trigger
+		if (!(triggerCount & 1)) {
+			if (xt.pendingSubtickRecord.subtick == NoSubtick) {
+				xt.pendingSubtickRecord = {
+					.subtick = subtick,
+					.pitch = curMove.pitch,
+					.yaw = curMove.turnRot
+				};
+			}
+		}
+		xt.heldTriggerSubtick = NoSubtick;
+		break;
+	}
 }
 
 void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
@@ -27,13 +45,7 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 	const auto endTick = msToTicks(endTime - 1);
 	const auto subtick = (uint8_t)(startTime % TickMs);
 
-	if (wasTriggerPressedSubtick())
-		xt.heldTriggerSubtick = subtick;
-	else if (isTriggerReleased())
-		xt.heldTriggerSubtick = NoSubtick;
-
-	// Check if the player clicked for the first time this tick or held
-	// the trigger for a full tick
+	// Preserve the subtick offset if the player holds the trigger across ticks
 	if (xt.pendingSubtickRecord.subtick == NoSubtick) {
 		if (xt.heldTriggerSubtick != NoSubtick) {
 			if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {

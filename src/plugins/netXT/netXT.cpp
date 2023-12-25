@@ -1,25 +1,25 @@
 #include "darkstar/Core/bitstream.h"
 #include "tribes/playerPSC.h"
 #include "tribes/worldGlobals.h"
-#include "plugins/netset/playerXT.h"
-#include "plugins/netset/playerPSCXT.h"
-#include "plugins/netset/netset.h"
+#include "plugins/netXT/netXT.h"
+#include "plugins/netXT/playerXT.h"
+#include "plugins/netXT/playerPSCXT.h"
 #include "util/tribes/console.h"
 
-PlayerXT *NetSetPlugin::hook_Player_ctor(PlayerXT *player)
+PlayerXT *NetXTPlugin::hook_Player_ctor(PlayerXT *player)
 {
 	// Initialize new fields
 	new (&player->xt) PlayerXT::DataXT;
 	return get()->hooks.Player.ctor.callOriginal(player);
 }
 
-void NetSetPlugin::hook_Player_serverUpdateMove(
+void NetXTPlugin::hook_Player_serverUpdateMove(
 	PlayerXT *player, edx_t, PlayerMove *moves, int moveCount)
 {
 	player->serverUpdateMove(moves, moveCount);
 }
 
-void NetSetPlugin::hook_Player_ghostSetMove(
+void NetXTPlugin::hook_Player_ghostSetMove(
 	PlayerXT *player, edx_t, PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
 	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp)
 {
@@ -27,7 +27,7 @@ void NetSetPlugin::hook_Player_ghostSetMove(
 	                     newPitch, skipCount, noInterp, timeNudge);
 }
 
-void NetSetPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
+void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
 
@@ -41,7 +41,7 @@ void NetSetPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *c
 	player->saveSnapshot(player->lastProcessTime);
 }
 
-__declspec(naked) void NetSetPlugin::hook_Player_updateMove_noImages()
+__declspec(naked) void NetXTPlugin::hook_Player_updateMove_noImages()
 {
 	__asm
 	{
@@ -51,12 +51,12 @@ __declspec(naked) void NetSetPlugin::hook_Player_updateMove_noImages()
 	}
 }
 
- void NetSetPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)
+ void NetXTPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)
  {
 	 player->clientMove(curTime);
  }
 
-__declspec(naked) void NetSetPlugin::hook_Player_clientProcess_move_asm()
+__declspec(naked) void NetXTPlugin::hook_Player_clientProcess_move_asm()
 {
 	__asm
 	{
@@ -71,7 +71,7 @@ __declspec(naked) void NetSetPlugin::hook_Player_clientProcess_move_asm()
 	}
 }
 
-uint32_t NetSetPlugin::hook_Player_packUpdate(
+uint32_t NetXTPlugin::hook_Player_packUpdate(
 	PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
 {
 	const auto snapshot = player->createSnapshot();
@@ -84,14 +84,14 @@ uint32_t NetSetPlugin::hook_Player_packUpdate(
 	return result;
 }
 
-PlayerPSCXT *NetSetPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
+PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {
 	// Initialize new fields
 	new (&psc->xt) PlayerPSCXT::DataXT;
 	return get()->hooks.PlayerPSC.ctor.callOriginal(psc, in_isServer);
 }
 
-bool NetSetPlugin::hook_PlayerPSC_writePacket(
+bool NetXTPlugin::hook_PlayerPSC_writePacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t &key)
 {
 	if (!psc->isServer || psc->controlPlayer == nullptr)
@@ -108,14 +108,14 @@ bool NetSetPlugin::hook_PlayerPSC_writePacket(
 	return result;
 }
 
-void NetSetPlugin::hook_PlayerPSC_clientCollectInput(
+void NetXTPlugin::hook_PlayerPSC_clientCollectInput(
 	PlayerPSCXT *psc, edx_t, uint32_t startTime, uint32_t endTime)
 {
 	psc->collectSubtickInput(startTime, endTime);
 	get()->hooks.PlayerPSC.clientCollectInput.callOriginal(psc, startTime, endTime);
 }
 
-void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
+void NetXTPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 {
 	const auto *psc = (PlayerPSC*)cs.reg.ebx;
 	if (auto *player = (PlayerXT*)psc->controlPlayer; player != nullptr) {
@@ -124,14 +124,14 @@ void NetSetPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 	}
 }
 
-void NetSetPlugin::hook_PlayerPSC_readPacket_move(CpuState &cs)
+void NetXTPlugin::hook_PlayerPSC_readPacket_move(CpuState &cs)
 {
 	auto *psc = (PlayerPSCXT*)cs.reg.ebx;
 	auto *stream = (BitStream*)cs.reg.ebp;
 	psc->readSubtick(stream);
 }
 
-void NetSetPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
+void NetXTPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
 {
 	auto *psc = (PlayerPSCXT*)cs.reg.ebp;
 	auto *stream = (BitStream*)cs.reg.edi;
@@ -139,7 +139,15 @@ void NetSetPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
 	psc->writeSubtick(stream, moveIndex);
 }
 
-bool NetSetPlugin::hook_PacketStream_checkPacketSend_check()
+void NetXTPlugin::hook_PlayerPSC_onSimActionEvent(CpuState &cs)
+{
+	auto *psc = (PlayerPSCXT*)cs.reg.ecx;
+	const auto action = (int)cs.reg.eax;
+	const auto eventValue = *(float*)(cs.reg.ebx + 0x28);
+	psc->preSimActionEvent(action, eventValue);
+}
+
+bool NetXTPlugin::hook_PacketStream_checkPacketSend_check()
 {
 	// Check if server ticked or client produced a move
 	if (wg == &sg)
@@ -148,7 +156,7 @@ bool NetSetPlugin::hook_PacketStream_checkPacketSend_check()
 		return msToTicks(cg.currentTime - 1) != msToTicks(cg.lastTime - 1);
 }
 
-__declspec(naked) void NetSetPlugin::hook_PacketStream_checkPacketSend_check_asm()
+__declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm()
 {
 	__asm {
 		call hook_PacketStream_checkPacketSend_check
@@ -176,7 +184,7 @@ static void c_remoteLoadSnapshot(PlayerXT *client)
 	client->loadSnapshot(testSnapshot);
 }
 
-void NetSetPlugin::init()
+void NetXTPlugin::init()
 {
 	addCommandXT<"remoteSaveSnapshot", c_remoteSaveSnapshot>(console);
 	addCommandXT<"remoteLoadSnapshot", c_remoteLoadSnapshot>(console);

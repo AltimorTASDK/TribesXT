@@ -28,11 +28,8 @@ public:
 
 	static constexpr size_t SIZEOF = PlayerPSC::SIZEOF + sizeof(DataXT);
 
-protected:
-	bool wasTriggerPressedSubtick() const;
-	bool isTriggerReleased() const;
-
 public:
+	void preSimActionEvent(int action, float eventValue);
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
 	void writeSubtick(BitStream *stream, int moveIndex);
 	void readSubtick(BitStream *stream);

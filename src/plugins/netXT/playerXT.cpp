@@ -1,8 +1,8 @@
 #include "darkstar/console/console.h"
 #include "tribes/playerPSC.h"
 #include "tribes/worldGlobals.h"
-#include "plugins/netset/netset.h"
-#include "plugins/netset/playerXT.h"
+#include "plugins/netXT/netXT.h"
+#include "plugins/netXT/playerXT.h"
 #include "util/math.h"
 #include <cstdint>
 #include <new>
