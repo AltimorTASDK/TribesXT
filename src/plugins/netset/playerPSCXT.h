@@ -35,5 +35,5 @@ protected:
 public:
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
 	void writeSubtick(BitStream *stream, int moveIndex);
-	void readSubtick(BitStream *stream, int skipCount);
+	void readSubtick(BitStream *stream);
 };

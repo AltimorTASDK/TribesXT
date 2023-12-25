@@ -72,7 +72,7 @@ void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 	}
 }
 
-void PlayerPSCXT::readSubtick(BitStream *stream, int skipCount)
+void PlayerPSCXT::readSubtick(BitStream *stream)
 {
 	auto record = SubtickRecord();
 
@@ -84,7 +84,7 @@ void PlayerPSCXT::readSubtick(BitStream *stream, int skipCount)
 			stream->read(&record.yaw);
 	}
 
-	if (skipCount != 0 || moves.size() >= SubtickHistory || controlPlayer == nullptr)
+	if (moves.size() >= SubtickHistory || controlPlayer == nullptr)
 		return;
 
 	// Pass to the player for serverUpdateMove

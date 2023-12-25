@@ -31,9 +31,11 @@ void NetSetPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *c
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
 
-	// Update item images after moving instead
-	for (auto i = 0; i < Player::MaxItemImages; i++)
-		player->updateImageState(i, 0.032f);
+	if (!player->xt.applySubtick) {
+		// Update item images after moving instead
+		for (auto i = 0; i < Player::MaxItemImages; i++)
+			player->updateImageState(i, 0.032f);
+	}
 
 	player->lastProcessTime += TickMs;
 	player->saveSnapshot(player->lastProcessTime);
@@ -126,8 +128,7 @@ void NetSetPlugin::hook_PlayerPSC_readPacket_move(CpuState &cs)
 {
 	auto *psc = (PlayerPSCXT*)cs.reg.ebx;
 	auto *stream = (BitStream*)cs.reg.ebp;
-	const auto skipCount = *(int*)(cs.reg.esp + 0x38);
-	psc->readSubtick(stream, skipCount);
+	psc->readSubtick(stream);
 }
 
 void NetSetPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
