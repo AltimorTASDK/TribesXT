@@ -252,8 +252,8 @@ void PlayerXT::ghostSetMove(
 	const auto rot = Point3F(getRot().x, getRot().y, newRot);
 
 	setLinearVelocity(newVel);
-	setPos(newPos);
 	setRot(rot);
+	setPos(newPos);
 	contact = newContact;
 	viewPitch = newPitch;
 	updateSkip = skipCount;
