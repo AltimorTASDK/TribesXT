@@ -54,7 +54,7 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 	Bullet *bullet, edx_t, SimRenderQueryImage *image)
 {
 	// Pull inherited velocity out for tracer calcs
-	const auto velocity = bullet->getLinearVelocity();
+	const auto &velocity = bullet->getLinearVelocity();
 	bullet->setLinearVelocity(velocity - bullet->m_shooterVel);
 
 	// Apply custom length
