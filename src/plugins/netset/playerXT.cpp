@@ -139,6 +139,18 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
+void PlayerXT::setViewAngles(float pitch, float yaw)
+{
+	viewPitch = pitch;
+	setRot({getRot().x, getRot().y, yaw});
+	setTransform(TMat3F(EulerF(getRot()), getTransform().p));
+}
+
+void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
+{
+	setViewAngles(clamp(pitch, -MaxPitch, MaxPitch), normalize_radians(yaw));
+}
+
 // clientProcess partial reimplementation
 void PlayerXT::clientMove(uint32_t curTime)
 {
@@ -171,23 +183,58 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 
 		updateDebt++;
 
-		if (moves->useItem != -1) {
+		const auto &move = moves[index];
+		const auto &subtickRecord = xt.subtickRecords[index];
+
+		float subtickPitch;
+		float subtickYaw;
+
+		// Clients shouldn't send more than SubtickHistory moves, but are allowed to
+		if (index < SubtickHistory && subtickRecord.subtick != NoSubtick) {
+			// Lets updateMove know not to update image states yet
+			xt.applySubtick = true;
+			subtickPitch = viewPitch + subtickRecord.pitch;
+			subtickYaw = getRot().z + subtickRecord.yaw;
+			Console->printf("subtick %d %f %f",
+				subtickRecord.subtick,
+				subtickRecord.pitch,
+				subtickRecord.yaw);
+		}
+
+		if (move.useItem != -1) {
 			char buf[16];
-			sprintf_s(buf, "%d", moves->useItem);
+			sprintf_s(buf, "%d", move.useItem);
 			Console->executef(3, "remoteUseItem", scriptThis(), buf);
 		}
 
 		updateDamage(0.032f);
-		updateMove(moves, true);
+		updateMove(&move, true);
 		updateAnimation(0.032f);
 
+		if (xt.applySubtick) {
+			const auto tickStart = lastProcessTime - TickMs;
+			const auto subtickTime = tickStart + subtickRecord.subtick;
+			loadSnapshotInterpolated(subtickTime);
+			setViewAnglesClamped(subtickPitch, subtickYaw);
+
+			// Call updateImageState here instead
+			for (auto i = 0; i < MaxItemImages; i++)
+				updateImageState(i, 0.032f);
+		}
+
 		// Update trigger state after move
-		if (lastPlayerMove.trigger && !moves->trigger)
+		if (lastPlayerMove.trigger && !move.trigger)
 			setImageTriggerUp(0);
-		else if (!lastPlayerMove.trigger && moves->trigger)
+		else if (!lastPlayerMove.trigger && move.trigger)
 			setImageTriggerDown(0);
 
-		lastPlayerMove = *moves++;
+		if (xt.applySubtick) {
+			// Restore
+			loadSnapshot(lastProcessTime);
+			xt.applySubtick = false;
+		}
+
+		lastPlayerMove = move;
 	}
 
 	if (mount == nullptr || mountPoint != 1)

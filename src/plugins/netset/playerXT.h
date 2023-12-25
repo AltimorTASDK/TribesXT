@@ -38,7 +38,9 @@ public:
 
 	struct DataXT {
 		Snapshot snapshots[SnapHistory];
+		// Server only
 		SubtickRecord subtickRecords[SubtickHistory];
+		bool applySubtick = false;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
@@ -67,6 +69,9 @@ public:
 				snap.time = -1;
 		}
 	}
+
+	void setViewAngles(float pitch, float yaw);
+	void setViewAnglesClamped(float pitch, float yaw);
 	
 	void clientMove(uint32_t curTime);
 	void serverUpdateMove(PlayerMove *moves, int moveCount);

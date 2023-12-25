@@ -166,7 +166,7 @@ public:
 		((func_t)0x4B41F0)(this, imageSlot);
 	}
 
-	void updateMove(PlayerMove *curMove, bool server)
+	void updateMove(const PlayerMove *curMove, bool server)
 	{
 		using func_t = to_static_function_t<decltype(&Player::updateMove)>;
 		((func_t)0x4BA640)(this, curMove, server);
