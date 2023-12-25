@@ -83,15 +83,16 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 		}
 	}
 
+	setLinearVelocity(snapshot.velocity);
 	setSensorPinged(snapshot.pingStatus);
-	const auto rot = Point3F(getRot().x, getRot().y, yaw);
+	setRot({getRot().x, getRot().y, yaw});
+	setPos(snapshot.position);
 
-	if (mount == nullptr) {
-		setLinearVelocity(snapshot.velocity);
-		setTransform({EulerF(rot), snapshot.position});
+	if (mount != nullptr) {
+		const auto mountTransform = mount->getObjectMountTransform(mountPoint);
+		setTransform(TMat3F(EulerF(getRot()), {0, 0, 0}) * mountTransform);
 	}
 
-	setRot(rot);
 	viewPitch = pitch;
 	energy = snapshot.energy;
 	contact = snapshot.contact;
