@@ -69,6 +69,6 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 
 void TracerXTPlugin::init()
 {
-	console->addVariable(0, "tracer::width", CMDConsole::Float, &cvars::tracer::width);
+	console->addVariable(0, "tracer::width",  CMDConsole::Float, &cvars::tracer::width);
 	console->addVariable(0, "tracer::length", CMDConsole::Float, &cvars::tracer::length);
 }
