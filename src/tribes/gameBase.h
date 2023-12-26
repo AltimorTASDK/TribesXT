@@ -25,6 +25,16 @@ public:
 		return (uint8_t)(sensorInfoBits >> SensorPingedBase);
 	}
 
+	float getDamageLevel() const
+	{
+		return call_virtual<62, decltype(&GameBase::getDamageLevel)>(this);
+	}
+
+	float getEnergyLevel() const
+	{
+		return call_virtual<63, decltype(&GameBase::getEnergyLevel)>(this);
+	}
+
 	void getObjectMountTransform(int mountPoint, TMat3F *mat) const
 	{
 		call_virtual<91, void(GameBase::*)(int, TMat3F*) const>(this, mountPoint, mat);

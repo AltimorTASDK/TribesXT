@@ -1,6 +1,7 @@
 #include "darkstar/console/console.h"
 #include "darkstar/Sim/simGame.h"
 #include "plugins/netXT/netXT.h"
+#include "plugins/scriptXT/scriptXT.h"
 #include "plugins/tracerXT/tracerXT.h"
 #include <Windows.h>
 
@@ -15,6 +16,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 		return FALSE;
 
 	REGISTER_PLUGIN(NetXTPlugin);
+	REGISTER_PLUGIN(ScriptXTPlugin);
 	REGISTER_PLUGIN(TracerXTPlugin);
 
 	return TRUE;
