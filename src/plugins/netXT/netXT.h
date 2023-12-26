@@ -8,10 +8,12 @@
 
 class BitStream;
 
+namespace cvars::net {
+inline int timeNudge = 48;
+};
+
 class NetXTPlugin : public SimConsolePlugin {
 	static inline NetXTPlugin *instance;
-
-	static inline int timeNudge = 48;
 
 public:
 	static NetXTPlugin *get()

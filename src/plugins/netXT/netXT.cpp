@@ -24,7 +24,7 @@ void NetXTPlugin::hook_Player_ghostSetMove(
 	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp)
 {
 	player->ghostSetMove(move, newPos, newVel, newContact, newRot,
-	                     newPitch, skipCount, noInterp, timeNudge);
+	                     newPitch, skipCount, noInterp, cvars::net::timeNudge);
 }
 
 void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
@@ -172,5 +172,5 @@ __declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm(
 
 void NetXTPlugin::init()
 {
-	console->addVariable(0, "net::timeNudge", CMDConsole::Int, &timeNudge);
+	console->addVariable(0, "net::timeNudge", CMDConsole::Int, &cvars::net::timeNudge);
 }

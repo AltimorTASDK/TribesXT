@@ -8,11 +8,13 @@ class BitStream;
 class Bullet;
 class SimRenderQueryImage;
 
+namespace cvars::tracer {
+inline float width = 1.0f;
+inline float length = 1.0f;
+};
+
 class TracerXTPlugin : public SimConsolePlugin {
 	static inline TracerXTPlugin *instance;
-
-	static inline float tracerWidth = 1.0f;
-	static inline float tracerLength = 1.0f;
 
 public:
 	static TracerXTPlugin *get()
