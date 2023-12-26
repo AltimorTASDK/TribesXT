@@ -9,7 +9,7 @@ class Bullet;
 class SimRenderQueryImage;
 
 namespace cvars::tracer {
-inline float width = 1.0f;
+inline float width  = 1.0f;
 inline float length = 1.0f;
 };
 
