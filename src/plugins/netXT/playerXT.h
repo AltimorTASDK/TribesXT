@@ -74,7 +74,8 @@ public:
 	void setViewAnglesClamped(float pitch, float yaw);
 	
 	void clientMove(uint32_t curTime);
-	void serverUpdateMove(PlayerMove *moves, int moveCount);
+	void updateWeapon(const PlayerMove &move);
+	void serverUpdateMove(const PlayerMove *moves, int moveCount);
 
 	void ghostSetMove(
 		PlayerMove *move, const Point3F &newPos, const Point3F &newVel,

@@ -173,7 +173,18 @@ void PlayerXT::clientMove(uint32_t curTime)
 	loadSnapshotInterpolated(curTime);
 }
 
-void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
+void PlayerXT::updateWeapon(const PlayerMove &move)
+{
+	if (lastPlayerMove.trigger && !move.trigger)
+		setImageTriggerUp(0);
+	else if (!lastPlayerMove.trigger && move.trigger)
+		setImageTriggerDown(0);
+
+	for (auto i = 0; i < MaxItemImages; i++)
+		updateImageState(i, 0.032f);
+}
+
+void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 {
 	if (dead)
 		return;
@@ -215,18 +226,9 @@ void PlayerXT::serverUpdateMove(PlayerMove *moves, int moveCount)
 			loadSnapshotInterpolated(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
 
-			// Call updateImageState here instead
-			for (auto i = 0; i < MaxItemImages; i++)
-				updateImageState(i, 0.032f);
-		}
+			// Update weapon with subtick state
+			updateWeapon(move);
 
-		// Update trigger state after move
-		if (lastPlayerMove.trigger && !move.trigger)
-			setImageTriggerUp(0);
-		else if (!lastPlayerMove.trigger && move.trigger)
-			setImageTriggerDown(0);
-
-		if (xt.applySubtick) {
 			// Restore
 			loadSnapshot(lastProcessTime);
 			xt.applySubtick = false;

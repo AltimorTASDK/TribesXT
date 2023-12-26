@@ -31,11 +31,8 @@ void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *cu
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
 
-	if (!player->xt.applySubtick) {
-		// Update item images after moving instead
-		for (auto i = 0; i < Player::MaxItemImages; i++)
-			player->updateImageState(i, 0.032f);
-	}
+	if (!player->xt.applySubtick)
+		player->updateWeapon(*curMove);
 
 	player->lastProcessTime += TickMs;
 	player->saveSnapshot(player->lastProcessTime);
