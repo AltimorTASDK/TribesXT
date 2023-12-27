@@ -116,6 +116,7 @@
     <ClInclude Include="src\plugins\netXT\playerPSCXT.h" />
     <ClInclude Include="src\plugins\netXT\playerXT.h" />
     <ClInclude Include="src\plugins\scriptXT\scriptXT.h" />
+    <ClInclude Include="src\plugins\skiBugFix\skiBugFix.h" />
     <ClInclude Include="src\plugins\tracerXT\tracerXT.h" />
     <ClInclude Include="src\tribes\bullet.h" />
     <ClInclude Include="src\tribes\constants.h" />
