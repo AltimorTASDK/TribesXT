@@ -59,6 +59,9 @@ constexpr T lerp(T a, T b, auto c)
 template<std::floating_point T>
 constexpr T normalize_radians(T value)
 {
+	if (value >= 0 && value < math::tau)
+		return value;
+
 	const auto result = std::fmod(value, math::tau);
 	return result >= 0 ? result : result + math::tau;
 }
@@ -67,6 +70,9 @@ constexpr T normalize_radians(T value)
 template<std::floating_point T>
 constexpr T normalize_radians_signed(T value)
 {
+	if (value >= -math::pi && value < math::pi)
+		return value;
+
 	return normalize_radians(value + math::pi) - math::pi;
 }
 
