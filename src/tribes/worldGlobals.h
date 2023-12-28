@@ -2,6 +2,7 @@
 
 #include "util/struct.h"
 
+class Player;
 class PlayerPSC;
 class SimManager;
 
@@ -12,6 +13,7 @@ public:
 	FIELD(0x08, uint32_t, timeBase);
 	FIELD(0x14, SimManager*, manager);
 	FIELD(0x1C, PlayerPSC*, psc);
+	FIELD(0x30, Player*, player);
 };
 
 inline auto &cg = *(WorldGlobals*)0x6D4FA8;
