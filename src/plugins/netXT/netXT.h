@@ -50,6 +50,8 @@ private:
 	static void __fastcall hook_PlayerPSC_clientCollectInput(
 		PlayerPSCXT*, edx_t, uint32_t startTime, uint32_t endTime);
 
+	static void hook_clampAngleDelta(float *angle, float range);
+
 	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
 	static void __x86Hook hook_PlayerPSC_readPacket_move(CpuState &cs);
 	static void __x86Hook hook_PlayerPSC_writePacket_move(CpuState &cs);
@@ -77,13 +79,28 @@ private:
 			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
 		} Player;
 		struct {
+			// Don't clamp IDACTION_PITCH
+			StaticCodePatch<0x483F9F, "\x18"> onSimActionEvent_noPitchClamp1;
+			StaticCodePatch<0x483FAE, "\x18"> onSimActionEvent_noPitchClamp2;
+			// Don't clamp IDACTION_YAW
+			StaticCodePatch<0x483F10, "\x18"> onSimActionEvent_noYawClamp1;
+			StaticCodePatch<0x483F1F, "\x18"> onSimActionEvent_noYawClamp2;
 			StaticCodePatch<0x4429F5, PlayerPSCXT::SIZEOF> allocationSize;
+			// Use PlayerPSCXT extension
 			StaticJmpHook<0x484A10, hook_PlayerPSC_ctor> ctor;
+			// Send player states from the previous move on the server
 			StaticJmpHook<0x482E30, hook_PlayerPSC_writePacket> writePacket;
+			// Collect subtick inputs
 			StaticJmpHook<0x484E30, hook_PlayerPSC_clientCollectInput> clientCollectInput;
+			// Don't clamp move angle deltas on the server
+			StaticJmpHook<0x482A90, hook_clampAngleDelta> clampAngleDelta;
+			// Invalidate predicted snapshots after a rollback
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
+			// Read subtick
 			x86Hook readPacket_move    = {hook_PlayerPSC_readPacket_move,    0x485634, 1};
+			// Write subtick
 			x86Hook writePacket_move   = {hook_PlayerPSC_writePacket_move,   0x483977, 2};
+			// Handle subtick inputs
 			x86Hook onSimActionEvent   = {hook_PlayerPSC_onSimActionEvent,   0x483DF4, 2};
 		} PlayerPSC;
 		struct {

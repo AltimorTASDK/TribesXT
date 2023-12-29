@@ -4,7 +4,9 @@
 #include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/playerPSCXT.h"
+#include "util/math.h"
 #include "util/tribes/console.h"
+#include <cmath>
 
 PlayerXT *NetXTPlugin::hook_Player_ctor(PlayerXT *player)
 {
@@ -110,6 +112,15 @@ void NetXTPlugin::hook_PlayerPSC_clientCollectInput(
 {
 	psc->collectSubtickInput(startTime, endTime);
 	get()->hooks.PlayerPSC.clientCollectInput.callOriginal(psc, startTime, endTime);
+}
+
+void NetXTPlugin::hook_clampAngleDelta(float *angle, float range)
+{
+	// Check subnormal/infinite/NaN
+	if (std::isnormal(*angle))
+		*angle = normalize_radians_signed(*angle);
+	else
+		*angle = 0.f;
 }
 
 void NetXTPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
