@@ -23,6 +23,27 @@ void TracerXTPlugin::hook_Bullet_TracerRenderImage_render_orientation(CpuState &
 	*(Point3F*)(cs.reg.esp + 0xC) = normalVec;
 }
 
+void TracerXTPlugin::hook_Bullet_writeInitialPacket(
+	Bullet *bullet, edx_t, Net::GhostManager *ghostManager, BitStream *stream)
+{
+	bullet->Projectile::writeInitialPacket(ghostManager, stream);
+
+	stream->write(bullet->m_spawnPosition);
+
+	const auto elapsedMs = sg.currentTime - bullet->m_spawnTime;
+	stream->writeInt(elapsedMs, 15);
+
+	const auto direction = bullet->m_spawnVelocity / bullet->m_spawnVelocityLen;
+	stream->writeNormalVector(direction, 20);
+	stream->writeIntClamped((int)(bullet->m_spawnVelocityLen * 16), 14);
+
+	// Using Player::packUpdate velocity quantization
+	const auto shooterSpeed = bullet->m_shooterVel.length();
+	const auto shooterDirection = bullet->m_shooterVel / shooterSpeed;
+	stream->writeIntClamped((int)(shooterSpeed * 512), 17);
+	stream->writeNormalVector(shooterDirection, 10);
+}
+
 void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	Bullet *bullet, edx_t, Net::GhostManager *ghostManager, BitStream *stream)
 {
@@ -59,27 +80,6 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 		else
 			bullet->m_shooterVel = {};
 	}
-}
-
-void TracerXTPlugin::hook_Bullet_writeInitialPacket(
-	Bullet *bullet, edx_t, Net::GhostManager *ghostManager, BitStream *stream)
-{
-	bullet->Projectile::writeInitialPacket(ghostManager, stream);
-
-	stream->write(bullet->m_spawnPosition);
-
-	const auto elapsedMs = sg.currentTime - bullet->m_spawnTime;
-	stream->writeInt(elapsedMs, 15);
-
-	const auto direction = bullet->m_spawnVelocity / bullet->m_spawnVelocityLen;
-	stream->writeNormalVector(direction, 20);
-	stream->writeIntClamped((int)(bullet->m_spawnVelocityLen * 16), 14);
-
-	// Using Player::packUpdate velocity quantization
-	const auto shooterSpeed = bullet->m_shooterVel.length();
-	const auto shooterDirection = bullet->m_shooterVel / shooterSpeed;
-	stream->writeIntClamped((int)(shooterSpeed * 512), 17);
-	stream->writeNormalVector(shooterDirection, 10);
 }
 
 void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(

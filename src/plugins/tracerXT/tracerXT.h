@@ -28,10 +28,10 @@ public:
 private:
 	static void __x86Hook hook_Bullet_TracerRenderImage_render_orientation(CpuState &cs);
 
-	static void __fastcall hook_Bullet_readInitialPacket(
+	static void __fastcall hook_Bullet_writeInitialPacket(
 		Bullet*, edx_t, Net::GhostManager *ghostManager, BitStream *stream);
 
-	static void __fastcall hook_Bullet_writeInitialPacket(
+	static void __fastcall hook_Bullet_readInitialPacket(
 		Bullet*, edx_t, Net::GhostManager *ghostManager, BitStream *stream);
 
 	static void __fastcall hook_Bullet_onSimRenderQueryImage(
@@ -51,10 +51,10 @@ private:
 			StaticCodePatch<0x4BFF5D, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionX;
 			StaticCodePatch<0x4BFF63, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionY;
 			StaticCodePatch<0x4BFF69, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionZ;
-			// Set m_spawnTime in readInitialPacket based on elapsed time from server
-			StaticJmpHook<0x4BDFD0, hook_Bullet_readInitialPacket> readInitialPacket;
 			// Set elapsed time in writeInitialPacket based on m_spawnTime like a normal person
 			StaticJmpHook<0x4BDE60, hook_Bullet_writeInitialPacket> writeInitialPacket;
+			// Set m_spawnTime in readInitialPacket based on elapsed time from server
+			StaticJmpHook<0x4BDFD0, hook_Bullet_readInitialPacket> readInitialPacket;
 			// Make tracers follow inherited velocity and set custom length
 			StaticJmpHook<0x4BF140, hook_Bullet_onSimRenderQueryImage> onSimRenderQueryImage;
 			// Draw tracers immediately on bullet spawn
