@@ -2,7 +2,7 @@
 
 #include "darkstar/Core/bitset.h"
 #include "darkstar/Core/tVector.h"
-#include "darkstar/Sim/simObject.h"
+#include "darkstar/Sim/simBase.h"
 #include "util/struct.h"
 
 namespace Net {

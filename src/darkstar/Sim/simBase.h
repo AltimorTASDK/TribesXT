@@ -1,7 +1,12 @@
 #pragma once
 
+#include "darkstar/Core/bitset.h"
 #include "darkstar/Sim/simEvDecl.h"
 #include "util/struct.h"
+
+struct SimQuery {
+	int type;
+};
 
 class SimObject {
 	enum Flag {
@@ -32,4 +37,7 @@ public:
 	{
 		return id;
 	}
+};
+
+class SimSet : public SimObject {
 };
