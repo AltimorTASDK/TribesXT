@@ -8,11 +8,26 @@
 #include "util/tribes/console.h"
 #include <cmath>
 
+void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
+{
+	auto *manager = (SimManager*)cs.reg.esi;
+	setUpWorld(manager);
+}
+
 PlayerXT *NetXTPlugin::hook_Player_ctor(PlayerXT *player)
 {
 	// Initialize new fields
 	new (&player->xt) PlayerXT::DataXT;
 	return get()->hooks.Player.ctor.callOriginal(player);
+}
+
+bool NetXTPlugin::hook_Player_onAdd(PlayerXT *player)
+{
+	if (!get()->hooks.Player.onAdd.callOriginal(player))
+		return false;
+
+	player->addToSet(LagCompensatedSetId);
+	return true;
 }
 
 void NetXTPlugin::hook_Player_serverUpdateMove(
@@ -181,8 +196,20 @@ __declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm(
 	}
 }
 
+void NetXTPlugin::setUpWorld(SimManager *manager)
+{
+	manager->addObject(new SimSet(false), LagCompensatedSetId);
+}
+
 void NetXTPlugin::init()
 {
 	console->addVariable(0, "net::timeNudge",             CMDConsole::Int, &cvars::net::timeNudge);
 	console->addVariable(0, "net::clientClockCorrection", CMDConsole::Int, &cvars::net::clientClockCorrection);
+
+	// Set up already running worlds
+	if (cg.manager != nullptr)
+		setUpWorld(cg.manager);
+
+	if (sg.manager != nullptr)
+		setUpWorld(sg.manager);
 }

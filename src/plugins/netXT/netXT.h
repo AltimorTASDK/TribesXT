@@ -9,6 +9,9 @@
 
 class BitStream;
 class FearGame;
+class SimManager;
+
+constexpr char LagCompensatedSetId[] = "LagCompensatedSet";
 
 namespace cvars::net {
 // Offset for inserting server snapshots into the client interpolation buffer
@@ -27,7 +30,11 @@ public:
 	}
 
 private:
+	static void __x86Hook hook_FearGame_consoleCallback_newGame(CpuState &cs);
+
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT*);
+
+	static bool __fastcall hook_Player_onAdd(PlayerXT*);
 
 	static void __fastcall hook_Player_serverUpdateMove(
 		PlayerXT*, edx_t, PlayerMove *moves, int moveCount);
@@ -74,7 +81,9 @@ private:
 		} FearCSDelegate;
 		struct {
 			// Don't skip Player clientProcess when lastProcessTime is currentTime
-			StaticCodePatch<0x4E8E02, "\x90\x90"> skipProcessTimeCheck;
+			StaticCodePatch<0x4E8E02, "\x90\x90"> clientProcess_skipProcessTimeCheck;
+			// Add new objects to a new client/server
+			x86Hook consoleCallback_newGame = {hook_FearGame_consoleCallback_newGame, 0x4E8288, 2};
 		} FearGame;
 		struct {
 			// Use PlayerXT
@@ -83,6 +92,8 @@ private:
 			StaticCodePatch<0x4CE4B8, PlayerXT::SIZEOF> allocationSize3;
 			StaticCodePatch<0x4CFDA2, PlayerXT::SIZEOF> allocationSize4;
 			StaticJmpHook<0x4ACE70, hook_Player_ctor> ctor;
+			// Add player to LagCompensatedSet
+			StaticJmpHook<0x4AB830, hook_Player_onAdd> onAdd;
 			// Run client moves on server
 			StaticJmpHook<0x4BBB40, hook_Player_serverUpdateMove> serverUpdateMove;
 			// Interpolate/extrapolate remote player
@@ -130,6 +141,8 @@ private:
 			StaticJmpHook<0x51A2E4, hook_PacketStream_checkPacketSend_check_asm> checkPacketSend_check;
 		} PacketStream;
 	} hooks;
+
+	static void setUpWorld(SimManager *manager);
 
 public:
 	NetXTPlugin()
