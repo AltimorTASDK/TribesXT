@@ -142,6 +142,65 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
+bool PlayerXT::startLagCompensation(uint32_t time)
+{
+	xt.lagCompensationBackup = createSnapshot();
+
+	const auto *a = xt.lagCompensationSnapshots.getPrev(time);
+	if (a == nullptr)
+		return false;
+
+	if (a->time == time) {
+		loadSnapshot(*a, false);
+		return true;
+	}
+
+	const auto *b = xt.lagCompensationSnapshots.getNext(time);
+	if (b == nullptr)
+		return false;
+
+	const auto fraction = (float)(time - a->time) / (b->time - a->time);
+	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), false);
+	return true;
+}
+
+void PlayerXT::endLagCompensation()
+{
+	loadSnapshot(xt.lagCompensationBackup);
+}
+
+void PlayerXT::startLagCompensationAll(uint32_t time)
+{
+	if (sg.manager == nullptr)
+		return;
+
+	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
+
+	if (lagCompensatedSet == nullptr)
+		return;
+
+	for (auto *object : lagCompensatedSet->objectList) {
+		auto *player = (PlayerXT*)object;
+		player->startLagCompensation(time);
+	}
+}
+
+void PlayerXT::endLagCompensationAll()
+{
+	if (sg.manager == nullptr)
+		return;
+
+	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
+
+	if (lagCompensatedSet == nullptr)
+		return;
+
+	for (auto *object : lagCompensatedSet->objectList) {
+		auto *player = (PlayerXT*)object;
+		player->endLagCompensation();
+	}
+}
+
 void PlayerXT::setViewAngles(float pitch, float yaw)
 {
 	viewPitch = pitch;

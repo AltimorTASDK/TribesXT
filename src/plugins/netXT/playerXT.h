@@ -53,7 +53,8 @@ public:
 		SnapshotBuffer snapshots;
 
 		// Server only, timed by sg.currentTime
-		SnapshotBuffer lagCompSnapshots;
+		SnapshotBuffer lagCompensationSnapshots;
+		Snapshot lagCompensationBackup;
 
 		// Server only
 		SubtickRecord subtickRecords[SubtickHistory];
@@ -75,6 +76,11 @@ public:
 	void loadSnapshot(const Snapshot &snapshot, bool useMouse = false);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
+	bool startLagCompensation(uint32_t time);
+	void endLagCompensation();
+
+	static void startLagCompensationAll(uint32_t time);
+	static void endLagCompensationAll();
 
 	void invalidatePrediction(uint32_t time)
 	{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "darkstar/Core/bitset.h"
+#include "darkstar/Core/tVector.h"
 #include "darkstar/Sim/simEvDecl.h"
 #include "util/struct.h"
 #include <cstddef>
@@ -57,6 +58,8 @@ public:
 class SimSet : public SimObject {
 public:
 	static constexpr size_t SIZEOF = 0x6C;
+
+	FIELD(0x54, Vector<SimObject*>, objectList);
 
 	static void *operator new(size_t count)
 	{
