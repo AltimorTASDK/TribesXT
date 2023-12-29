@@ -23,7 +23,7 @@ public:
 	struct Snapshot {
 		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
 
-		uint32_t time = (uint32_t)-1;
+		uint32_t time = -1;
 		float yaw;
 		Point3F position;
 		Point3F velocity;
@@ -37,7 +37,15 @@ public:
 		bool jetting;
 		bool crouching;
 
-		bool isValid() const { return time != -1; }
+		bool isValid() const
+		{
+			return time != -1;
+		}
+
+		void invalidate()
+		{
+			time = -1;
+		}
 	};
 
 	struct SnapshotBuffer {
@@ -66,7 +74,7 @@ public:
 
 		// Server only
 		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
-		LagCompensationRequest currentLagCompensation;
+		uint32_t currentLagCompensation;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
@@ -80,7 +88,7 @@ public:
 
 	bool hasLagCompensation() const
 	{
-		return xt.currentLagCompensation.time != -1;
+		return xt.currentLagCompensation != -1;
 	}
 
 	Snapshot createSnapshot(uint32_t time = 0) const;
@@ -101,7 +109,7 @@ public:
 		xt.lagCompensationSnapshots[index] = createSnapshot(time);
 	}
 
-	Snapshot startLagCompensation(uint32_t time);
+	void startLagCompensation(uint32_t time);
 	void endLagCompensation();
 
 	static void startLagCompensationAll(const PlayerXT *exclude, uint32_t time);
@@ -110,9 +118,9 @@ public:
 
 	void invalidatePrediction(uint32_t time)
 	{
-		for (auto &snap : xt.snapshots.buffer) {
-			if (snap.time >= time)
-				snap.time = -1;
+		for (auto &snapshot : xt.snapshots.buffer) {
+			if (snapshot.time >= time)
+				snapshot.invalidate();
 		}
 	}
 

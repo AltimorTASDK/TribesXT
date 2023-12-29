@@ -9,6 +9,7 @@
 
 class BitStream;
 class FearGame;
+class Projectile;
 class SimManager;
 
 constexpr char LagCompensatedSetId[] = "LagCompensatedSet";
@@ -18,6 +19,8 @@ namespace cvars::net {
 inline int timeNudge = 48;
 // How far to allow the client's synced clock to drift from the server before correcting
 inline int clientClockCorrection = 16;
+// How far back in time to allow lag compensation to
+inline int maxLagCompensation = 150;
 }
 
 class NetXTPlugin : public SimConsolePlugin {
@@ -54,6 +57,8 @@ private:
 	static uint32_t __fastcall hook_Player_packUpdate(
 		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
 
+	static void __x86Hook hook_Player_fireImageProjectile_init(CpuState &cs);
+
 	static PlayerPSCXT *__fastcall hook_PlayerPSC_ctor(PlayerPSCXT*, edx_t, bool in_isServer);
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
@@ -74,6 +79,8 @@ private:
 
 	static bool hook_PacketStream_checkPacketSend_check();
 	static void hook_PacketStream_checkPacketSend_check_asm();
+
+	static Projectile *__fastcall hook_Projectile_ctor(Projectile*, edx_t, int in_datFileId);
 
 	struct {
 		struct {
@@ -113,6 +120,8 @@ private:
 			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;
 			// Send player states from the previous move on the server
 			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
+			// Pass subtick + lag compensation data to projectile
+			x86Hook fireImageProjectile_init = {hook_Player_fireImageProjectile_init, 0x4B3985, 3};
 		} Player;
 		struct {
 			// Use PlayerPSCXT
@@ -142,8 +151,13 @@ private:
 			x86Hook onSimActionEvent   = {hook_PlayerPSC_onSimActionEvent,   0x483DF4, 2};
 		} PlayerPSC;
 		struct {
+			// Send a packet with every server tick/client move
 			StaticJmpHook<0x51A2E4, hook_PacketStream_checkPacketSend_check_asm> checkPacketSend_check;
 		} PacketStream;
+		struct {
+			// Initialize repurposed fields
+			StaticJmpHook<0x4C1300, hook_Projectile_ctor> ctor;
+		} Projectile;
 	} hooks;
 
 	static void setUpWorld(SimManager *manager);

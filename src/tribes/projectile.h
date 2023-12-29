@@ -19,6 +19,11 @@ public:
 	FIELD(0x344, ShapeBase*, m_pShooter);
 	FIELD(0x350, Point3F, m_shooterVel);
 
+	// Reuse these fields on the server since Projectile is a base class
+	// and can't be easily extended
+	FIELD(0x2FC, uint32_t, subtickOffsetXT);
+	FIELD(0x300, uint32_t, lagCompensationOffsetXT);
+
 	void readInitialPacket(Net::GhostManager *io_pGM, BitStream *io_pStream)
 	{
 		using func_t = to_static_function_t<decltype(&Projectile::readInitialPacket)>;
@@ -29,5 +34,15 @@ public:
 	{
 		using func_t = to_static_function_t<decltype(&Projectile::writeInitialPacket)>;
 		((func_t)0x4C0EB0)(this, io_pGM, io_pStream);
+	}
+
+	bool hasSubtick() const
+	{
+		return subtickOffsetXT != -1;
+	}
+
+	bool hasLagCompensation() const
+	{
+		return lagCompensationOffsetXT != -1;
 	}
 };

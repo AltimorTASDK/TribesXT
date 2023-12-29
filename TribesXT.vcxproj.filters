@@ -159,6 +159,9 @@
     <ClInclude Include="src\darkstar\Sim\simRenderGrp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\darkstar\Core\encryptedPointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

@@ -142,30 +142,32 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
-auto PlayerXT::startLagCompensation(uint32_t time) -> Snapshot
+void PlayerXT::startLagCompensation(uint32_t time)
 {
 	const auto *a = xt.lagCompensationSnapshots.getPrev(time);
 	const auto *b = xt.lagCompensationSnapshots.getNext(time);
 
 	if (a == nullptr && b == nullptr)
-		return {};
+		return;
 
 	xt.lagCompensationBackup = createSnapshot();
 
 	if (a != nullptr && (a->time == time || b == nullptr)) {
 		loadSnapshot(*a);
-		return *a;
+		xt.lagCompensationTarget = *a;
+		return;
 	}
 	
 	if (b != nullptr && a == nullptr) {
 		loadSnapshot(*b);
-		return *b;
+		xt.lagCompensationTarget = *b;
+		return;
 	}
 
 	const auto fraction = (float)(time - a->time) / (b->time - a->time);
 	const auto snapshot = Snapshot::interpolate(*a, *b, fraction);
 	loadSnapshot(snapshot);
-	return snapshot;
+	xt.lagCompensationTarget = snapshot;
 }
 
 void PlayerXT::endLagCompensation()
@@ -178,7 +180,7 @@ void PlayerXT::endLagCompensation()
 	loadSnapshot(xt.lagCompensationBackup);
 	setLinearVelocity(getLinearVelocity() + impulse);
 
-	xt.lagCompensationTarget.time = -1;
+	xt.lagCompensationTarget.invalidate();
 }
 
 void PlayerXT::startLagCompensationAll(const PlayerXT *exclude, uint32_t time)
@@ -191,9 +193,9 @@ void PlayerXT::startLagCompensationAll(const PlayerXT *exclude, uint32_t time)
 	if (lagCompensatedSet == nullptr)
 		return;
 
-	for (auto *object : lagCompensatedSet->objectList) {
-		if (auto *player = (PlayerXT*)object; player != exclude)
-			player->xt.lagCompensationTarget = player->startLagCompensation(time);
+	for (const auto object : lagCompensatedSet->objectList) {
+		if (auto *player = (PlayerXT*)object.get(); player != exclude)
+			player->startLagCompensation(time);
 	}
 }
 
@@ -207,8 +209,8 @@ void PlayerXT::endLagCompensationAll(const PlayerXT *exclude)
 	if (lagCompensatedSet == nullptr)
 		return;
 
-	for (auto *object : lagCompensatedSet->objectList) {
-		if (auto *player = (PlayerXT*)object; player != exclude)
+	for (const auto object : lagCompensatedSet->objectList) {
+		if (auto *player = (PlayerXT*)object.get(); player != exclude)
 			player->endLagCompensation();
 	}
 }
@@ -223,8 +225,8 @@ void PlayerXT::saveLagCompensationSnapshotAll(uint32_t time)
 	if (lagCompensatedSet == nullptr)
 		return;
 
-	for (auto *object : lagCompensatedSet->objectList) {
-		auto *player = (PlayerXT*)object;
+	for (const auto object : lagCompensatedSet->objectList) {
+		auto *player = (PlayerXT*)object.get();
 		player->saveLagCompensationSnapshot(time);
 	}
 }
@@ -299,7 +301,11 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 				subtickPitch = viewPitch + subtickRecord.pitch;
 				subtickYaw = getRot().z + subtickRecord.yaw;
 			}
-			xt.currentLagCompensation = lagCompensationRequest;
+
+			xt.currentLagCompensation = clamp(
+				lagCompensationRequest.time,
+				sg.currentTime - cvars::net::maxLagCompensation,
+				sg.currentTime);
 		}
 
 		if (move.useItem != -1) {
@@ -327,7 +333,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 			xt.currentSubtick = NoSubtick;
 		}
 
-		xt.currentLagCompensation.time = -1;
+		xt.currentLagCompensation = -1;
 
 		lastPlayerMove = move;
 	}

@@ -31,7 +31,10 @@ void TracerXTPlugin::hook_Bullet_writeInitialPacket(
 	stream->write(bullet->m_spawnPosition);
 
 	const auto elapsedMs = sg.currentTime - bullet->m_spawnTime;
-	stream->writeInt(elapsedMs, 15);
+	if (bullet->hasSubtick())
+		stream->writeInt(elapsedMs + TickMs - bullet->subtickOffsetXT, 15);
+	else
+		stream->writeInt(elapsedMs, 15);
 
 	const auto direction = bullet->m_spawnVelocity / bullet->m_spawnVelocityLen;
 	stream->writeNormalVector(direction, 20);

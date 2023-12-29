@@ -1,5 +1,6 @@
 #include "darkstar/Core/bitstream.h"
 #include "tribes/playerPSC.h"
+#include "tribes/projectile.h"
 #include "tribes/worldGlobals.h"
 #include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerXT.h"
@@ -95,6 +96,20 @@ uint32_t NetXTPlugin::hook_Player_packUpdate(
 	player->loadSnapshot(snapshot);
 
 	return result;
+}
+
+void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
+{
+	auto *player = (PlayerXT*)cs.reg.esi;
+	auto *projectile = (Projectile*)cs.reg.edi;
+
+	if (player->hasSubtick())
+		projectile->subtickOffsetXT = player->xt.currentSubtick;
+
+	if (player->hasLagCompensation()) {
+		const auto offset = player->xt.currentLagCompensation - sg.currentTime;
+		projectile->lagCompensationOffsetXT = offset;
+	}
 }
 
 PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
@@ -207,6 +222,14 @@ __declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm(
 	}
 }
 
+Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int in_datFileId)
+{
+	get()->hooks.Projectile.ctor.callOriginal(projectile, in_datFileId);
+	projectile->subtickOffsetXT = -1;
+	projectile->lagCompensationOffsetXT = -1;
+	return projectile;
+}
+
 void NetXTPlugin::setUpWorld(SimManager *manager)
 {
 	manager->addObject(new SimSet(false), LagCompensatedSetId);
@@ -216,6 +239,7 @@ void NetXTPlugin::init()
 {
 	console->addVariable(0, "net::timeNudge",             CMDConsole::Int, &cvars::net::timeNudge);
 	console->addVariable(0, "net::clientClockCorrection", CMDConsole::Int, &cvars::net::clientClockCorrection);
+	console->addVariable(0, "net::maxLagCompensation",    CMDConsole::Int, &cvars::net::maxLagCompensation);
 
 	// Set up already running worlds
 	if (cg.manager != nullptr)
