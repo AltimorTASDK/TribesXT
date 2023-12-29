@@ -45,12 +45,12 @@ private:
 				// Make the tracer always face the camera properly
 				x86Hook render_orientation = {hook_Bullet_TracerRenderImage_render_orientation, 0x4C0370, 3};
 			} TracerRenderImage;
-			// Keep m_spawnTime set by us in readInitialPacket
-			StaticCodePatch<0x4BFF7F, "\x90\x90\x90\x90\x90\x90"> preserveSpawnTime;
 			// Keep m_spawnPosition set in readInitialPacket
 			StaticCodePatch<0x4BFF5D, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionX;
 			StaticCodePatch<0x4BFF63, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionY;
 			StaticCodePatch<0x4BFF69, "\x90\x90\x90\x90\x90\x90"> preserveSpawnPositionZ;
+			// Keep m_spawnTime set by us in readInitialPacket
+			StaticCodePatch<0x4BFF7F, "\x90\x90\x90\x90\x90\x90"> preserveSpawnTime;
 			// Set elapsed time in writeInitialPacket based on m_spawnTime like a normal person
 			StaticJmpHook<0x4BDE60, hook_Bullet_writeInitialPacket> writeInitialPacket;
 			// Set m_spawnTime in readInitialPacket based on elapsed time from server
