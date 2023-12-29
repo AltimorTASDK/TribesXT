@@ -245,8 +245,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 
 void PlayerXT::ghostSetMove(
 	PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
-	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp,
-	int timeNudge)
+	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp)
 {
 	const auto rot = Point3F(getRot().x, getRot().y, newRot);
 
@@ -264,7 +263,7 @@ void PlayerXT::ghostSetMove(
 
 	// Use average time of frame since we don't know when the packet arrived
 	const auto avgTime = (cg.currentTime + cg.lastTime + 1) / 2;
-	lastProcessTime = avgTime + timeNudge - TickMs;
+	lastProcessTime = avgTime + cvars::net::timeNudge - TickMs;
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
 	// State sent by server is from before the move, so simulate once

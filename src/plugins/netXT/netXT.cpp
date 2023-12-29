@@ -25,8 +25,8 @@ void NetXTPlugin::hook_Player_ghostSetMove(
 	PlayerXT *player, edx_t, PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
 	bool newContact, float newRot, float newPitch, int skipCount, bool noInterp)
 {
-	player->ghostSetMove(move, newPos, newVel, newContact, newRot,
-	                     newPitch, skipCount, noInterp, cvars::net::timeNudge);
+	player->ghostSetMove(move, newPos, newVel, newContact,
+	                     newRot, newPitch, skipCount, noInterp);
 }
 
 void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
