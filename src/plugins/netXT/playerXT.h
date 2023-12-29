@@ -10,9 +10,10 @@
 #include <cstdint>
 
 class PlayerXT : public Player {
-	// Receive subtick data from PlayerPSCXT
+	// Receive subtick and lag compensation data from PlayerPSCXT
 	using SubtickRecord = PlayerPSCXT::SubtickRecord;
-	static constexpr auto SubtickHistory = PlayerPSCXT::SubtickHistory;
+	using LagCompensationRequest = PlayerPSCXT::LagCompensationRequest;
+	static constexpr auto MaxMovesXT = PlayerPSCXT::MaxMovesXT;
 	static constexpr auto NoSubtick = PlayerPSCXT::NoSubtick;
 
 public:
@@ -57,8 +58,13 @@ public:
 		Snapshot lagCompensationBackup;
 
 		// Server only
-		SubtickRecord subtickRecords[SubtickHistory];
+		SubtickRecord subtickRecords[MaxMovesXT];
 		bool applySubtick = false;
+
+		// Server only
+		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
+		LagCompensationRequest lastLagCompensationRequest;
+		bool applyLagCompensation = false;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);

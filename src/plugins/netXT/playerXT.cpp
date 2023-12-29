@@ -262,8 +262,8 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		float subtickPitch;
 		float subtickYaw;
 
-		// Clients shouldn't send more than SubtickHistory moves, but are allowed to
-		if (index < SubtickHistory && subtickRecord.subtick != NoSubtick) {
+		// Clients shouldn't send more than MaxMovesXT moves, but are allowed to
+		if (index < MaxMovesXT && subtickRecord.subtick != NoSubtick) {
 			// Lets updateMove know not to update image states yet
 			xt.applySubtick = true;
 			subtickPitch = viewPitch + subtickRecord.pitch;

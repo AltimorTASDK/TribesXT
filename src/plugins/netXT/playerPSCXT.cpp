@@ -64,7 +64,7 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 
 	if (endTick != startTick) {
 		for (auto tick = startTick + 1; tick <= endTick; tick++)
-			xt.subtickRecords[tick % SubtickHistory] = xt.pendingSubtickRecord;
+			xt.subtickRecords[tick % MaxMovesXT] = xt.pendingSubtickRecord;
 
 		xt.pendingSubtickRecord.subtick = NoSubtick;
 	}
@@ -80,7 +80,7 @@ void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 	// Reverse of the index calc in getClientMove
 	const auto movesBack = moves.size() - moveIndex - 1;
 	const auto moveTick = msToTicks(cg.currentTime - 1) - movesBack;
-	const auto &record = xt.subtickRecords[moveTick % SubtickHistory];
+	const auto &record = xt.subtickRecords[moveTick % MaxMovesXT];
 
 	if (stream->writeFlag(record.subtick != NoSubtick)) {
 		stream->writeInt(record.subtick, TickShift);
@@ -103,12 +103,48 @@ void PlayerPSCXT::readSubtick(BitStream *stream)
 			stream->read(&record.yaw);
 	}
 
-	if (moves.size() >= SubtickHistory || controlPlayer == nullptr)
+	if (moves.size() >= MaxMovesXT || controlPlayer == nullptr)
 		return;
 
 	// Pass to the player for serverUpdateMove
 	auto *player = (PlayerXT*)controlPlayer;
 	player->xt.subtickRecords[moves.size()] = record;
+}
+
+void PlayerPSCXT::writeLagCompensation(BitStream *stream, int moveIndex)
+{
+	if (serverNetcodeVersion < Netcode::XT::LagCompensation)
+		return;
+
+	// Reverse of the index calc in getClientMove
+	const auto movesBack = moves.size() - moveIndex - 1;
+	const auto moveTick = msToTicks(cg.currentTime - 1) - movesBack;
+	const auto &subtickRecord = xt.subtickRecords[moveTick % MaxMovesXT];
+
+	const auto syncedTimeBase = xt.syncedClock - cvars::net::timeNudge;
+	const auto syncedTimeMove = syncedTimeBase - movesBack * TickMs;
+
+	uint32_t lagCompensationTime;
+
+	// Adjust by subtick if possible
+	if (subtickRecord.subtick != NoSubtick)
+		lagCompensationTime = syncedTimeMove - TickMs + subtickRecord.subtick;
+	else
+		lagCompensationTime = syncedTimeMove;
+
+	stream->writeInt(lagCompensationTime, 32);
+}
+
+void PlayerPSCXT::readLagCompensation(BitStream *stream)
+{
+	const auto lagCompensationTime = stream->readInt(32);
+
+	if (moves.size() >= MaxMovesXT || controlPlayer == nullptr)
+		return;
+
+	// Pass to the player for serverUpdateMove
+	auto *player = (PlayerXT*)controlPlayer;
+	player->xt.lagCompensationRequests[moves.size()].time = lagCompensationTime;
 }
 
 void PlayerPSCXT::clientUpdateClock(uint32_t startTime, uint32_t endTime)

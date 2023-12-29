@@ -9,7 +9,9 @@ class BitStream;
 
 class PlayerPSCXT : public PlayerPSC {
 public:
-	static constexpr auto SubtickHistory = std::bit_ceil(MaxMoves);
+	// More efficient modulo
+	static constexpr auto MaxMovesXT = std::bit_ceil(MaxMoves);
+
 	static constexpr uint8_t NoSubtick = -1;
 
 	static constexpr auto ClockTickBits = 32 - TickShift;
@@ -21,9 +23,13 @@ public:
 		float yaw;
 	};
 
+	struct LagCompensationRequest {
+		uint32_t time;
+	};
+
 	struct DataXT {
 		// Client only
-		SubtickRecord subtickRecords[SubtickHistory];
+		SubtickRecord subtickRecords[MaxMovesXT];
 		SubtickRecord pendingSubtickRecord;
 		int prevFrameTriggerCount = 0;
 		uint8_t heldTriggerSubtick = NoSubtick;
@@ -44,6 +50,9 @@ public:
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
 	void writeSubtick(BitStream *stream, int moveIndex);
 	void readSubtick(BitStream *stream);
+
+	void writeLagCompensation(BitStream *stream, int moveIndex);
+	void readLagCompensation(BitStream *stream);
 
 	void clientUpdateClock(uint32_t startTime, uint32_t endTime);
 	void writeClockSync(BitStream *stream);

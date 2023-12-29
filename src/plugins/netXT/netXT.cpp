@@ -155,6 +155,7 @@ void NetXTPlugin::hook_PlayerPSC_readPacket_move(CpuState &cs)
 	auto *psc = (PlayerPSCXT*)cs.reg.ebx;
 	auto *stream = (BitStream*)cs.reg.ebp;
 	psc->readSubtick(stream);
+	psc->readLagCompensation(stream);
 }
 
 void NetXTPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
@@ -163,6 +164,7 @@ void NetXTPlugin::hook_PlayerPSC_writePacket_move(CpuState &cs)
 	auto *stream = (BitStream*)cs.reg.edi;
 	const auto moveIndex = (int)cs.reg.eax;
 	psc->writeSubtick(stream, moveIndex);
+	psc->writeLagCompensation(stream, moveIndex);
 }
 
 void NetXTPlugin::hook_PlayerPSC_onSimActionEvent(CpuState &cs)
