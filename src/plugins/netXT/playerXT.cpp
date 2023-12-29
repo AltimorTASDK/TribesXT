@@ -28,6 +28,7 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 		.pitch = viewPitch,
 		.energy = energy,
 		.traction = traction,
+		.lastContactCount = lastContactCount,
 		.jumpSurfaceLastContact = jumpSurfaceLastContact,
 		.pingStatus = getSensorPinged(),
 		.contact = contact,
@@ -107,6 +108,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 	else if (oldCrouch && !crouching)
 		setAnimation(ANIM_STAND);
 
+	lastContactCount = snapshot.lastContactCount;
 	jumpSurfaceLastContact = snapshot.jumpSurfaceLastContact;
 }
 
