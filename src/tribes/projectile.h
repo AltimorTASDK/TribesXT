@@ -11,6 +11,7 @@ class ShapeBase;
 class Projectile : public GameBase {
 public:
 	FIELD(0x25C, fxRenderImage, m_renderImage);
+	FIELD(0x31C, uint32_t, m_lastUpdated);
 	FIELD(0x344, ShapeBase*, m_pShooter);
 	FIELD(0x350, Point3F, m_shooterVel);
 
