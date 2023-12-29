@@ -261,11 +261,21 @@ void PlayerXT::ghostSetMove(
 		setTransform(TMat3F(EulerF(rot), {0, 0, 0}) * mountTransform);
 	}
 
-	// Use average time of frame since we don't know when the packet arrived
-	const auto avgTime = (cg.currentTime + cg.lastTime + 1) / 2;
-	lastProcessTime = avgTime + cvars::net::timeNudge - TickMs;
+	if (serverNetcodeVersion >= Netcode::XT::ClockSync && cg.psc != nullptr) {
+		// Translate the snapshot time to client time
+		const auto *psc = (PlayerPSCXT*)cg.psc;
+		const auto clockOffset = cg.currentTime - psc->xt.syncedClock;
+		lastProcessTime = psc->xt.serverClock + clockOffset;
+	} else {
+		// Use average time of frame since we don't know when the packet arrived
+		lastProcessTime = (cg.currentTime + cg.lastTime + 1) / 2;
+	}
+
+	// Adjust for time nudge and extra move tick
+	lastProcessTime += cvars::net::timeNudge - TickMs;
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
+
 	// State sent by server is from before the move, so simulate once
 	updateMove(move, false);
 	lastPlayerMove = *move;

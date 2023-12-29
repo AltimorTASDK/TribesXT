@@ -1,7 +1,9 @@
 #pragma once
 
+#include "tribes/constants.h"
 #include "tribes/playerPSC.h"
 #include "util/struct.h"
+#include <bit>
 
 class BitStream;
 
@@ -9,6 +11,9 @@ class PlayerPSCXT : public PlayerPSC {
 public:
 	static constexpr auto SubtickHistory = std::bit_ceil(MaxMoves);
 	static constexpr uint8_t NoSubtick = -1;
+
+	static constexpr auto ClockTickBits = 32 - TickShift;
+	static constexpr auto ClockHistory = std::bit_ceil((size_t)(1.0 * TickRate));
 
 	struct SubtickRecord {
 		uint8_t subtick = NoSubtick;
@@ -22,6 +27,12 @@ public:
 		SubtickRecord pendingSubtickRecord;
 		int prevFrameTriggerCount = 0;
 		uint8_t heldTriggerSubtick = NoSubtick;
+
+		// Client only
+		uint32_t serverClock = 0;
+		uint32_t syncedClock = 0;
+		uint32_t clockHistoryIndex = 0;
+		int clockErrorHistory[ClockHistory] = {};
 	};
 
 	FIELD(PlayerPSC::SIZEOF, DataXT, xt);
@@ -33,4 +44,8 @@ public:
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
 	void writeSubtick(BitStream *stream, int moveIndex);
 	void readSubtick(BitStream *stream);
+
+	void clientUpdateClock(uint32_t startTime, uint32_t endTime);
+	void writeClockSync(BitStream *stream);
+	void readClockSync(BitStream *stream);
 };

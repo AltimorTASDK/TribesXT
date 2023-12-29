@@ -8,10 +8,14 @@
 #include "nofix/x86Hook.h"
 
 class BitStream;
+class FearGame;
 
 namespace cvars::net {
+// Offset for inserting server snapshots into the client interpolation buffer
 inline int timeNudge = 48;
-};
+// How far to allow the client's synced clock to drift from the server before correcting
+inline int clientClockCorrection = 16;
+}
 
 class NetXTPlugin : public SimConsolePlugin {
 	static inline NetXTPlugin *instance;
@@ -45,6 +49,9 @@ private:
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
 		PlayerPSCXT*, edx_t, BitStream *bstream, uint32_t &key);
+
+	static void __fastcall hook_PlayerPSC_readPacket(
+		PlayerPSCXT*, edx_t, BitStream *bstream, uint32_t currentTime);
 
 	static void __fastcall hook_PlayerPSC_clientCollectInput(
 		PlayerPSCXT*, edx_t, uint32_t startTime, uint32_t endTime);
@@ -96,7 +103,9 @@ private:
 			StaticJmpHook<0x484A10, hook_PlayerPSC_ctor> ctor;
 			// Send player states from the previous move on the server
 			StaticJmpHook<0x482E30, hook_PlayerPSC_writePacket> writePacket;
-			// Collect subtick inputs
+			// Protocol extensions
+			StaticJmpHook<0x4854C0, hook_PlayerPSC_readPacket> readPacket;
+			// Collect subtick inputs and maintain client clock
 			StaticJmpHook<0x484E30, hook_PlayerPSC_clientCollectInput> clientCollectInput;
 			// Don't clamp IDACTION_PITCH
 			StaticCodePatch<0x483F9F, "\x18"> onSimActionEvent_noPitchClamp1;

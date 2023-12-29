@@ -2,9 +2,12 @@
 #include "tribes/constants.h"
 #include "tribes/fear.strings.h"
 #include "tribes/worldGlobals.h"
+#include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerPSCXT.h"
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/version.h"
+#include <algorithm>
+#include <numeric>
 
 void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 {
@@ -106,4 +109,45 @@ void PlayerPSCXT::readSubtick(BitStream *stream)
 	// Pass to the player for serverUpdateMove
 	auto *player = (PlayerXT*)controlPlayer;
 	player->xt.subtickRecords[moves.size()] = record;
+}
+
+void PlayerPSCXT::clientUpdateClock(uint32_t startTime, uint32_t endTime)
+{
+	xt.syncedClock += endTime - startTime;
+	xt.clockHistoryIndex = (xt.clockHistoryIndex + 1) % ClockHistory;
+}
+
+void PlayerPSCXT::writeClockSync(BitStream *stream)
+{
+	stream->writeInt(msToTicks(sg.currentTime), ClockTickBits);
+}
+
+void PlayerPSCXT::readClockSync(BitStream *stream)
+{
+	if (serverNetcodeVersion < Netcode::XT::ClockSync)
+		return;
+
+	xt.serverClock = ticksToMs(stream->readInt(ClockTickBits));
+	xt.clockErrorHistory[xt.clockHistoryIndex] = xt.serverClock - xt.syncedClock;
+
+	const auto errorSum = std::accumulate(
+		&xt.clockErrorHistory[0],
+		&xt.clockErrorHistory[ClockHistory],
+		0);
+
+	const auto clockCorrection = clamp(cvars::net::clientClockCorrection, 0, 64);
+
+	if ((uint32_t)std::abs(errorSum) <= clockCorrection * ClockHistory)
+		return;
+
+	// Must be signed division
+	const auto error = errorSum / (int)ClockHistory;
+
+	// Adjust clock based on average error
+	xt.syncedClock += error;
+
+	for (size_t i = 0; i < ClockHistory; i++)
+		xt.clockErrorHistory[i] -= error;
+
+	Console->printf(CON_YELLOW, "Clock correction: %d ms", error);
 }

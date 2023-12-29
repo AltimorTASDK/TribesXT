@@ -83,6 +83,9 @@ PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_i
 bool NetXTPlugin::hook_PlayerPSC_writePacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t &key)
 {
+	if (psc->isServer)
+		psc->writeClockSync(bstream);
+
 	if (!psc->isServer || psc->controlPlayer == nullptr)
 		return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
 
@@ -97,9 +100,19 @@ bool NetXTPlugin::hook_PlayerPSC_writePacket(
 	return result;
 }
 
+void NetXTPlugin::hook_PlayerPSC_readPacket(
+	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t currentTime)
+{
+	if (!psc->isServer)
+		psc->readClockSync(bstream);
+
+	get()->hooks.PlayerPSC.readPacket.callOriginal(psc, bstream, currentTime);
+}
+
 void NetXTPlugin::hook_PlayerPSC_clientCollectInput(
 	PlayerPSCXT *psc, edx_t, uint32_t startTime, uint32_t endTime)
 {
+	psc->clientUpdateClock(startTime, endTime);
 	psc->collectSubtickInput(startTime, endTime);
 	get()->hooks.PlayerPSC.clientCollectInput.callOriginal(psc, startTime, endTime);
 }
@@ -170,5 +183,6 @@ __declspec(naked) void NetXTPlugin::hook_PacketStream_checkPacketSend_check_asm(
 
 void NetXTPlugin::init()
 {
-	console->addVariable(0, "net::timeNudge", CMDConsole::Int, &cvars::net::timeNudge);
+	console->addVariable(0, "net::timeNudge",             CMDConsole::Int, &cvars::net::timeNudge);
+	console->addVariable(0, "net::clientClockCorrection", CMDConsole::Int, &cvars::net::clientClockCorrection);
 }
