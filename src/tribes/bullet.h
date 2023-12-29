@@ -1,6 +1,7 @@
 #pragma once
 
 #include "darkstar/Ml/ml.h"
+#include "darkstar/Sim/simRenderGrp.h"
 #include "tribes/projectile.h"
 #include "util/struct.h"
 
@@ -11,7 +12,7 @@ public:
 		FIELD(0xA8, float, tracerLength);
 	};
 
-	class TracerRenderImage {
+	class TracerRenderImage : public SimRenderImage {
 	public:
 		FIELD(0x18, Point3F, m_endPoint);
 		FIELD(0x24, Point3F, m_startPoint);
