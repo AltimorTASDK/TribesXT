@@ -29,7 +29,6 @@ public:
 		float pitch;
 		float energy;
 		float traction;
-		int currentAnimation;
 		int lastContactCount;
 		int jumpSurfaceLastContact;
 		uint8_t pingStatus;
