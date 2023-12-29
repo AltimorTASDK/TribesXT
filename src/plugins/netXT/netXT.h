@@ -92,6 +92,8 @@ private:
 			// Skip updateImageState calls and handle it ourselves
 			// jmp 0x4BA66C
 			StaticCodePatch<0x4BA653, "\xEB\x17"> updateMove_noImages;
+			// Allow remote players to jump during prediction
+			StaticCodePatch<0x4BA7DB, "\xEB"> updateMove_predictJump;
 			// Predict/interpolate/extrapolate on the client
 			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;
 			// Send player states from the previous move on the server
