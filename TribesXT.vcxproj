@@ -125,6 +125,8 @@
     <ClInclude Include="src\tribes\constants.h" />
     <ClInclude Include="src\darkstar\Core\encryptedPointer.h" />
     <ClInclude Include="src\tribes\fear.strings.h" />
+    <ClInclude Include="src\tribes\grenade.h" />
+    <ClInclude Include="src\tribes\rocketDumb.h" />
     <ClInclude Include="src\tribes\version.h" />
     <ClInclude Include="src\tribes\fearPlugin.h" />
     <ClInclude Include="src\tribes\projectile.h" />

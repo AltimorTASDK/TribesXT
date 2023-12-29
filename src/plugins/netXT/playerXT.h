@@ -112,8 +112,8 @@ public:
 	void startLagCompensation(uint32_t time);
 	void endLagCompensation();
 
-	static void startLagCompensationAll(const PlayerXT *exclude, uint32_t time);
-	static void endLagCompensationAll(const PlayerXT *exclude);
+	static void startLagCompensationAll(const SimObject *exclude, uint32_t time);
+	static void endLagCompensationAll(const SimObject *exclude);
 	static void saveLagCompensationSnapshotAll(uint32_t time);
 
 	void invalidatePrediction(uint32_t time)

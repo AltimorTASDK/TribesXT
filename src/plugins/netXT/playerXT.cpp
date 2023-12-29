@@ -183,7 +183,7 @@ void PlayerXT::endLagCompensation()
 	xt.lagCompensationTarget.invalidate();
 }
 
-void PlayerXT::startLagCompensationAll(const PlayerXT *exclude, uint32_t time)
+void PlayerXT::startLagCompensationAll(const SimObject *exclude, uint32_t time)
 {
 	if (sg.manager == nullptr)
 		return;
@@ -199,7 +199,7 @@ void PlayerXT::startLagCompensationAll(const PlayerXT *exclude, uint32_t time)
 	}
 }
 
-void PlayerXT::endLagCompensationAll(const PlayerXT *exclude)
+void PlayerXT::endLagCompensationAll(const SimObject *exclude)
 {
 	if (sg.manager == nullptr)
 		return;

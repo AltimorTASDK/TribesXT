@@ -8,8 +8,11 @@
 #include "nofix/x86Hook.h"
 
 class BitStream;
+class Bullet;
 class FearGame;
+class Grenade;
 class Projectile;
+class RocketDumb;
 class SimManager;
 
 constexpr char LagCompensatedSetId[] = "LagCompensatedSet";
@@ -20,7 +23,7 @@ inline int timeNudge = 48;
 // How far to allow the client's synced clock to drift from the server before correcting
 inline int clientClockCorrection = 16;
 // How far back in time to allow lag compensation to
-inline int maxLagCompensation = 150;
+inline int maxLagCompensation = 250;
 }
 
 class NetXTPlugin : public SimConsolePlugin {
@@ -82,6 +85,10 @@ private:
 
 	static Projectile *__fastcall hook_Projectile_ctor(Projectile*, edx_t, int in_datFileId);
 
+	static void __fastcall hook_Bullet_serverProcess(Bullet*, edx_t, uint32_t in_currTime);
+	static void __fastcall hook_RocketDumb_serverProcess(RocketDumb*, edx_t, uint32_t in_currTime);
+	static void __fastcall hook_Grenade_serverProcess(Grenade*, edx_t, uint32_t in_currTime);
+
 	struct {
 		struct {
 			// Fix client reading netcode version bytes backwards
@@ -122,6 +129,7 @@ private:
 			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
 			// Pass subtick + lag compensation data to projectile
 			x86Hook fireImageProjectile_init = {hook_Player_fireImageProjectile_init, 0x4B3985, 3};
+			x86Hook startImageFire_init      = {hook_Player_fireImageProjectile_init, 0x4B2223, 3};
 		} Player;
 		struct {
 			// Use PlayerPSCXT
@@ -158,6 +166,18 @@ private:
 			// Initialize repurposed fields
 			StaticJmpHook<0x4C1300, hook_Projectile_ctor> ctor;
 		} Projectile;
+		struct {
+			// Lag compensation
+			StaticJmpHook<0x4BF950, hook_Bullet_serverProcess> serverProcess;
+		} Bullet;
+		struct {
+			// Lag compensation
+			StaticJmpHook<0x4CAB90, hook_RocketDumb_serverProcess> serverProcess;
+		} RocketDumb;
+		struct {
+			// Lag compensation
+			StaticJmpHook<0x4C3F60, hook_Grenade_serverProcess> serverProcess;
+		} Grenade;
 	} hooks;
 
 	static void setUpWorld(SimManager *manager);
