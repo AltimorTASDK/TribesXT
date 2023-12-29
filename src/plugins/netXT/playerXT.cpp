@@ -37,18 +37,18 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 	};
 }
 
-auto PlayerXT::getSnapshot(uint32_t time) const -> const Snapshot*
+auto PlayerXT::SnapshotBuffer::get(uint32_t time) const -> const Snapshot*
 {
-	const auto &snap = xt.snapshots[msToTicks(time) % SnapHistory];
+	const auto &snap = buffer[msToTicks(time) % SnapHistory];
 	return snap.time == time ? &snap : nullptr;
 }
 
-auto PlayerXT::getSnapshotNext(uint32_t time) const -> const Snapshot*
+auto PlayerXT::SnapshotBuffer::getNext(uint32_t time) const -> const Snapshot*
 {
 	const auto startTick = msToTicks(time);
 
 	for (auto tick = startTick; tick < startTick + SnapHistory; tick++) {
-		const auto &snap = xt.snapshots[tick % SnapHistory];
+		const auto &snap = buffer[tick % SnapHistory];
 		if (msToTicks(snap.time) == tick && snap.time >= time)
 			return &snap;
 	}
@@ -56,12 +56,12 @@ auto PlayerXT::getSnapshotNext(uint32_t time) const -> const Snapshot*
 	return nullptr;
 }
 
-auto PlayerXT::getSnapshotPrev(uint32_t time) const -> const Snapshot*
+auto PlayerXT::SnapshotBuffer::getPrev(uint32_t time) const -> const Snapshot*
 {
 	const auto startTick = msToTicks(time);
 
 	for (auto tick = startTick; tick > startTick - SnapHistory; tick--) {
-		const auto &snap = xt.snapshots[tick % SnapHistory];
+		const auto &snap = buffer[tick % SnapHistory];
 		if (msToTicks(snap.time) == tick && snap.time <= time)
 			return &snap;
 	}
@@ -77,7 +77,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 
 	if (useMouse && hasFocus && cg.psc != nullptr) {
 		// Use accumulated mouse input for local player
-		if (const auto *newSnap = getSnapshot(lastProcessTime); newSnap != nullptr) {
+		if (const auto *newSnap = xt.snapshots.get(lastProcessTime); newSnap != nullptr) {
 			const auto &curMove = cg.psc->curMove;
 			pitch = clamp(newSnap->pitch + curMove.pitch, -MaxPitch, MaxPitch);
 			yaw = normalize_radians(newSnap->yaw + curMove.turnRot);
@@ -114,7 +114,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 
 bool PlayerXT::loadSnapshot(uint32_t time)
 {
-	const auto *snap = getSnapshot(time);
+	const auto *snap = xt.snapshots.get(time);
 	if (snap == nullptr)
 		return false;
 
@@ -124,7 +124,7 @@ bool PlayerXT::loadSnapshot(uint32_t time)
 
 bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 {
-	const auto *a = getSnapshotPrev(time);
+	const auto *a = xt.snapshots.getPrev(time);
 	if (a == nullptr)
 		return false;
 
@@ -133,7 +133,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return true;
 	}
 
-	const auto *b = getSnapshotNext(time);
+	const auto *b = xt.snapshots.getNext(time);
 	if (b == nullptr)
 		return false;
 

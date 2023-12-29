@@ -37,8 +37,24 @@ public:
 		bool crouching;
 	};
 
+	struct SnapshotBuffer {
+		Snapshot buffer[SnapHistory];
+
+		const Snapshot *get(uint32_t time) const;
+		const Snapshot *getNext(uint32_t time) const;
+		const Snapshot *getPrev(uint32_t time) const;
+
+		Snapshot &operator[](size_t index) { return buffer[index]; }
+		const Snapshot &operator[](size_t index) const { return buffer[index]; }
+	};
+
 	struct DataXT {
-		Snapshot snapshots[SnapHistory];
+		// Timed by lastProcessTime
+		SnapshotBuffer snapshots;
+
+		// Server only, timed by sg.currentTime
+		SnapshotBuffer lagCompSnapshots;
+
 		// Server only
 		SubtickRecord subtickRecords[SubtickHistory];
 		bool applySubtick = false;
@@ -49,9 +65,6 @@ public:
 	static constexpr size_t SIZEOF = Player::SIZEOF + sizeof(DataXT);
 
 	Snapshot createSnapshot(uint32_t time = 0) const;
-	const Snapshot *getSnapshot(uint32_t time) const;
-	const Snapshot *getSnapshotNext(uint32_t time) const;
-	const Snapshot *getSnapshotPrev(uint32_t time) const;
 
 	void saveSnapshot(uint32_t time)
 	{
@@ -65,7 +78,7 @@ public:
 
 	void invalidatePrediction(uint32_t time)
 	{
-		for (auto &snap : xt.snapshots) {
+		for (auto &snap : xt.snapshots.buffer) {
 			if (snap.time >= time)
 				snap.time = -1;
 		}
