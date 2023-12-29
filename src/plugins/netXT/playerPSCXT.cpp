@@ -149,22 +149,11 @@ void PlayerPSCXT::readLagCompensation(BitStream *stream)
 
 void PlayerPSCXT::clientUpdateClock(uint32_t startTime, uint32_t endTime)
 {
-	xt.syncedClock += endTime - startTime;
-	xt.clockHistoryIndex = (xt.clockHistoryIndex + 1) % ClockHistory;
-}
-
-void PlayerPSCXT::writeClockSync(BitStream *stream)
-{
-	stream->writeInt(msToTicks(sg.currentTime), ClockTickBits);
-}
-
-void PlayerPSCXT::readClockSync(BitStream *stream)
-{
 	if (serverNetcodeVersion < Netcode::XT::ClockSync)
 		return;
 
-	xt.serverClock = ticksToMs(stream->readInt(ClockTickBits));
-	xt.clockErrorHistory[xt.clockHistoryIndex] = xt.serverClock - xt.syncedClock;
+	xt.syncedClock += endTime - startTime;
+	xt.clockHistoryIndex = (xt.clockHistoryIndex + 1) % ClockHistory;
 
 	const auto errorSum = std::accumulate(
 		&xt.clockErrorHistory[0],
@@ -186,4 +175,18 @@ void PlayerPSCXT::readClockSync(BitStream *stream)
 		xt.clockErrorHistory[i] -= error;
 
 	Console->printf(CON_YELLOW, "Clock correction: %d ms", error);
+}
+
+void PlayerPSCXT::writeClockSync(BitStream *stream)
+{
+	stream->writeInt(msToTicks(sg.currentTime), ClockTickBits);
+}
+
+void PlayerPSCXT::readClockSync(BitStream *stream)
+{
+	if (serverNetcodeVersion < Netcode::XT::ClockSync)
+		return;
+
+	xt.serverClock = ticksToMs(stream->readInt(ClockTickBits));
+	xt.clockErrorHistory[xt.clockHistoryIndex] = xt.serverClock - xt.syncedClock;
 }
