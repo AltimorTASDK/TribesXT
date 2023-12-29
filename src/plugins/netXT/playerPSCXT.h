@@ -24,7 +24,7 @@ public:
 	};
 
 	struct LagCompensationRequest {
-		uint32_t time;
+		uint32_t time = -1;
 	};
 
 	struct DataXT {

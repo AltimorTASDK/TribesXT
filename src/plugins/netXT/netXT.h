@@ -32,6 +32,8 @@ public:
 private:
 	static void __x86Hook hook_FearGame_consoleCallback_newGame(CpuState &cs);
 
+	static void __fastcall hook_FearGame_serverProcess(FearGame*);
+
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT*);
 
 	static bool __fastcall hook_Player_onAdd(PlayerXT*);
@@ -84,6 +86,8 @@ private:
 			StaticCodePatch<0x4E8E02, "\x90\x90"> clientProcess_skipProcessTimeCheck;
 			// Add new objects to a new client/server
 			x86Hook consoleCallback_newGame = {hook_FearGame_consoleCallback_newGame, 0x4E8288, 2};
+			// Update lag compensation snapshots
+			StaticJmpHook<0x4E8EE0, hook_FearGame_serverProcess> serverProcess;
 		} FearGame;
 		struct {
 			// Use PlayerXT

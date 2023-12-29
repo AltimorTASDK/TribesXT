@@ -142,34 +142,46 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
-bool PlayerXT::startLagCompensation(uint32_t time)
+auto PlayerXT::startLagCompensation(uint32_t time) -> Snapshot
 {
+	const auto *a = xt.lagCompensationSnapshots.getPrev(time);
+	const auto *b = xt.lagCompensationSnapshots.getNext(time);
+
+	if (a == nullptr && b == nullptr)
+		return {};
+
 	xt.lagCompensationBackup = createSnapshot();
 
-	const auto *a = xt.lagCompensationSnapshots.getPrev(time);
-	if (a == nullptr)
-		return false;
-
-	if (a->time == time) {
-		loadSnapshot(*a, false);
-		return true;
+	if (a != nullptr && (a->time == time || b == nullptr)) {
+		loadSnapshot(*a);
+		return *a;
+	}
+	
+	if (b != nullptr && a == nullptr) {
+		loadSnapshot(*b);
+		return *b;
 	}
 
-	const auto *b = xt.lagCompensationSnapshots.getNext(time);
-	if (b == nullptr)
-		return false;
-
 	const auto fraction = (float)(time - a->time) / (b->time - a->time);
-	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), false);
-	return true;
+	const auto snapshot = Snapshot::interpolate(*a, *b, fraction);
+	loadSnapshot(snapshot);
+	return snapshot;
 }
 
 void PlayerXT::endLagCompensation()
 {
+	if (!xt.lagCompensationTarget.isValid())
+		return;
+
+	// Preserve any velocity change from explosions
+	const auto impulse = getLinearVelocity() - xt.lagCompensationTarget.velocity;
 	loadSnapshot(xt.lagCompensationBackup);
+	setLinearVelocity(getLinearVelocity() + impulse);
+
+	xt.lagCompensationTarget.time = -1;
 }
 
-void PlayerXT::startLagCompensationAll(uint32_t time)
+void PlayerXT::startLagCompensationAll(const PlayerXT *exclude, uint32_t time)
 {
 	if (sg.manager == nullptr)
 		return;
@@ -180,12 +192,28 @@ void PlayerXT::startLagCompensationAll(uint32_t time)
 		return;
 
 	for (auto *object : lagCompensatedSet->objectList) {
-		auto *player = (PlayerXT*)object;
-		player->startLagCompensation(time);
+		if (auto *player = (PlayerXT*)object; player != exclude)
+			player->xt.lagCompensationTarget = player->startLagCompensation(time);
 	}
 }
 
-void PlayerXT::endLagCompensationAll()
+void PlayerXT::endLagCompensationAll(const PlayerXT *exclude)
+{
+	if (sg.manager == nullptr)
+		return;
+
+	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
+
+	if (lagCompensatedSet == nullptr)
+		return;
+
+	for (auto *object : lagCompensatedSet->objectList) {
+		if (auto *player = (PlayerXT*)object; player != exclude)
+			player->endLagCompensation();
+	}
+}
+
+void PlayerXT::saveLagCompensationSnapshotAll(uint32_t time)
 {
 	if (sg.manager == nullptr)
 		return;
@@ -197,7 +225,7 @@ void PlayerXT::endLagCompensationAll()
 
 	for (auto *object : lagCompensatedSet->objectList) {
 		auto *player = (PlayerXT*)object;
-		player->endLagCompensation();
+		player->saveLagCompensationSnapshot(time);
 	}
 }
 
@@ -258,16 +286,20 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 
 		const auto &move = moves[index];
 		const auto &subtickRecord = xt.subtickRecords[index];
+		const auto &lagCompensationRequest = xt.lagCompensationRequests[index];
 
 		float subtickPitch;
 		float subtickYaw;
 
 		// Clients shouldn't send more than MaxMovesXT moves, but are allowed to
-		if (index < MaxMovesXT && subtickRecord.subtick != NoSubtick) {
-			// Lets updateMove know not to update image states yet
-			xt.applySubtick = true;
-			subtickPitch = viewPitch + subtickRecord.pitch;
-			subtickYaw = getRot().z + subtickRecord.yaw;
+		if (index < MaxMovesXT) {
+			if (subtickRecord.subtick != NoSubtick) {
+				// Lets updateMove know not to update image states yet
+				xt.currentSubtick = subtickRecord.subtick;
+				subtickPitch = viewPitch + subtickRecord.pitch;
+				subtickYaw = getRot().z + subtickRecord.yaw;
+			}
+			xt.currentLagCompensation = lagCompensationRequest;
 		}
 
 		if (move.useItem != -1) {
@@ -280,7 +312,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		updateMove(&move, true);
 		updateAnimation(0.032f);
 
-		if (xt.applySubtick) {
+		if (hasSubtick()) {
 			// Subtract an extra tick to match the client's interpolated view
 			const auto tickStart = lastProcessTime - TickMs * 2;
 			const auto subtickTime = tickStart + subtickRecord.subtick;
@@ -292,8 +324,10 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 
 			// Restore
 			loadSnapshot(lastProcessTime);
-			xt.applySubtick = false;
+			xt.currentSubtick = NoSubtick;
 		}
+
+		xt.currentLagCompensation.time = -1;
 
 		lastPlayerMove = move;
 	}

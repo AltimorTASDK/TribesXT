@@ -14,6 +14,15 @@ void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
 	setUpWorld(manager);
 }
 
+void NetXTPlugin::hook_FearGame_serverProcess(FearGame *game)
+{
+	get()->hooks.FearGame.serverProcess.callOriginal(game);
+
+	// Check if the server ticked, which also coincides with packet send
+	if (sg.currentTime != sg.lastTime)
+		PlayerXT::saveLagCompensationSnapshotAll(sg.currentTime);
+}
+
 PlayerXT *NetXTPlugin::hook_Player_ctor(PlayerXT *player)
 {
 	// Initialize new fields
@@ -48,7 +57,7 @@ void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *cu
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
 
-	if (!player->xt.applySubtick)
+	if (!player->hasSubtick())
 		player->updateWeapon(*curMove);
 
 	player->lastProcessTime += TickMs;

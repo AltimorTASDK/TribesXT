@@ -23,7 +23,7 @@ public:
 	struct Snapshot {
 		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
 
-		uint32_t time = -1;
+		uint32_t time = (uint32_t)-1;
 		float yaw;
 		Point3F position;
 		Point3F velocity;
@@ -36,6 +36,8 @@ public:
 		bool contact;
 		bool jetting;
 		bool crouching;
+
+		bool isValid() const { return time != -1; }
 	};
 
 	struct SnapshotBuffer {
@@ -55,21 +57,31 @@ public:
 
 		// Server only, timed by sg.currentTime
 		SnapshotBuffer lagCompensationSnapshots;
+		Snapshot lagCompensationTarget;
 		Snapshot lagCompensationBackup;
 
 		// Server only
 		SubtickRecord subtickRecords[MaxMovesXT];
-		bool applySubtick = false;
+		uint8_t currentSubtick = NoSubtick;
 
 		// Server only
 		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
-		LagCompensationRequest lastLagCompensationRequest;
-		bool applyLagCompensation = false;
+		LagCompensationRequest currentLagCompensation;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
 
 	static constexpr size_t SIZEOF = Player::SIZEOF + sizeof(DataXT);
+
+	bool hasSubtick() const
+	{
+		return xt.currentSubtick != NoSubtick;
+	}
+
+	bool hasLagCompensation() const
+	{
+		return xt.currentLagCompensation.time != -1;
+	}
 
 	Snapshot createSnapshot(uint32_t time = 0) const;
 
@@ -82,11 +94,19 @@ public:
 	void loadSnapshot(const Snapshot &snapshot, bool useMouse = false);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
-	bool startLagCompensation(uint32_t time);
+
+	void saveLagCompensationSnapshot(uint32_t time)
+	{
+		const auto index = msToTicks(time) % SnapHistory;
+		xt.lagCompensationSnapshots[index] = createSnapshot(time);
+	}
+
+	Snapshot startLagCompensation(uint32_t time);
 	void endLagCompensation();
 
-	static void startLagCompensationAll(uint32_t time);
-	static void endLagCompensationAll();
+	static void startLagCompensationAll(const PlayerXT *exclude, uint32_t time);
+	static void endLagCompensationAll(const PlayerXT *exclude);
+	static void saveLagCompensationSnapshotAll(uint32_t time);
 
 	void invalidatePrediction(uint32_t time)
 	{
