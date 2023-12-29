@@ -11,9 +11,9 @@ namespace Net {
 class GhostManager;
 }
 
-namespace cvars::tracer {
-inline float width  = 1.0f;
-inline float length = 1.0f;
+namespace cvars::pref {
+inline float tracerWidth  = 1.0f;
+inline float tracerLength = 1.0f;
 };
 
 class TracerXTPlugin : public SimConsolePlugin {

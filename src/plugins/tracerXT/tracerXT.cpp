@@ -91,7 +91,7 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 
 	// Apply custom length
 	const auto baseLength = bullet->m_pBulletData->tracerLength;
-	bullet->m_pBulletData->tracerLength *= clamp(cvars::tracer::length, 0.f, 1000.f);
+	bullet->m_pBulletData->tracerLength *= clamp(cvars::pref::tracerLength, 0.f, 1000.f);
 
 	get()->hooks.Bullet.onSimRenderQueryImage.callOriginal(bullet, image);
 
@@ -101,11 +101,11 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 
 void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs)
 {
-	*(float*)(cs.reg.esp + 0x30) = clamp(cvars::tracer::width, 0.f, 10.f);
+	*(float*)(cs.reg.esp + 0x30) = clamp(cvars::pref::tracerWidth, 0.f, 10.f);
 }
 
 void TracerXTPlugin::init()
 {
-	console->addVariable(0, "tracer::width",  CMDConsole::Float, &cvars::tracer::width);
-	console->addVariable(0, "tracer::length", CMDConsole::Float, &cvars::tracer::length);
+	console->addVariable(0, "tracer::width",  CMDConsole::Float, &cvars::pref::tracerWidth);
+	console->addVariable(0, "tracer::length", CMDConsole::Float, &cvars::pref::tracerLength);
 }
