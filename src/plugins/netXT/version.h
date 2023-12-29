@@ -9,4 +9,5 @@ constexpr auto Latest = v100;
 
 // Feature tests
 constexpr auto Subtick = v100;
+constexpr auto TracerInheritance = v100;
 }

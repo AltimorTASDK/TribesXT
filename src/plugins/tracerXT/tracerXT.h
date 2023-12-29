@@ -31,7 +31,8 @@ private:
 	static void __fastcall hook_Bullet_readInitialPacket(
 		Bullet*, edx_t, Net::GhostManager *ghostManager, BitStream *stream);
 
-	static void __x86Hook hook_Bullet_writeInitialPacket_setElapsed(CpuState &cs);
+	static void __fastcall hook_Bullet_writeInitialPacket(
+		Bullet*, edx_t, Net::GhostManager *ghostManager, BitStream *stream);
 
 	static void __fastcall hook_Bullet_onSimRenderQueryImage(
 		Bullet*, edx_t, SimRenderQueryImage *image);
@@ -53,12 +54,12 @@ private:
 			// Set m_spawnTime in readInitialPacket based on elapsed time from server
 			StaticJmpHook<0x4BDFD0, hook_Bullet_readInitialPacket> readInitialPacket;
 			// Set elapsed time in writeInitialPacket based on m_spawnTime like a normal person
-			x86Hook writeInitialPacket_setElapsed = {hook_Bullet_writeInitialPacket_setElapsed, 0x4BDF16, 2};
+			StaticJmpHook<0x4BDE60, hook_Bullet_writeInitialPacket> writeInitialPacket;
+			// Make tracers follow inherited velocity and set custom length
+			StaticJmpHook<0x4BF140, hook_Bullet_onSimRenderQueryImage> onSimRenderQueryImage;
 			// Draw tracers immediately on bullet spawn
 			// mov edx, ebp
 			StaticCodePatch<0x4BF313, "\x89\xEA\x90"> onSimRenderQueryImage_setFirstDrawTime;
-			// Make tracers follow inherited velocity and set custom length
-			StaticJmpHook<0x4BF140, hook_Bullet_onSimRenderQueryImage> onSimRenderQueryImage;
 			// Set custom tracer width
 			x86Hook onSimRenderQueryImage_setWidth = {hook_Bullet_onSimRenderQueryImage_setWidth, 0x4BF371, 3};
 		} Bullet;

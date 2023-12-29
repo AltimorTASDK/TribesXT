@@ -2,6 +2,7 @@
 
 #include "darkstar/Core/streamio.h"
 #include "darkstar/Ml/ml.h"
+#include <algorithm>
 #include <cmath>
 
 class BitStream : public StreamIO {
@@ -35,6 +36,11 @@ public:
 	void readBits(int bitCount, void *bitPtr);
 	bool writeFlag(bool val);
 	bool readFlag();
+
+	void writeIntClamped(int value, int bitCount)
+	{
+		writeInt(std::min(value, (1 << bitCount) - 1), bitCount);
+	}
 
 	unsigned int readUInt(int bitCount)
 	{

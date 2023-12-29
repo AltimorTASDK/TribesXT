@@ -44,7 +44,7 @@ public:
 	virtual void readString(char stringBuf[256]);
 	virtual void writeString(const char *stringBuf, int maxLen = 255);
 
-	bool write(auto value)
+	bool write(const auto &value)
 	{
 		return write(sizeof(value), &value);
 	}

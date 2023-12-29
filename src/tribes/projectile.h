@@ -19,4 +19,10 @@ public:
 		using func_t = to_static_function_t<decltype(&Projectile::readInitialPacket)>;
 		((func_t)0x4C0E00)(this, io_pGM, io_pStream);
 	}
+
+	void writeInitialPacket(Net::GhostManager *io_pGM, BitStream *io_pStream)
+	{
+		using func_t = to_static_function_t<decltype(&Projectile::writeInitialPacket)>;
+		((func_t)0x4C0EB0)(this, io_pGM, io_pStream);
+	}
 };

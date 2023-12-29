@@ -3,6 +3,7 @@
 #include "tribes/constants.h"
 #include "tribes/shapeBase.h"
 #include "tribes/worldGlobals.h"
+#include "plugins/netXT/version.h"
 #include "plugins/tracerXT/tracerXT.h"
 #include "util/math.h"
 #include "nofix/x86Hook.h"
@@ -22,11 +23,6 @@ void TracerXTPlugin::hook_Bullet_TracerRenderImage_render_orientation(CpuState &
 	*(Point3F*)(cs.reg.esp + 0xC) = normalVec;
 }
 
-void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs)
-{
-	*(float*)(cs.reg.esp + 0x30) = clamp(cvars::tracer::width, 0.f, 10.f);
-}
-
 void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	Bullet *bullet, edx_t, Net::GhostManager *ghostManager, BitStream *stream)
 {
@@ -44,23 +40,46 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	bullet->m_spawnDirection = stream->readNormalVector(20);
 	bullet->m_renderImage.faceDirection(bullet->m_spawnDirection);
 
-	bullet->m_spawnVelocityLen = stream->readInt(14) / 16.0f;
+	bullet->m_spawnVelocityLen = stream->readInt(14) / 16.f;
 	bullet->m_spawnVelocity = bullet->m_spawnDirection * bullet->m_spawnVelocityLen;
 	bullet->setLinearVelocity(bullet->m_spawnVelocity);
 
 	const auto position = bullet->m_spawnPosition + bullet->m_spawnVelocity * elapsedSecs;
 	bullet->setTransform({bullet->getRotation(), position});
 
-	if (bullet->m_pShooter != nullptr)
-		bullet->m_shooterVel = bullet->m_pShooter->getLinearVelocity();
-	else
-		bullet->m_shooterVel = {};
+	if (serverNetcodeVersion >= Netcode::XT::TracerInheritance) {
+		// Using Player::packUpdate velocity quantization
+		const auto shooterSpeed = stream->readInt(17) / 512.f;
+		const auto shooterDirection = stream->readNormalVector(10);
+		bullet->m_shooterVel = shooterDirection * shooterSpeed;
+	} else {
+		// Fall back to current velocity
+		if (bullet->m_pShooter != nullptr)
+			bullet->m_shooterVel = bullet->m_pShooter->getLinearVelocity();
+		else
+			bullet->m_shooterVel = {};
+	}
 }
 
-void TracerXTPlugin::hook_Bullet_writeInitialPacket_setElapsed(CpuState &cs)
+void TracerXTPlugin::hook_Bullet_writeInitialPacket(
+	Bullet *bullet, edx_t, Net::GhostManager *ghostManager, BitStream *stream)
 {
-	auto *bullet = (Bullet*)cs.reg.esi;
-	cs.reg.ebp = sg.currentTime - bullet->m_spawnTime;
+	bullet->Projectile::writeInitialPacket(ghostManager, stream);
+
+	stream->write(bullet->m_spawnPosition);
+
+	const auto elapsedMs = sg.currentTime - bullet->m_spawnTime;
+	stream->writeInt(elapsedMs, 15);
+
+	const auto direction = bullet->m_spawnVelocity / bullet->m_spawnVelocityLen;
+	stream->writeNormalVector(direction, 20);
+	stream->writeIntClamped((int)(bullet->m_spawnVelocityLen * 16), 14);
+
+	// Using Player::packUpdate velocity quantization
+	const auto shooterSpeed = bullet->m_shooterVel.length();
+	const auto shooterDirection = bullet->m_shooterVel / shooterSpeed;
+	stream->writeIntClamped((int)(shooterSpeed * 512), 17);
+	stream->writeNormalVector(shooterDirection, 10);
 }
 
 void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
@@ -78,6 +97,11 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage(
 
 	bullet->m_pBulletData->tracerLength = baseLength;
 	bullet->setLinearVelocity(velocity);
+}
+
+void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs)
+{
+	*(float*)(cs.reg.esp + 0x30) = clamp(cvars::tracer::width, 0.f, 10.f);
 }
 
 void TracerXTPlugin::init()
