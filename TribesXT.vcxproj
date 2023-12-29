@@ -107,12 +107,14 @@
     <ClInclude Include="src\darkstar\Core\streamio.h" />
     <ClInclude Include="src\darkstar\Core\tVector.h" />
     <ClInclude Include="src\darkstar\Ml\processor.h" />
+    <ClInclude Include="src\darkstar\SimObjects\fxRenderImage.h" />
     <ClInclude Include="src\darkstar\Sim\netGhostManager.h" />
     <ClInclude Include="src\darkstar\Sim\simContainer.h" />
     <ClInclude Include="src\darkstar\Sim\simEvDecl.h" />
     <ClInclude Include="src\darkstar\Sim\simMovement.h" />
     <ClInclude Include="src\darkstar\Sim\simNetObject.h" />
-    <ClInclude Include="src\darkstar\Sim\simObject.h" />
+    <ClInclude Include="src\darkstar\Sim\simBase.h" />
+    <ClInclude Include="src\darkstar\Sim\simRenderGrp.h" />
     <ClInclude Include="src\plugins\netXT\playerPSCXT.h" />
     <ClInclude Include="src\plugins\netXT\playerXT.h" />
     <ClInclude Include="src\plugins\netXT\version.h" />

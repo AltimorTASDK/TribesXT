@@ -20,5 +20,8 @@ public:
 
 	FIELD(0x494, uint32_t, m_spawnTime);
 	FIELD(0x498, Point3F, m_spawnPosition);
+	FIELD(0x4A4, Point3F, m_spawnVelocity);
+	FIELD(0x4B0, float, m_spawnVelocityLen);
+	FIELD(0x4B4, Point3F, m_spawnDirection);
 	FIELD(0x5D0, BulletData*, m_pBulletData);
 };

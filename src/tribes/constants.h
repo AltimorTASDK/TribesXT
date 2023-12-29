@@ -28,3 +28,8 @@ constexpr uint32_t roundMsUpToTick(uint32_t ms)
 {
 	return roundMsDownToTick(ms + TickMs - 1);
 }
+
+constexpr float msToSecs(uint32_t ms)
+{
+	return ms * 0.001f;
+}

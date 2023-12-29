@@ -64,9 +64,22 @@ struct TMat3F : RMat3F {
 
 	constexpr TMat3F() = default;
 
+	constexpr TMat3F(const RMat3F &r, const Point3F &t)
+	{
+		set(r, t);
+	}
+
 	constexpr TMat3F(const EulerF &e, const Point3F &t)
 	{
 		set(e, t);
+	}
+
+	constexpr TMat3F &set(const RMat3F &r, const Point3F &t)
+	{
+		p = t;
+		RMat3F::RMat3F(r);
+		flags |= Matrix_HasTranslation;
+		return *this;
 	}
 
 	constexpr TMat3F &set(const EulerF &e, const Point3F &t)

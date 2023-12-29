@@ -1,6 +1,8 @@
 #pragma once
 
 #include "darkstar/Core/streamio.h"
+#include "darkstar/Ml/ml.h"
+#include <cmath>
 
 class BitStream : public StreamIO {
 	uint8_t *dataPtr;
@@ -25,10 +27,20 @@ public:
 	void writeFloat(float f, int bitCount);
 	void writeSignedFloat(float f, int bitCount);
 
+	// writes a normalized vector
+	void writeNormalVector(const Point3F &vec, int bitCount);
+	Point3F readNormalVector(int bitCount);
+
 	void writeBits(int bitCount, const void *bitPtr);
 	void readBits(int bitCount, void *bitPtr);
 	bool writeFlag(bool val);
 	bool readFlag();
+
+	unsigned int readUInt(int bitCount)
+	{
+		// readInt is already unsigned unless bitCount is 32
+		return (unsigned int)readInt(bitCount);
+	}
 };
 
 inline bool BitStream::readFlag()
@@ -171,4 +183,26 @@ inline int BitStream::readSignedInt(int bitCount)
 		return -readInt(bitCount - 1);
 	else
 		return readInt(bitCount - 1);
+}
+
+inline void BitStream::writeNormalVector(const Point3F &vec, int bitCount)
+{
+	writeSignedFloat(vec.x, bitCount);
+	writeSignedFloat(vec.y, bitCount);
+	writeFlag(vec.z < 0);
+}
+
+inline Point3F BitStream::readNormalVector(int bitCount)
+{
+	const auto x = readSignedFloat(bitCount);
+	const auto y = readSignedFloat(bitCount);
+	const auto zsquared = 1 - x*x - y*y;
+
+	if (zsquared < 0) {
+		readFlag();
+		return {x, y, 0};
+	}
+
+	const auto z = std::sqrt(zsquared);
+	return {x, y, readFlag() ? -z : z};
 }

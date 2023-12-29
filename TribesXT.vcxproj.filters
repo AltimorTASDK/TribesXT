@@ -90,7 +90,7 @@
     <ClInclude Include="src\darkstar\Sim\simNetObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\darkstar\Sim\simObject.h">
+    <ClInclude Include="src\darkstar\Sim\simBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\util\tribes\console.h">
@@ -151,6 +151,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\plugins\netXT\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\SimObjects\fxRenderImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\darkstar\Sim\simRenderGrp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
