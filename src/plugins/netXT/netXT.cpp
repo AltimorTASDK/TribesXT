@@ -40,16 +40,6 @@ void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *cu
 	player->saveSnapshot(player->lastProcessTime);
 }
 
-__declspec(naked) void NetXTPlugin::hook_Player_updateMove_noImages()
-{
-	__asm
-	{
-		// Don't run updateImageState before moving
-		mov eax, 0x4BA66C
-		jmp eax
-	}
-}
-
  void NetXTPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)
  {
 	 player->clientMove(curTime);

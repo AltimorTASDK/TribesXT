@@ -4,6 +4,7 @@
 #include "tribes/worldGlobals.h"
 #include "plugins/netXT/playerPSCXT.h"
 #include "plugins/netXT/playerXT.h"
+#include "plugins/netXT/version.h"
 
 void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 {
@@ -70,6 +71,9 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 
 void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 {
+	if (serverNetcodeVersion < Netcode::XT::Subtick)
+		return;
+
 	// Reverse of the index calc in getClientMove
 	const auto movesBack = moves.size() - moveIndex - 1;
 	const auto moveTick = msToTicks(cg.currentTime - 1) - movesBack;
