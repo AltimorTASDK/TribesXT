@@ -115,6 +115,15 @@ void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
 	}
 }
 
+void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
+{
+	auto &anim = cs.reg.eax;
+	// Prevent clients from interrupting ANIM_LAND with ANIM_JUMPRUN
+	// Vanilla clients normally believe they can't jump at all out of ANIM_LAND
+	if (anim == Player::ANIM_LAND)
+		anim = Player::ANIM_JUMPRUN;
+}
+
 PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {
 	// Initialize new fields

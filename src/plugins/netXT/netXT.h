@@ -62,6 +62,8 @@ private:
 
 	static void __x86Hook hook_Player_fireImageProjectile_init(CpuState &cs);
 
+	static void __x86Hook hook_Player_updateMove_landAnim(CpuState &cs);
+
 	static PlayerPSCXT *__fastcall hook_PlayerPSC_ctor(PlayerPSCXT*, edx_t, bool in_isServer);
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
@@ -130,6 +132,11 @@ private:
 			// Pass subtick + lag compensation data to projectile
 			x86Hook fireImageProjectile_init = {hook_Player_fireImageProjectile_init, 0x4B3985, 3};
 			x86Hook startImageFire_init      = {hook_Player_fireImageProjectile_init, 0x4B2223, 3};
+			// Remove the client's check for preventing jumps during hard landings
+			// It's fake because the server doesn't track animations
+			StaticCodePatch<0x4BA7C2, "\x90\x90\x90\x90\x90\x90"> noClientHardLandingCheck;
+			// Preserve the visuals by not interrupting the hard landing animation
+			x86Hook updateMove_landAnim = {hook_Player_updateMove_landAnim, 0x4BA7F1, 1};
 		} Player;
 		struct {
 			// Use PlayerPSCXT
