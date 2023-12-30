@@ -128,8 +128,10 @@ bool NetXTPlugin::hook_PlayerPSC_writePacket(
 	if (psc->isServer)
 		psc->writeClockSync(bstream);
 
-	if (!psc->isServer || psc->controlPlayer == nullptr)
+	if (!psc->isServer || psc->controlPlayer == nullptr
+	                   || psc->controlPlayer != psc->controlObject) {
 		return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
+	}
 
 	auto *player = (PlayerXT*)psc->controlPlayer;
 	const auto snapshot = player->createSnapshot();
