@@ -32,7 +32,6 @@ public:
 		float traction;
 		int lastContactCount;
 		int jumpSurfaceLastContact;
-		float damageFlash;
 		uint8_t pingStatus;
 		bool contact;
 		bool jetting;
