@@ -97,3 +97,13 @@ struct TMat3F : RMat3F {
 		return result;
 	}
 };
+
+struct RectF {
+	Point2F upperL;
+	Point2F lowerR;
+};
+
+struct ColorF : color_rgb_f32 {
+	using color_rgb_f32::color_rgb_f32;
+	constexpr ColorF(const color_rgb_f32 &color) : color_rgb_f32(color) {}
+};

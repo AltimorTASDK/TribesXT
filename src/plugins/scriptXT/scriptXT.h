@@ -4,11 +4,17 @@
 #include "util/hooks.h"
 
 class FearPlugin;
+class PlayerPSC;
+struct SimQuery;
 
 namespace cvars::xt {
 inline float speed;
 inline float health;
 inline float energy;
+};
+
+namespace cvars::pref {
+inline float damageFlash = 0.35f;
 };
 
 class ScriptXTPlugin : public SimConsolePlugin {
@@ -22,6 +28,8 @@ public:
 
 private:
 	static void __fastcall hook_FearPlugin_endFrame(FearPlugin*);
+
+	static bool __fastcall hook_PlayerPSC_processQuery(PlayerPSC*, edx_t, SimQuery *query);
 
 	struct {
 		struct {
@@ -41,6 +49,10 @@ private:
 			// ret 8
 			StaticCodePatch<0x478E60, "\xC2\x08\x00"> parentResized_fixExtent;
 		} FearGuiFormattedText;
+		struct {
+			// Apply damage flash cvar
+			StaticJmpHook<0x484720, hook_PlayerPSC_processQuery> processQuery;
+		} PlayerPSC;
 	} hooks;
 
 public:

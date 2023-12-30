@@ -111,6 +111,7 @@
     <ClInclude Include="src\darkstar\SimObjects\fxRenderImage.h" />
     <ClInclude Include="src\darkstar\Sim\netGhostManager.h" />
     <ClInclude Include="src\darkstar\Sim\simContainer.h" />
+    <ClInclude Include="src\darkstar\Sim\simEv.h" />
     <ClInclude Include="src\darkstar\Sim\simEvDecl.h" />
     <ClInclude Include="src\darkstar\Sim\simMovement.h" />
     <ClInclude Include="src\darkstar\Sim\simNetObject.h" />
