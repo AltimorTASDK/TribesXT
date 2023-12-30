@@ -4,6 +4,7 @@
 #include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerXT.h"
 #include "util/math.h"
+#include <algorithm>
 #include <cstdint>
 #include <new>
 
@@ -15,12 +16,14 @@ auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float
 	snapshot.velocity = lerp(a.velocity, b.velocity, t);
 	snapshot.pitch = lerp(a.pitch, b.pitch, t);
 	snapshot.energy = lerp(a.energy, b.energy, t);
+	if (b.damageFlash < a.damageFlash)
+		snapshot.damageFlash = lerp(a.damageFlash, b.damageFlash, t);
 	return snapshot;
 }
 
 auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 {
-	return {
+	auto snapshot = Snapshot {
 		.time = time,
 		.yaw = getRot().z,
 		.position = getLinearPosition(),
@@ -30,11 +33,18 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 		.traction = traction,
 		.lastContactCount = lastContactCount,
 		.jumpSurfaceLastContact = jumpSurfaceLastContact,
+		.damageFlash = damageFlash,
 		.pingStatus = getSensorPinged(),
 		.contact = contact,
 		.jetting = jetting,
 		.crouching = crouching
 	};
+
+	// damageFlash is set on the psc for clients
+	if (hasFocus && cg.psc != nullptr)
+		snapshot.damageFlash = cg.psc->damageFlash;
+
+	return snapshot;
 }
 
 auto PlayerXT::SnapshotBuffer::get(uint32_t time) const -> const Snapshot*
@@ -75,13 +85,20 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 	auto pitch = snapshot.pitch;
 	auto yaw = snapshot.yaw;
 
-	if (useMouse && hasFocus && cg.psc != nullptr) {
-		// Use accumulated mouse input for local player
-		if (const auto *newSnap = xt.snapshots.get(lastProcessTime); newSnap != nullptr) {
-			const auto &curMove = cg.psc->curMove;
-			pitch = clamp(newSnap->pitch + curMove.pitch, -MaxPitch, MaxPitch);
-			yaw = normalize_radians(newSnap->yaw + curMove.turnRot);
+	if (hasFocus && cg.psc != nullptr) {
+		if (useMouse) {
+			// Use accumulated mouse input for local player
+			const auto *newSnap = xt.snapshots.get(lastProcessTime);
+
+			if (newSnap != nullptr) {
+				const auto &curMove = cg.psc->curMove;
+				pitch = clamp(newSnap->pitch + curMove.pitch, -MaxPitch, MaxPitch);
+				yaw = normalize_radians(newSnap->yaw + curMove.turnRot);
+			}
 		}
+
+		// Only restore damageFlash from the local player
+		cg.psc->damageFlash = snapshot.damageFlash;
 	}
 
 	setLinearVelocity(snapshot.velocity);

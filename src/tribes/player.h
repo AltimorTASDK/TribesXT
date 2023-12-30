@@ -119,6 +119,7 @@ public:
 	FIELD(0x0FB4, int, updateDebt);
 	FIELD(0x0FC0, int, currentAnimation);
 	FIELD(0x0FD0, int, jumpSurfaceLastContact);
+	FIELD(0x0FE0, float, damageFlash);
 	FIELD(0x0FE4, int, lastContactCount);
 	FIELD(0x0FE8, float, viewPitch);
 	FIELD(0x0FF0, float, traction);
