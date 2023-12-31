@@ -2,7 +2,9 @@
 
 #include "darkstar/Sim/simConsolePlugin.h"
 #include "util/hooks.h"
+#include "nofix/x86Hook.h"
 
+class BitStream;
 class FearPlugin;
 class PlayerPSC;
 struct SimQuery;
@@ -14,6 +16,7 @@ inline float energy;
 };
 
 namespace cvars::pref {
+// Damage flash opacity multiplier
 inline float damageFlash = 0.35f;
 };
 
@@ -29,6 +32,8 @@ public:
 private:
 	static void __fastcall hook_FearPlugin_endFrame(FearPlugin*);
 
+	static void __x86Hook hook_TextFormat_formatControlString_imageWidth(CpuState &cs);
+
 	static bool __fastcall hook_PlayerPSC_processQuery(PlayerPSC*, edx_t, SimQuery *query);
 
 	struct {
@@ -39,6 +44,7 @@ private:
 		struct {
 			// Fix right alignment with multiple formatting segments
 			StaticCodePatch<0x55367F, "\xEB"> formatControlString_fixRightAlign;
+			x86Hook formatControlString_imageWidth = {hook_TextFormat_formatControlString_imageWidth, 0x5531F2, 1};
 		} TextFormat;
 		struct {
 			// Right align based on text control width rather than parent width

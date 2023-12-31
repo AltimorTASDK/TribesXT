@@ -19,6 +19,16 @@ void ScriptXTPlugin::hook_FearPlugin_endFrame(FearPlugin *plugin)
 	cvars::xt::energy = (1 - player->getEnergyLevel()) * 100;
 }
 
+void ScriptXTPlugin::hook_TextFormat_formatControlString_imageWidth(CpuState &cs)
+{
+	const auto imageWidth = (int)cs.reg.eax;
+	auto &width = *(int*)(cs.reg.esp + 0x164);
+
+	// Force images to fit for e.g. resizing HUD bars
+	if (imageWidth > width)
+		width = imageWidth;
+}
+
 bool ScriptXTPlugin::hook_PlayerPSC_processQuery(PlayerPSC *psc, edx_t, SimQuery *query)
 {
 	if (!get()->hooks.PlayerPSC.processQuery.callOriginal(psc, query))
