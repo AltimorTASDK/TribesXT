@@ -1,16 +1,50 @@
 #pragma once
 
+#include "darkstar/Core/encryptedPointer.h"
 #include "darkstar/SimObjects/fxRenderImage.h"
 #include "tribes/gameBase.h"
 #include "util/memory.h"
 #include "util/meta.h"
 #include "util/struct.h"
+#include <cstdint>
 
 class BitStream;
+class ResourceObject;
 class ShapeBase;
 
 class Projectile : public GameBase {
 public:
+	struct ProjectileData : GameBaseData {
+		const char *bulletShapeName;
+		int explosionTag;
+		int expRandCycle;
+		bool collideWithOwner;
+		uint32_t ownerGraceMS;
+		float collisionRadius;
+		float mass;
+		int damageClass;
+		float damageValue;
+		int damageType;
+		float explosionRadius;
+		float kickBackStrength;
+		float aimDeflection;
+		float muzzleVelocity;
+		float terminalVelocity;
+		float acceleration;
+		float totalTime;
+		float liveTime;
+		float projSpecialTime;
+		bool projSpecialBool;
+		float lightRange;
+		ColorF lightColor;
+		float inheritedVelocityScale;
+		int soundId;
+		ResourceObject *m_projRes;
+	};
+
+	static_assert(sizeof(ProjectileData) == 0xA0);
+
+	FIELD(0x254, EncryptedPointer<ProjectileData>, m_projectileData);
 	FIELD(0x25C, fxRenderImage, m_renderImage);
 	FIELD(0x2FC, uint32_t, m_startInterp);
 	FIELD(0x300, uint32_t, m_endInterp);
