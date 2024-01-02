@@ -17,6 +17,8 @@ struct GhostRef {
 } // namespace Net
 
 class SimNetObject : public SimObject {
+	friend class PlayerXT;
+
 protected:
 	enum NetFlag {
 		IsGhost       = BIT(1), // This is a ghost

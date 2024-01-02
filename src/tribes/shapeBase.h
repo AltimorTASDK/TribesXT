@@ -30,4 +30,17 @@ public:
 	{
 		call_virtual<104, decltype(&ShapeBase::setRot)>(this, rot);
 	}
+
+	bool getAimedMuzzleTransform(int slot, TMat3F *mat) const
+	{
+		using func_t = to_static_function_t<bool(ShapeBase::*)(int, TMat3F*) const>;
+		return ((func_t)0x4D1DA0)(this, slot, mat);
+	}
+
+	TMat3F getAimedMuzzleTransform(int slot) const
+	{
+		TMat3F mat;
+		getAimedMuzzleTransform(slot, &mat);
+		return mat;
+	}
 };

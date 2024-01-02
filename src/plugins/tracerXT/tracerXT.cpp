@@ -109,6 +109,6 @@ void TracerXTPlugin::hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs)
 
 void TracerXTPlugin::init()
 {
-	console->addVariable(0, "tracer::width",  CMDConsole::Float, &cvars::pref::tracerWidth);
-	console->addVariable(0, "tracer::length", CMDConsole::Float, &cvars::pref::tracerLength);
+	console->addVariable(0, "pref::tracerWidth",  CMDConsole::Float, &cvars::pref::tracerWidth);
+	console->addVariable(0, "pref::tracerLength", CMDConsole::Float, &cvars::pref::tracerLength);
 }

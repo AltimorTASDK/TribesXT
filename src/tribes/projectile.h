@@ -2,6 +2,7 @@
 
 #include "darkstar/SimObjects/fxRenderImage.h"
 #include "tribes/gameBase.h"
+#include "util/memory.h"
 #include "util/meta.h"
 #include "util/struct.h"
 
@@ -23,6 +24,13 @@ public:
 	// and can't be easily extended
 	FIELD(0x2FC, uint32_t, subtickOffsetXT);
 	FIELD(0x300, uint32_t, lagCompensationOffsetXT);
+
+	void initProjectile(
+		const TMat3F &in_rTrans, const Point3F &in_rShooterVel, SimObjectId in_shooterId)
+	{
+		call_virtual<109, decltype(&Projectile::initProjectile)>(
+			this, in_rTrans, in_rShooterVel, in_shooterId);
+	}
 
 	void readInitialPacket(Net::GhostManager *io_pGM, BitStream *io_pStream)
 	{

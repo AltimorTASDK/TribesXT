@@ -111,7 +111,7 @@
     <ClInclude Include="src\darkstar\Core\bitset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\darkstar\Sim\simEvDecl.h">
+    <ClInclude Include="src\darkstar\Sim\simEvDcl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\darkstar\Ml\processor.h">
@@ -169,6 +169,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\darkstar\Sim\simEv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\dataBlockManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tribes\projectileFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

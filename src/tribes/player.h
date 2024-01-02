@@ -1,8 +1,13 @@
 #pragma once
 
+#include "tribes/dataBlockManager.h"
+#include "tribes/projectileFactory.h"
 #include "tribes/shapeBase.h"
+#include "tribes/worldGlobals.h"
 #include "util/math.h"
 #include "util/struct.h"
+
+class ResourceObject;
 
 struct PlayerMove {
 	int forwardAction;
@@ -102,6 +107,46 @@ public:
 		ANIM_DIE_GRAB_BACK = diegrabback,
 	};
 
+	struct ItemImageData : public GameBaseData {
+		const char *shapeFile;
+		int mountPoint;
+		Point3F mountOffset;
+		Point3F mountRotation;
+		int weaponType;
+		int ammoType;
+		float activateTime;
+		float fireTime;
+		float reloadTime;
+		float spinUpTime;
+		float spinDownTime;
+		ProjectileDataType projectile;
+		float minEnergy;
+		float maxEnergy;
+		float mass;
+		int lightType;
+		float lightTime;
+		float lightRadius;
+		Point3F lightColor;
+		int sfxActivateTag;
+		int sfxFireTag;
+		int sfxReadyTag;
+		int sfxReloadTag;
+		int sfxSpinUpTag;
+		int sfxSpinDownTag;
+		bool firstPerson;
+		bool accuFire;
+		ResourceObject *shape;
+		int activationSequence;
+		int ambientSequence;
+		int spinSequence;
+		int fireSequence;
+		int reloadSequence;
+		int noammoSequence;
+		int readySequence;
+	};
+
+	static_assert(sizeof(ItemImageData) == 0xD8);
+
 	struct ItemImageEntry {
 		int state;
 		int typeId;
@@ -136,13 +181,6 @@ public:
 	FIELD(0x1054, float, forwardAxisMovement);
 	FIELD(0x1058, float, sideAxisMovement);
 	ARRAY_FIELD(0x169C, ItemImageEntry[MaxItemImages], itemImageList);
-
-	const char *scriptThis() const
-	{
-		static char name[10];
-		sprintf_s(name, "%d", getId());
-		return name;
-	}
 
 	void setAnimation(uint32_t anim)
 	{
@@ -184,5 +222,18 @@ public:
 	{
 		using func_t = to_static_function_t<decltype(&Player::updateAnimation)>;
 		((func_t)0x4AD2F0)(this, t);
+	}
+
+	const char *scriptThis() const
+	{
+		static char name[10];
+		sprintf_s(name, "%d", getId());
+		return name;
+	}
+
+	ItemImageData *getItemImageData(int imageId) const
+	{
+		return (ItemImageData*)wg->dbm->lookupDataBlock(
+			imageId, DataBlockManager::ItemImageDataType);
 	}
 };

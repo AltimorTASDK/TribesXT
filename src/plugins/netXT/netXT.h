@@ -64,6 +64,8 @@ private:
 
 	static void __x86Hook hook_Player_updateMove_landAnim(CpuState &cs);
 
+	static void __fastcall hook_Player_fireImageProjectile(PlayerXT*, edx_t, int imageSlot);
+
 	static PlayerPSCXT *__fastcall hook_PlayerPSC_ctor(PlayerPSCXT*, edx_t, bool in_isServer);
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
@@ -137,6 +139,13 @@ private:
 			StaticCodePatch<0x4BA7C2, "\x90\x90\x90\x90\x90\x90"> noClientHardLandingCheck;
 			// Preserve the visuals by not interrupting the hard landing animation
 			x86Hook updateMove_landAnim = {hook_Player_updateMove_landAnim, 0x4BA7F1, 1};
+			// Run weapon update logic on the client
+			StaticCodePatch<0x4B413A, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient1;
+			StaticCodePatch<0x4B4196, "\x90\x90"> updateWeaponOnClient2;
+			StaticCodePatch<0x4B41FA, "\x90\x90"> updateWeaponOnClient3;
+			StaticCodePatch<0x4B422E, "\x90\x90"> updateWeaponOnClient4;
+			// Predict shots on the client
+			StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
 		} Player;
 		struct {
 			// Use PlayerPSCXT

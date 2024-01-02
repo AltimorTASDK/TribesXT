@@ -112,7 +112,7 @@
     <ClInclude Include="src\darkstar\Sim\netGhostManager.h" />
     <ClInclude Include="src\darkstar\Sim\simContainer.h" />
     <ClInclude Include="src\darkstar\Sim\simEv.h" />
-    <ClInclude Include="src\darkstar\Sim\simEvDecl.h" />
+    <ClInclude Include="src\darkstar\Sim\simEvDcl.h" />
     <ClInclude Include="src\darkstar\Sim\simMovement.h" />
     <ClInclude Include="src\darkstar\Sim\simNetObject.h" />
     <ClInclude Include="src\darkstar\Sim\simBase.h" />
@@ -126,8 +126,10 @@
     <ClInclude Include="src\tribes\bullet.h" />
     <ClInclude Include="src\tribes\constants.h" />
     <ClInclude Include="src\darkstar\Core\encryptedPointer.h" />
+    <ClInclude Include="src\tribes\dataBlockManager.h" />
     <ClInclude Include="src\tribes\fear.strings.h" />
     <ClInclude Include="src\tribes\grenade.h" />
+    <ClInclude Include="src\tribes\projectileFactory.h" />
     <ClInclude Include="src\tribes\rocketDumb.h" />
     <ClInclude Include="src\tribes\version.h" />
     <ClInclude Include="src\tribes\fearPlugin.h" />

@@ -2,7 +2,7 @@
 
 #include "darkstar/Ml/ml.h"
 #include "darkstar/Sim/simBase.h"
-#include "darkstar/Sim/simEvDecl.h"
+#include "darkstar/Sim/simEvDcl.h"
 
 enum SimCameraProjection {
 	SimOrthographicProjection,

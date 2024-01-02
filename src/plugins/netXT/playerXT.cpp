@@ -1,5 +1,6 @@
 #include "darkstar/console/console.h"
 #include "tribes/playerPSC.h"
+#include "tribes/projectile.h"
 #include "tribes/worldGlobals.h"
 #include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerXT.h"
@@ -381,4 +382,29 @@ void PlayerXT::ghostSetMove(
 	// State sent by server is from before the move, so simulate once
 	updateMove(move, false);
 	lastPlayerMove = *move;
+}
+
+void PlayerXT::clientFireImageProjectile(int imageSlot)
+{
+	const auto &itemImage = itemImageList[imageSlot];
+	const auto &imageData = *getItemImageData(itemImage.imageId);
+
+	// Normally calls Player::onFire on the server, seems unused though
+	if (imageData.projectile.type == -1)
+		return;
+
+	TMat3F muzzleTransform;
+
+	if (imageData.accuFire && !dead)
+		muzzleTransform = getAimedMuzzleTransform(imageSlot);
+	else
+		muzzleTransform = getMuzzleTransform(imageSlot) * getTransform();
+
+	auto *projectile = createProjectile(imageData.projectile);
+	projectile->initProjectile(getTransform(), getLinearVelocity(), getId());
+	projectile->netFlags.set(IsGhost);
+	manager->addObject(projectile);
+
+	switch (imageData.projectile.type) {
+	};
 }

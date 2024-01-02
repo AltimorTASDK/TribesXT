@@ -4,10 +4,15 @@
 #include "darkstar/Sim/simMovement.h"
 #include "util/memory.h"
 #include "util/struct.h"
+#include <cstddef>
 #include <cstdint>
 
 class GameBase : public SimMovement {
 public:
+	struct GameBaseData {
+		std::byte padding00[0x34];
+	};
+
 	static constexpr uint8_t SensorPingedBase = 24;
 
 	FIELD(0x214, uint32_t, sensorInfoBits);
@@ -33,6 +38,18 @@ public:
 	float getEnergyLevel() const
 	{
 		return call_virtual<63, decltype(&GameBase::getEnergyLevel)>(this);
+	}
+
+	bool getMuzzleTransform(int slot, TMat3F *mat) const
+	{
+		return call_virtual<67, bool(GameBase::*)(int, TMat3F*) const>(this, slot, mat);
+	}
+
+	TMat3F getMuzzleTransform(int slot) const
+	{
+		TMat3F mat;
+		getMuzzleTransform(slot, &mat);
+		return mat;
 	}
 
 	void getObjectMountTransform(int mountPoint, TMat3F *mat) const

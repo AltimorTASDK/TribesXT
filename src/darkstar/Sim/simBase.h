@@ -3,9 +3,12 @@
 #include "darkstar/Core/bitset.h"
 #include "darkstar/Core/encryptedPointer.h"
 #include "darkstar/Core/tVector.h"
-#include "darkstar/Sim/simEvDecl.h"
+#include "darkstar/Sim/simEvDcl.h"
 #include "util/struct.h"
 #include <cstddef>
+
+class SimGroup;
+class SimManager;
 
 struct SimQuery {
 	int type;
@@ -26,6 +29,8 @@ class SimObject {
 
 protected:
 	FIELD(0x44, SimObjectId, id);
+	FIELD(0x48, SimGroup*, group);
+	FIELD(0x4C, SimManager*, manager);
 
 public:
 	bool addToSet(uint32_t setId)
