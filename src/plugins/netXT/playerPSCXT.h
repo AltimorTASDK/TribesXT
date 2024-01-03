@@ -48,6 +48,7 @@ public:
 public:
 	void preSimActionEvent(int action, float eventValue);
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
+	const SubtickRecord &getSubtick(uint32_t time);
 	void writeSubtick(BitStream *stream, int moveIndex);
 	void readSubtick(BitStream *stream);
 

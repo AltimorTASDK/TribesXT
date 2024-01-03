@@ -251,15 +251,47 @@ void PlayerXT::clientMove(uint32_t curTime)
 	if (lastProcessTime < curTime) {
 		loadSnapshot(lastProcessTime);
 		do {
-			if (hasFocus) {
-				auto *move = cg.psc->getClientMove(lastProcessTime);
-				if (move == nullptr)
-					break;
-				lastPlayerMove = *move;
-				updateMove(move, false);
-			} else {
+			if (!hasFocus) {
+				// Remote ghost
 				updateMove(&lastPlayerMove, false);
+				continue;
 			}
+
+			auto *psc = (PlayerPSCXT*)cg.psc;
+			auto *move = psc->getClientMove(lastProcessTime);
+
+			if (move == nullptr)
+				break;
+
+			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
+
+			float subtickPitch;
+			float subtickYaw;
+
+			if (subtickRecord.subtick != NoSubtick) {
+				// Lets updateMove know not to update image states yet
+				xt.currentSubtick = subtickRecord.subtick;
+				subtickPitch = viewPitch + subtickRecord.pitch;
+				subtickYaw = getRot().z + subtickRecord.yaw;
+			}
+
+			updateMove(move, false);
+
+			if (hasSubtick()) {
+				const auto tickStart = lastProcessTime - TickMs;
+				const auto subtickTime = tickStart + subtickRecord.subtick;
+				loadSnapshotInterpolated(subtickTime);
+				setViewAnglesClamped(subtickPitch, subtickYaw);
+
+				// Update weapon with subtick state
+				updateWeapon(*move);
+
+				// Restore
+				loadSnapshot(lastProcessTime);
+				xt.currentSubtick = NoSubtick;
+			}
+
+			lastPlayerMove = *move;
 		} while (lastProcessTime < curTime);
 	}
 
@@ -321,8 +353,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		updateAnimation(0.032f);
 
 		if (hasSubtick()) {
-			// Subtract an extra tick to match the client's interpolated view
-			const auto tickStart = lastProcessTime - TickMs * 2;
+			const auto tickStart = lastProcessTime - TickMs;
 			const auto subtickTime = tickStart + subtickRecord.subtick;
 			loadSnapshotInterpolated(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
@@ -384,6 +415,18 @@ void PlayerXT::ghostSetMove(
 	lastPlayerMove = *move;
 }
 
+void PlayerXT::addPredictedProjectile(Projectile *projectile, int type)
+{
+	const auto &data = *projectile->m_projectileData;
+
+	const auto direction = Point3F(projectile->getTransform().row<1>());
+	const auto baseVelocity = direction * data.muzzleVelocity;
+	const auto inheritedVelocity = projectile->m_shooterVel * data.inheritedVelocityScale;
+	const auto velocity = baseVelocity + inheritedVelocity;
+	projectile->setLinearVelocity(velocity);
+	projectile->m_instTerminalVelocity = velocity;
+}
+
 void PlayerXT::clientFireImageProjectile(int imageSlot)
 {
 	const auto &itemImage = itemImageList[imageSlot];
@@ -401,10 +444,8 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 		muzzleTransform = getMuzzleTransform(imageSlot) * getTransform();
 
 	auto *projectile = createProjectile(imageData.projectile);
-	projectile->initProjectile(getTransform(), getLinearVelocity(), getId());
+	projectile->initProjectile(muzzleTransform, getLinearVelocity(), getId());
 	projectile->netFlags.set(IsGhost);
 	manager->addObject(projectile);
-
-	switch (imageData.projectile.type) {
-	};
+	addPredictedProjectile(projectile, imageData.projectile.type);
 }

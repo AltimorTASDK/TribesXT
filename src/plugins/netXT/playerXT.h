@@ -70,6 +70,7 @@ public:
 
 		// Server only
 		SubtickRecord subtickRecords[MaxMovesXT];
+		// Server + client
 		uint8_t currentSubtick = NoSubtick;
 
 		// Server only
@@ -135,5 +136,6 @@ public:
 		PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
 		bool newContact, float newRot, float newPitch, int skipCount, bool noInterp);
 
+	void addPredictedProjectile(Projectile *projectile, int type);
 	void clientFireImageProjectile(int imageSlot);
 };

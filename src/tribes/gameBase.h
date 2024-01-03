@@ -52,6 +52,16 @@ public:
 		return mat;
 	}
 
+	void clientProcess(uint32_t curTime)
+	{
+		call_virtual<85, decltype(&GameBase::clientProcess)>(this, curTime);
+	}
+
+	void serverProcess(uint32_t curTime)
+	{
+		call_virtual<86, decltype(&GameBase::serverProcess)>(this, curTime);
+	}
+
 	void getObjectMountTransform(int mountPoint, TMat3F *mat) const
 	{
 		call_virtual<91, void(GameBase::*)(int, TMat3F*) const>(this, mountPoint, mat);

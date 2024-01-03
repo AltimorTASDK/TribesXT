@@ -55,7 +55,7 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	stream->read(&bullet->m_spawnPosition);
 
 	// Work around the poor calculation from vanilla servers
-	const auto elapsedMs = std::max(stream->readUInt(15), TickMs);
+	const auto elapsedMs = std::max(stream->readUInt(15), TickMs) - TickMs;
 	const auto elapsedSecs = msToSecs(elapsedMs);
 
 	// Start tracer from initial position
