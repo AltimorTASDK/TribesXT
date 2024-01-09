@@ -124,13 +124,13 @@ void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
 		anim = Player::ANIM_JUMPRUN;
 }
 
-void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int imageSlot)
+/*void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int imageSlot)
 {
 	get()->hooks.Player.fireImageProjectile.callOriginal(player, imageSlot);
 
 	if (player->isGhost())
 		player->clientFireImageProjectile(imageSlot);
-}
+}*/
 
 PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {

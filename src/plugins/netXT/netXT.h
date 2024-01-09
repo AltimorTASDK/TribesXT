@@ -21,7 +21,7 @@ namespace cvars::net {
 // Offset for inserting server snapshots into the client interpolation buffer
 inline int timeNudge = 48;
 // How far to allow the client's synced clock to drift from the server before correcting
-inline int clientClockCorrection = 16;
+inline int clientClockCorrection = 8;
 // How far back in time to allow lag compensation to
 inline int maxLagCompensation = 250;
 }
@@ -145,7 +145,7 @@ private:
 			StaticCodePatch<0x4B41FA, "\x90\x90"> updateWeaponOnClient3;
 			StaticCodePatch<0x4B422E, "\x90\x90"> updateWeaponOnClient4;
 			// Predict shots on the client
-			StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
+			//StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
 		} Player;
 		struct {
 			// Use PlayerPSCXT
