@@ -18,6 +18,8 @@ inline float energy;
 namespace cvars::pref {
 // Damage flash opacity multiplier
 inline float damageFlash = 0.35f;
+// Center third person camera above head like 1.40
+inline bool newThirdPerson = false;
 };
 
 class ScriptXTPlugin : public SimConsolePlugin {
@@ -33,6 +35,8 @@ private:
 	static void __fastcall hook_FearPlugin_endFrame(FearPlugin*);
 
 	static void __x86Hook hook_TextFormat_formatControlString_imageWidth(CpuState &cs);
+
+	static void __x86Hook hook_Player_getCameraTransform_140Check(CpuState &cs);
 
 	static bool __fastcall hook_PlayerPSC_processQuery(PlayerPSC*, edx_t, SimQuery *query);
 
@@ -55,6 +59,9 @@ private:
 			// ret 8
 			StaticCodePatch<0x478E60, "\xC2\x08\x00"> parentResized_fixExtent;
 		} FearGuiFormattedText;
+		struct {
+			x86Hook getCameraTransform_140Check = {hook_Player_getCameraTransform_140Check, 0x4ACBD3, 1};
+		} Player;
 		struct {
 			// Apply damage flash cvar
 			StaticJmpHook<0x484720, hook_PlayerPSC_processQuery> processQuery;

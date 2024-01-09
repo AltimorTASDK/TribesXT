@@ -29,6 +29,12 @@ void ScriptXTPlugin::hook_TextFormat_formatControlString_imageWidth(CpuState &cs
 		width = imageWidth;
 }
 
+void ScriptXTPlugin::hook_Player_getCameraTransform_140Check(CpuState &cs)
+{
+	cs.eflag.cf = !cvars::pref::newThirdPerson;
+	cs.eflag.zf = cs.eflag.cf;
+}
+
 bool ScriptXTPlugin::hook_PlayerPSC_processQuery(PlayerPSC *psc, edx_t, SimQuery *query)
 {
 	if (!get()->hooks.PlayerPSC.processQuery.callOriginal(psc, query))
@@ -51,4 +57,6 @@ void ScriptXTPlugin::init()
 	console->addVariable(0, "$xt::energy", CMDConsole::Float, &cvars::xt::energy);
 
 	console->addVariable(0, "$pref::damageFlash", CMDConsole::Float, &cvars::pref::damageFlash);
+
+	console->addVariable(0, "$pref::newThirdPerson", CMDConsole::Bool, &cvars::pref::newThirdPerson);
 }
