@@ -9,5 +9,5 @@ void *operator new(size_t count)
 void operator delete(void *ptr)
 {
 	using func_t = void(*)(void*);
-	return ((func_t)0x5A94EE)(ptr);
+	((func_t)0x5A94EE)(ptr);
 }
