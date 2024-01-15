@@ -82,7 +82,7 @@ bool x86Hook::BuildCallStub(void)
 
 	// attach hook call
 	pStub = WriteImmediate(pStub, 0xE8, 
-		PtrToLong(pStub), PtrToLong(_pFunction));
+	                       PtrToLong(pStub), PtrToLong(_pFunction));
 	
 	// attach footer
 	memcpy(pStub, CallStubFooter, 5);
@@ -94,13 +94,12 @@ bool x86Hook::BuildCallStub(void)
 
 	// attach jmp instruction for return back home
 	pStub = WriteImmediate(pStub, 0xE9, PtrToLong(pStub), 
-		_return ? PtrToLong(_return) : PtrToLong(_pAddress) + _size);
+	                       _return ? PtrToLong(_return) : PtrToLong(_pAddress) + _size);
 
 	// update protections
 	DWORD protect;
-	if(!(VirtualProtect(_pCallStub, (pStub - _pCallStub),
-			PAGE_EXECUTE_READWRITE, &protect)))
-			return false;
+	if(!(VirtualProtect(_pCallStub, (pStub - _pCallStub), PAGE_EXECUTE_READWRITE, &protect)))
+		return false;
 
 	return true;
 }
@@ -116,12 +115,10 @@ bool x86Hook::BuildJmpPatch(void)
 
 	// nop-sled, and write jmp
 	memset(_pJmpPatch, 0x90, _size);
-	WriteImmediate(_pJmpPatch, 0xE9, PtrToLong(_pAddress), 
-		PtrToLong(_pCallStub));
+	WriteImmediate(_pJmpPatch, 0xE9, PtrToLong(_pAddress), PtrToLong(_pCallStub));
 
 	DWORD protect;
-	if(!(VirtualProtect(_pAddress, 512, 
-			PAGE_EXECUTE_READWRITE, &protect)))
+	if(!(VirtualProtect(_pAddress, 512, PAGE_EXECUTE_READWRITE, &protect)))
 			return false;
 
 	return true;
