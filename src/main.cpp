@@ -6,6 +6,8 @@
 #include "plugins/skiBugFix/skiBugFix.h"
 #include <Windows.h>
 
+extern const char *buildString;
+
 #define REGISTER_PLUGIN(type) [] { \
 	SimGame::get()->registerPlugin(new (type)); \
 	Console->printf(CON_YELLOW, "TribesXT: Loaded " #type); \
@@ -15,6 +17,8 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 {
 	if (reason != DLL_PROCESS_ATTACH)
 		return FALSE;
+
+	Console->printf(CON_GREEN, buildString);
 
 	REGISTER_PLUGIN(NetXTPlugin);
 	REGISTER_PLUGIN(ScriptXTPlugin);

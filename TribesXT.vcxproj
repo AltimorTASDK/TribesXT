@@ -101,6 +101,10 @@
 )</Command>
       <Message>Copying to Tribes plugins directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>powershell -command "\"const char *buildString = `\"TribesXT ({0}) built on {1}`\";\" -f %24(git describe --tags), (Get-Date -Format \"yyyy-MM-dd HH:mm:ss\")" &gt; src/version.cpp</Command>
+      <Message>Outputting version string</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\darkstar\Core\bitset.h" />
@@ -170,6 +174,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\alloc.cpp" />
     <ClCompile Include="src\util\memory.cpp" />
+    <ClCompile Include="src\version.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

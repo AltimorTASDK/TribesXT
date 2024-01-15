@@ -212,5 +212,8 @@
     <ClCompile Include="src\plugins\scriptXT\scriptXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\version.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
