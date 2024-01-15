@@ -398,8 +398,8 @@ void PlayerXT::ghostSetMove(
 	if (serverNetcodeVersion >= Netcode::XT::ClockSync && cg.psc != nullptr) {
 		// Translate the snapshot time to client time
 		const auto *psc = (PlayerPSCXT*)cg.psc;
-		const auto clockOffset = cg.currentTime - psc->xt.syncedClock;
-		lastProcessTime = psc->xt.serverClock + clockOffset;
+		const auto clockOffset = psc->xt.serverClock - psc->xt.syncedClock;
+		lastProcessTime = cg.currentTime + clockOffset;
 	} else {
 		// Use average time of frame since we don't know when the packet arrived
 		lastProcessTime = (cg.currentTime + cg.lastTime + 1) / 2;
