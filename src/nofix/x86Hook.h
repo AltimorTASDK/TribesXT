@@ -67,28 +67,13 @@ class x86Hook
 public:
 	enum x86HookOpt
 	{
+		NOFLAGS = 0,
 		BEFORE = 0x1,
 		PRESERVEFPU = 0x2,
 		NOINSTRUCITON = 0x4
 	};
 
-	x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = 0, bool bEnable = true) :
-			_pAddress((void*)pAddress),
-			_pFunction(pFunction),
-			_nInstruction(nInstructions),
-			_return(ret),
-			_opt(opt)
-	{   
-		_enabled = _initialized = false;
-		_size = 0;
-
-		_pBackup = _pCallStub = _pJmpPatch = NULL;
-
-		if(bEnable)
-			Initialize(true);
-	}
-
-	x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = 0, bool bEnable = true) :
+	x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = NOFLAGS, bool bEnable = true) :
 			_pAddress(pAddress),
 			_pFunction(pFunction),
 			_nInstruction(nInstructions),
@@ -102,6 +87,11 @@ public:
 
 		if(bEnable)
 			Initialize(true);
+	}
+
+	x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = NOFLAGS, bool bEnable = true) :
+			x86Hook(pFunction, (void*)pAddress, nInstructions, ret, opt, bEnable)
+	{   
 	}
 
 	~x86Hook()
