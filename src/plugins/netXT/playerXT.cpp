@@ -245,59 +245,6 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 	setViewAngles(clamp(pitch, -MaxPitch, MaxPitch), normalize_radians(yaw));
 }
 
-// clientProcess partial reimplementation
-void PlayerXT::clientMove(uint32_t curTime)
-{
-	if (lastProcessTime < curTime) {
-		loadSnapshot(lastProcessTime);
-		do {
-			if (!hasFocus) {
-				// Remote ghost
-				updateMove(&lastPlayerMove, false);
-				continue;
-			}
-
-			auto *psc = (PlayerPSCXT*)cg.psc;
-			auto *move = psc->getClientMove(lastProcessTime);
-
-			if (move == nullptr)
-				break;
-
-			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
-
-			float subtickPitch;
-			float subtickYaw;
-
-			if (subtickRecord.subtick != NoSubtick) {
-				// Lets updateMove know not to update image states yet
-				xt.currentSubtick = subtickRecord.subtick;
-				subtickPitch = viewPitch + subtickRecord.pitch;
-				subtickYaw = getRot().z + subtickRecord.yaw;
-			}
-
-			updateMove(move, false);
-
-			if (hasSubtick()) {
-				const auto tickStart = lastProcessTime - TickMs;
-				const auto subtickTime = tickStart + subtickRecord.subtick;
-				loadSnapshotInterpolated(subtickTime);
-				setViewAnglesClamped(subtickPitch, subtickYaw);
-
-				// Update weapon with subtick state
-				updateWeapon(*move);
-
-				// Restore
-				loadSnapshot(lastProcessTime);
-				xt.currentSubtick = NoSubtick;
-			}
-
-			lastPlayerMove = *move;
-		} while (lastProcessTime < curTime);
-	}
-
-	loadSnapshotInterpolated(curTime);
-}
-
 void PlayerXT::updateWeapon(const PlayerMove &move)
 {
 	if (lastPlayerMove.trigger && !move.trigger)
@@ -375,6 +322,59 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		setMaskBits(OrientationMask);
 
 	updateSkip = 0;
+}
+
+// clientProcess partial reimplementation
+void PlayerXT::clientMove(uint32_t curTime)
+{
+	if (lastProcessTime < curTime) {
+		loadSnapshot(lastProcessTime);
+		do {
+			if (!hasFocus) {
+				// Remote ghost
+				updateMove(&lastPlayerMove, false);
+				continue;
+			}
+
+			auto *psc = (PlayerPSCXT*)cg.psc;
+			auto *move = psc->getClientMove(lastProcessTime);
+
+			if (move == nullptr)
+				break;
+
+			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
+
+			float subtickPitch;
+			float subtickYaw;
+
+			if (subtickRecord.subtick != NoSubtick) {
+				// Lets updateMove know not to update image states yet
+				xt.currentSubtick = subtickRecord.subtick;
+				subtickPitch = viewPitch + subtickRecord.pitch;
+				subtickYaw = getRot().z + subtickRecord.yaw;
+			}
+
+			updateMove(move, false);
+
+			if (hasSubtick()) {
+				const auto tickStart = lastProcessTime - TickMs;
+				const auto subtickTime = tickStart + subtickRecord.subtick;
+				loadSnapshotInterpolated(subtickTime);
+				setViewAnglesClamped(subtickPitch, subtickYaw);
+
+				// Update weapon with subtick state
+				updateWeapon(*move);
+
+				// Restore
+				loadSnapshot(lastProcessTime);
+				xt.currentSubtick = NoSubtick;
+			}
+
+			lastPlayerMove = *move;
+		} while (lastProcessTime < curTime);
+	}
+
+	loadSnapshotInterpolated(curTime);
 }
 
 void PlayerXT::ghostSetMove(
