@@ -1,8 +1,8 @@
 #ifndef _X86HOOK_H_
 #define _X86HOOK_H_
 
-#include <Windows.h>
 #include "nofix/x86.h"
+#include <cstdint>
 
 #define __x86Hook __stdcall
 
@@ -26,38 +26,38 @@ struct CpuState
   }eflag;
   struct RegisterStruct
   {
-    DWORD edi;
-    DWORD esi;
-    DWORD ebp;
-    DWORD esp;
-    DWORD ebx;
-    DWORD edx;
-    DWORD ecx;
-    DWORD eax;
+    uint32_t edi;
+    uint32_t esi;
+    uint32_t ebp;
+    uint32_t esp;
+    uint32_t ebx;
+    uint32_t edx;
+    uint32_t ecx;
+    uint32_t eax;
   }reg;
   /*
   struct FpuStruct
   {
-    WORD control;
-    WORD unused;
-    WORD status;
-    WORD unused1;
-    WORD tag;
-    WORD unused2;
-    DWORD instruction;
-    WORD codeseg;
-    WORD unused3;
-    DWORD operand;
-    WORD dataseg;
-    WORD unused4;
-    BYTE st_0[10];
-    BYTE st_1[10];
-    BYTE st_2[10];
-    BYTE st_3[10];
-    BYTE st_4[10];
-    BYTE st_5[10];
-    BYTE st_6[10];
-    BYTE st_7[10]; 
+    uint16_t control;
+    uint16_t unused;
+    uint16_t status;
+    uint16_t unused1;
+    uint16_t tag;
+    uint16_t unused2;
+    uint32_t instruction;
+    uint16_t codeseg;
+    uint16_t unused3;
+    uint32_t operand;
+    uint16_t dataseg;
+    uint16_t unused4;
+    uint8_t st_0[10];
+    uint8_t st_1[10];
+    uint8_t st_2[10];
+    uint8_t st_3[10];
+    uint8_t st_4[10];
+    uint8_t st_5[10];
+    uint8_t st_6[10];
+    uint8_t st_7[10]; 
   }fpu;*/
 };
 
@@ -75,8 +75,8 @@ public:
     X86H_NOINSTRUCITON = 0x4
   };
 
-  x86Hook(void *pFunction, DWORD pAddress, int nInstructions = 0, DWORD ret = 0, x86HookOpt opt = X86H_NULL, bool bEnable = true) :
-      _pAddress(LongToPtr(pAddress)),
+  x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = X86H_NULL, bool bEnable = true) :
+      _pAddress((void*)pAddress),
       _pFunction(pFunction),
       _nInstruction(nInstructions),
       _return(ret),
@@ -91,7 +91,7 @@ public:
       Initialize(true);
   }
 
-  x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, DWORD ret = 0, x86HookOpt opt = X86H_NULL, bool bEnable = true) :
+  x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = X86H_NULL, bool bEnable = true) :
       _pAddress(pAddress),
       _pFunction(pFunction),
       _nInstruction(nInstructions),
@@ -121,7 +121,7 @@ private:
   bool BuildCallStub(void);
   bool BuildJmpPatch(void);
   bool CreateBackup(void);
-  unsigned char *WriteImmediate(unsigned char *dst, unsigned char val, DWORD from, DWORD to);
+  unsigned char *WriteImmediate(unsigned char *dst, unsigned char val, uint32_t from, uint32_t to);
 
 private:
   bool _enabled;
@@ -134,8 +134,8 @@ private:
   void * const _pFunction;
   void * const _pAddress;
   int _nInstruction;
-  DWORD _opt;
-  DWORD _return;
+  uint32_t _opt;
+  uint32_t _return;
 };
 
 #endif

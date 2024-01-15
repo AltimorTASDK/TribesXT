@@ -149,7 +149,7 @@ bool x86Hook::CreateBackup(void)
   return false;
 }
 
-unsigned char *x86Hook::WriteImmediate(unsigned char *dst, unsigned char val, DWORD from, DWORD to)
+unsigned char *x86Hook::WriteImmediate(unsigned char *dst, unsigned char val, uint32_t from, uint32_t to)
 {
   *dst++ = val;
   *reinterpret_cast<PDWORD>(dst) = to - from - 5;
