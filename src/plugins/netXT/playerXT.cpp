@@ -289,15 +289,15 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 				sg.currentTime);
 		}
 
+		updateDamage(0.032f);
+		updateMove(&move, true);
+		updateAnimation(0.032f);
+
 		if (move.useItem != -1) {
 			char buf[16];
 			sprintf_s(buf, "%d", move.useItem);
 			Console->executef(3, "remoteUseItem", scriptThis(), buf);
 		}
-
-		updateDamage(0.032f);
-		updateMove(&move, true);
-		updateAnimation(0.032f);
 
 		if (hasSubtick()) {
 			const auto tickStart = lastProcessTime - TickMs;
