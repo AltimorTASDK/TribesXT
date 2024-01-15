@@ -3,8 +3,6 @@
 #include "darkstar/Sim/simConsolePlugin.h"
 #include "util/hooks.h"
 
-class FearPlugin;
-
 class SkiBugFixPlugin : public SimConsolePlugin {
 	struct {
 		struct {
