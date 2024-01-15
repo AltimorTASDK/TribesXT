@@ -36,7 +36,7 @@ public:
 	}
 
 private:
-	static void __x86Hook hook_FearGame_consoleCallback_newGame(CpuState &cs);
+	static void hook_FearGame_consoleCallback_newGame(CpuState &cs);
 
 	static void __fastcall hook_FearGame_serverProcess(FearGame*);
 
@@ -60,9 +60,9 @@ private:
 	static uint32_t __fastcall hook_Player_packUpdate(
 		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
 
-	static void __x86Hook hook_Player_fireImageProjectile_init(CpuState &cs);
+	static void hook_Player_fireImageProjectile_init(CpuState &cs);
 
-	static void __x86Hook hook_Player_updateMove_landAnim(CpuState &cs);
+	static void hook_Player_updateMove_landAnim(CpuState &cs);
 
 	static void __fastcall hook_Player_fireImageProjectile(PlayerXT*, edx_t, int imageSlot);
 
@@ -79,10 +79,10 @@ private:
 
 	static void hook_clampAngleDelta(float *angle, float range);
 
-	static void __x86Hook hook_PlayerPSC_readPacket_setTime(CpuState &cs);
-	static void __x86Hook hook_PlayerPSC_readPacket_move(CpuState &cs);
-	static void __x86Hook hook_PlayerPSC_writePacket_move(CpuState &cs);
-	static void __x86Hook hook_PlayerPSC_onSimActionEvent(CpuState &cs);
+	static void hook_PlayerPSC_readPacket_setTime(CpuState &cs);
+	static void hook_PlayerPSC_readPacket_move(CpuState &cs);
+	static void hook_PlayerPSC_writePacket_move(CpuState &cs);
+	static void hook_PlayerPSC_onSimActionEvent(CpuState &cs);
 
 	static bool hook_PacketStream_checkPacketSend_check();
 	static void hook_PacketStream_checkPacketSend_check_asm();

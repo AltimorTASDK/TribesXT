@@ -34,9 +34,9 @@ public:
 private:
 	static void __fastcall hook_FearPlugin_endFrame(FearPlugin*);
 
-	static void __x86Hook hook_TextFormat_formatControlString_imageWidth(CpuState &cs);
+	static void hook_TextFormat_formatControlString_imageWidth(CpuState &cs);
 
-	static void __x86Hook hook_Player_getCameraTransform_140Check(CpuState &cs);
+	static void hook_Player_getCameraTransform_140Check(CpuState &cs);
 
 	static bool __fastcall hook_PlayerPSC_processQuery(PlayerPSC*, edx_t, SimQuery *query);
 

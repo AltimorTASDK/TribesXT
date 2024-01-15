@@ -4,8 +4,6 @@
 #include "nofix/x86.h"
 #include <cstdint>
 
-#define __x86Hook __stdcall
-
 struct CpuState
 {
 	struct EFlagStruct

@@ -85,22 +85,15 @@ bool x86Hook::BuildCallStub(void)
 		PtrToLong(pStub), PtrToLong(_pFunction));
 	
 	// attach footer
-	memcpy(pStub, CallStubFooter, 2);
-	pStub += 2;
+	memcpy(pStub, CallStubFooter, 5);
+	pStub += 5;
 
 	// attach instructions from hooked function
 	if((_opt & X86H_BEFORE) && !(_opt & X86H_NOINSTRUCITON))
 		pStub += x86Copy(pStub, _pAddress, _nInstruction);
 
 	// attach jmp instruction for return back home
-	unsigned char *retJmp;
-	retJmp = _pCallStub + _size + 10;
-	
-	// 
-	if((_opt & X86H_NOINSTRUCITON))
-		retJmp -= _size;
-	
-	pStub = WriteImmediate(retJmp, 0xE9, PtrToLong(retJmp), 
+	pStub = WriteImmediate(pStub, 0xE9, PtrToLong(pStub), 
 		_return ? PtrToLong(_return) : PtrToLong(_pAddress) + _size);
 
 	// update protections
@@ -173,6 +166,7 @@ extern "C"
 	{
 		__asm
 		{
+			add esp, 4
 			popfd
 			popad
 		}
@@ -194,6 +188,7 @@ extern "C"
 	{
 		__asm
 		{
+			add esp, 4
 			frstor [esp+0x24]
 			popad                   // 10 restore registers                  
 			popfd                   // 9 restore flags

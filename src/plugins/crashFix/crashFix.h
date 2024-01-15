@@ -4,7 +4,7 @@
 #include "nofix/x86Hook.h"
 
 class CrashFixPlugin : public SimConsolePlugin {
-	static void __x86Hook hook_SimWinConsolePlugin_endFrame_fixCrash(CpuState &cs);
+	static void hook_SimWinConsolePlugin_endFrame_fixCrash(CpuState &cs);
 
 	struct {
 		struct {

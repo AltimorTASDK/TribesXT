@@ -26,7 +26,7 @@ public:
 	}
 
 private:
-	static void __x86Hook hook_Bullet_TracerRenderImage_render_orientation(CpuState &cs);
+	static void hook_Bullet_TracerRenderImage_render_orientation(CpuState &cs);
 
 	static void __fastcall hook_Bullet_writeInitialPacket(
 		Bullet*, edx_t, Net::GhostManager *ghostManager, BitStream *stream);
@@ -37,7 +37,7 @@ private:
 	static void __fastcall hook_Bullet_onSimRenderQueryImage(
 		Bullet*, edx_t, SimRenderQueryImage *image);
 
-	static void __x86Hook hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs);
+	static void hook_Bullet_onSimRenderQueryImage_setWidth(CpuState &cs);
 
 	struct {
 		struct {
