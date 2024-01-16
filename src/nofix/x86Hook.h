@@ -73,7 +73,7 @@ public:
 		NOINSTRUCITON = 0x4
 	};
 
-	x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = NOFLAGS, bool bEnable = true) :
+	x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, x86HookOpt opt = NOFLAGS, uint32_t ret = 0, bool bEnable = true) :
 			_pAddress(pAddress),
 			_pFunction(pFunction),
 			_nInstruction(nInstructions),
@@ -89,7 +89,7 @@ public:
 			Initialize(true);
 	}
 
-	x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, uint32_t ret = 0, x86HookOpt opt = NOFLAGS, bool bEnable = true) :
+	x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, x86HookOpt opt = NOFLAGS, uint32_t ret = 0, bool bEnable = true) :
 			x86Hook(pFunction, (void*)pAddress, nInstructions, ret, opt, bEnable)
 	{   
 	}
