@@ -183,6 +183,9 @@
     <ClInclude Include="src\plugins\wineFix\wineFix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\darkstar\SimObjects\simWinConsolePlugin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

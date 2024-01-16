@@ -20,6 +20,11 @@ public:
 	virtual const char *consoleCallback(CMDConsole*, int id, int argc, const char *argv[]) = 0;
 };
 
+class CMDConsumer {
+public:
+	virtual void consoleCallback(CMDConsole*, const char *consoleLine) = 0;
+};
+
 class CMDConsole : public CMDCallback {
 public:
 	enum Type {

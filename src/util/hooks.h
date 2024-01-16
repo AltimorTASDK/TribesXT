@@ -124,6 +124,10 @@ JmpHook(auto, ReturnType(__cdecl *hook)(ArgTypes...))
 	-> JmpHook<decltype(hook), decltype(hook), ArgTypes...>;
 
 template<typename ReturnType, typename ...ArgTypes>
+JmpHook(auto, ReturnType(__cdecl *hook)(ArgTypes..., ...))
+	-> JmpHook<decltype(hook), decltype(hook), ArgTypes...>;
+
+template<typename ReturnType, typename ...ArgTypes>
 JmpHook(auto, ReturnType(__stdcall *hook)(ArgTypes...))
 	-> JmpHook<decltype(hook), decltype(hook), ArgTypes...>;
 

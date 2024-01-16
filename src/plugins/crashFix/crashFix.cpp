@@ -1,5 +1,9 @@
+#include "darkstar/SimObjects/simWinConsolePlugin.h"
 #include "plugins/crashFix/crashFix.h"
-#include <cstring>
+#include <algorithm>
+#include <cstdarg>
+
+static char scratchBuffer[1024];
 
 void CrashFixPlugin::hook_SimWinConsolePlugin_endFrame_fixCrash(CpuState &cs)
 {
@@ -8,10 +12,25 @@ void CrashFixPlugin::hook_SimWinConsolePlugin_endFrame_fixCrash(CpuState &cs)
 		cs.eflag.cf = 1;
 }
 
+void CrashFixPlugin::hook_SimWinConsolePlugin_printf(SimWinConsolePlugin *console, const char *s, ...)
+{
+	// Fix buffer overflow
+	va_list args;
+	va_start(args, s);
+	const auto length = vsnprintf(scratchBuffer, sizeof(scratchBuffer), s, args);
+
+	if (length < 0)
+		return;
+
+	const auto written = std::min((size_t)length, sizeof(scratchBuffer) - 1);
+
+	DWORD bytes;
+	WriteFile(console->stdOut, scratchBuffer, written, &bytes, nullptr);
+	FlushFileBuffers(console->stdOut);
+}
+
 static const char *concatArguments(int startIndex, int argc, const char **argv)
 {
-	static char scratchBuffer[1024];
-
 	auto argIndex = startIndex;
 	size_t charIndex = 0;
 	size_t totalIndex = 0;
