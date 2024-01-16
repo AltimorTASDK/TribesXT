@@ -180,6 +180,9 @@
     <ClInclude Include="src\plugins\crashFix\crashFix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\plugins\wineFix\wineFix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">
@@ -219,6 +222,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\plugins\crashFix\crashFix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\wineFix\wineFix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

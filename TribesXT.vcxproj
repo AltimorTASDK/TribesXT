@@ -57,7 +57,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
@@ -128,6 +128,7 @@
     <ClInclude Include="src\plugins\scriptXT\scriptXT.h" />
     <ClInclude Include="src\plugins\skiBugFix\skiBugFix.h" />
     <ClInclude Include="src\plugins\tracerXT\tracerXT.h" />
+    <ClInclude Include="src\plugins\wineFix\wineFix.h" />
     <ClInclude Include="src\tribes\bullet.h" />
     <ClInclude Include="src\tribes\constants.h" />
     <ClInclude Include="src\darkstar\Core\encryptedPointer.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\plugins\netXT\playerXT.cpp" />
     <ClCompile Include="src\plugins\scriptXT\scriptXT.cpp" />
     <ClCompile Include="src\plugins\tracerXT\tracerXT.cpp" />
+    <ClCompile Include="src\plugins\wineFix\wineFix.cpp" />
     <ClCompile Include="src\util\hooks.cpp" />
     <ClCompile Include="src\nofix\x86.cpp" />
     <ClCompile Include="src\nofix\x86Hook.cpp" />
