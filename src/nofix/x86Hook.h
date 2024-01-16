@@ -90,7 +90,7 @@ public:
 	}
 
 	x86Hook(void *pFunction, uint32_t pAddress, int nInstructions = 0, x86HookOpt opt = NOFLAGS, uint32_t ret = 0, bool bEnable = true) :
-			x86Hook(pFunction, (void*)pAddress, nInstructions, ret, opt, bEnable)
+			x86Hook(pFunction, (void*)pAddress, nInstructions, opt, ret, bEnable)
 	{   
 	}
 
