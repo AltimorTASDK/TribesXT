@@ -44,6 +44,12 @@ public:
 		((func_t)0x403A10)(this, color, format, std::forward<decltype(args)>(args)...);
 	}
 
+	void dbprintf(int level, const char *format, auto &&...args)
+	{
+		using func_t = void(*)(CMDConsole*, int, const char*, ...);
+		((func_t)0x403A40)(this, level, format, std::forward<decltype(args)>(args)...);
+	}
+
 	void addVariable(int id, const char *name, Callback cb, const char *value = nullptr)
 	{
 		using func_t = void(__thiscall*)(CMDConsole*, int, const char*,
