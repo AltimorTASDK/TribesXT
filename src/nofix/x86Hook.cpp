@@ -73,7 +73,7 @@ bool x86Hook::BuildCallStub(void)
 		return false;
 
 	// if this isn't a post hook, 
-	if(!(_opt & BEFORE) && !(_opt & NOINSTRUCITON))
+	if(!(_opt & BEFORE) && !(_opt & NOINSTRUCTION))
 		pStub += x86Copy(pStub, _pAddress, _nInstruction);  
 
 	// attach header
@@ -89,7 +89,7 @@ bool x86Hook::BuildCallStub(void)
 	pStub += 5;
 
 	// attach instructions from hooked function
-	if((_opt & BEFORE) && !(_opt & NOINSTRUCITON))
+	if((_opt & BEFORE) && !(_opt & NOINSTRUCTION))
 		pStub += x86Copy(pStub, _pAddress, _nInstruction);
 
 	// attach jmp instruction for return back home

@@ -70,7 +70,7 @@ public:
 		NOFLAGS = 0,
 		BEFORE = 0x1,
 		PRESERVEFPU = 0x2,
-		NOINSTRUCITON = 0x4
+		NOINSTRUCTION = 0x4
 	};
 
 	x86Hook(void *pFunction, void *pAddress, int nInstructions = 0, x86HookOpt opt = NOFLAGS, uint32_t ret = 0, bool bEnable = true) :
