@@ -247,10 +247,12 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 
 void PlayerXT::updateWeapon(const PlayerMove &move)
 {
-	if (lastPlayerMove.trigger && !move.trigger)
+	if (xt.lastTrigger && !move.trigger)
 		setImageTriggerUp(0);
-	else if (!lastPlayerMove.trigger && move.trigger)
+	else if (!xt.lastTrigger && move.trigger)
 		setImageTriggerDown(0);
+
+	xt.lastTrigger = move.trigger;
 
 	for (auto i = 0; i < MaxItemImages; i++)
 		updateImageState(i, 0.032f);

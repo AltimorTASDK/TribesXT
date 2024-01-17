@@ -76,6 +76,9 @@ public:
 		// Server only
 		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
 		uint32_t currentLagCompensation = -1;
+
+		// Server + client
+		bool lastTrigger = false;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
