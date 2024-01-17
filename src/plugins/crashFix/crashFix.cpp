@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstdarg>
 
-static char scratchBuffer[1024];
+static char scratchBuffer[2048];
 
 void CrashFixPlugin::hook_SimWinConsolePlugin_endFrame_fixCrash(CpuState &cs)
 {
