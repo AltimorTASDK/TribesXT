@@ -18,6 +18,7 @@ void CrashFixPlugin::hook_SimWinConsolePlugin_printf(SimWinConsolePlugin *consol
 	va_list args;
 	va_start(args, s);
 	const auto length = vsnprintf(scratchBuffer, sizeof(scratchBuffer), s, args);
+	va_end(args);
 
 	if (length < 0)
 		return;
