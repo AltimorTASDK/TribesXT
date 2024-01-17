@@ -75,7 +75,7 @@ public:
 
 		// Server only
 		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
-		uint32_t currentLagCompensation;
+		uint32_t currentLagCompensation = -1;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
