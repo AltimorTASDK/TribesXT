@@ -16,8 +16,7 @@ public:
 	};
 };
 
-struct Net::GhostInfo
-{
+struct Net::GhostInfo {
 	enum Flags {
 		Valid                 = BIT(0),
 		InScope               = BIT(1),
