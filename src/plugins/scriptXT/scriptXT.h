@@ -13,14 +13,15 @@ namespace cvars::xt {
 inline float speed;
 inline float health;
 inline float energy;
-};
+inline int ping;
+}
 
 namespace cvars::pref {
 // Damage flash opacity multiplier
 inline float damageFlash = 0.35f;
 // Center third person camera above head like 1.40
 inline bool newThirdPerson = false;
-};
+}
 
 class ScriptXTPlugin : public SimConsolePlugin {
 	static inline ScriptXTPlugin *instance;
