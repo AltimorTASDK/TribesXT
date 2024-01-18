@@ -9,7 +9,6 @@
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/playerPSCXT.h"
 #include "util/math.h"
-#include "util/tribes/console.h"
 #include <cmath>
 
 void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
