@@ -3,6 +3,7 @@
 #include "util/struct.h"
 
 class DataBlockManager;
+class PacketStream;
 class Player;
 class PlayerPSC;
 class SimManager;
@@ -16,6 +17,7 @@ public:
 	FIELD(0x10, DataBlockManager*, dbm);
 	FIELD(0x14, SimManager*, manager);
 	FIELD(0x1C, PlayerPSC*, psc);
+	FIELD(0x24, PacketStream*, packetStream);
 	FIELD(0x30, Player*, player);
 };
 
