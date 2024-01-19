@@ -20,7 +20,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 	if (reason != DLL_PROCESS_ATTACH)
 		return FALSE;
 
-	Console->printf(CON_GREEN, buildString);
+	Console->printf(CON_PINK, buildString);
 
 	REGISTER_PLUGIN(CrashFixPlugin);
 	REGISTER_PLUGIN(NetXTPlugin);
