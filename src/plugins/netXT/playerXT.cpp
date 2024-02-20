@@ -102,13 +102,10 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 	jetting = snapshot.jetting;
 	traction = snapshot.traction;
 
-	const auto oldCrouch = crouching;
-	crouching = snapshot.crouching;
-
-	if (crouching && !oldCrouch)
-		setAnimation(ANIM_CROUCH);
-	else if (oldCrouch && !crouching)
-		setAnimation(ANIM_STAND);
+	if (crouching != snapshot.crouching) {
+		crouching = snapshot.crouching;
+		setAnimation(crouching ? ANIM_CROUCH : ANIM_STAND);
+	}
 
 	lastContactCount = snapshot.lastContactCount;
 	jumpSurfaceLastContact = snapshot.jumpSurfaceLastContact;
