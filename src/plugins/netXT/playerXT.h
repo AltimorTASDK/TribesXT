@@ -103,7 +103,10 @@ public:
 		xt.snapshots[index] = createSnapshot(time);
 	}
 
-	void loadSnapshot(const Snapshot &snapshot, bool useMouse = false);
+	// Instantly apply mouse input to rotation
+	void applyAccumulatedAim();
+
+	void loadSnapshot(const Snapshot &snapshot);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
 

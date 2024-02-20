@@ -71,24 +71,22 @@ auto PlayerXT::SnapshotBuffer::getPrev(uint32_t time) const -> const Snapshot*
 	return nullptr;
 }
 
-// Corresponds to Player::readPacketData
-void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
+void PlayerXT::applyAccumulatedAim()
 {
-	auto pitch = snapshot.pitch;
-	auto yaw = snapshot.yaw;
-
-	if (useMouse && hasFocus && cg.psc != nullptr) {
-		// Use accumulated mouse input for local player
-		if (const auto *newSnap = xt.snapshots.get(lastProcessTime); newSnap != nullptr) {
-			const auto &curMove = cg.psc->curMove;
-			pitch = clamp(newSnap->pitch + curMove.pitch, -MaxPitch, MaxPitch);
-			yaw = normalize_radians(newSnap->yaw + curMove.turnRot);
-		}
+	// Use accumulated mouse input for local player
+	if (const auto *snap = xt.snapshots.get(lastProcessTime); snap != nullptr) {
+		const auto pitch = snap->pitch + cg.psc->curMove.pitch;
+		const auto yaw = snap->yaw + cg.psc->curMove.turnRot;
+		setViewAnglesClamped(pitch, yaw);
 	}
+}
 
+// Corresponds to Player::readPacketData
+void PlayerXT::loadSnapshot(const Snapshot &snapshot)
+{
 	setLinearVelocity(snapshot.velocity);
 	setSensorPinged(snapshot.pingStatus);
-	setRot({getRot().x, getRot().y, yaw});
+	setRot({getRot().x, getRot().y, snapshot.yaw});
 	setPos(snapshot.position);
 
 	if (mount != nullptr) {
@@ -96,7 +94,7 @@ void PlayerXT::loadSnapshot(const Snapshot &snapshot, bool useMouse)
 		setTransform(TMat3F(EulerF(getRot()), {0, 0, 0}) * mountTransform);
 	}
 
-	viewPitch = pitch;
+	viewPitch = snapshot.pitch;
 	energy = snapshot.energy;
 	contact = snapshot.contact;
 	jetting = snapshot.jetting;
@@ -128,7 +126,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return false;
 
 	if (a->time == time) {
-		loadSnapshot(*a, true);
+		loadSnapshot(*a);
 		return true;
 	}
 
@@ -137,7 +135,7 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 		return false;
 
 	const auto fraction = (float)(time - a->time) / (b->time - a->time);
-	loadSnapshot(Snapshot::interpolate(*a, *b, fraction), true);
+	loadSnapshot(Snapshot::interpolate(*a, *b, fraction));
 	return true;
 }
 
@@ -374,6 +372,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 	}
 
 	loadSnapshotInterpolated(curTime);
+	applyAccumulatedAim();
 }
 
 void PlayerXT::ghostSetMove(
