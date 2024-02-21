@@ -78,6 +78,7 @@ public:
 		uint32_t currentLagCompensation = -1;
 
 		// Server + client
+		uint32_t lastWeaponProcessTime = 0;
 		bool lastTrigger = false;
 	};
 
@@ -134,7 +135,7 @@ public:
 	void setViewAngles(float pitch, float yaw);
 	void setViewAnglesClamped(float pitch, float yaw);
 	
-	void updateWeapon(const PlayerMove &move, bool trigger = true);
+	void updateWeapon(const PlayerMove &move);
 	void serverUpdateMove(const PlayerMove *moves, int moveCount);
 	void clientMove(uint32_t curTime);
 

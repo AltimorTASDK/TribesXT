@@ -240,16 +240,19 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 	setViewAngles(clamp(pitch, -MaxPitch, MaxPitch), normalize_radians(yaw));
 }
 
-void PlayerXT::updateWeapon(const PlayerMove &move, bool trigger)
+void PlayerXT::updateWeapon(const PlayerMove &move)
 {
-	if (trigger) {
-		if (xt.lastTrigger && !move.trigger)
-			setImageTriggerUp(0);
-		else if (!xt.lastTrigger && move.trigger)
-			setImageTriggerDown(0);
+	if (lastProcessTime <= xt.lastWeaponProcessTime)
+		return;
 
-		xt.lastTrigger = move.trigger;
-	}
+	xt.lastWeaponProcessTime = lastProcessTime;
+
+	if (xt.lastTrigger && !move.trigger)
+		setImageTriggerUp(0);
+	else if (!xt.lastTrigger && move.trigger)
+		setImageTriggerDown(0);
+
+	xt.lastTrigger = move.trigger;
 
 	for (auto i = 0; i < MaxItemImages; i++)
 		updateImageState(i, 0.032f);
@@ -404,7 +407,6 @@ void PlayerXT::ghostSetMove(
 
 	// State sent by server is from before the move, so simulate once
 	updateMove(move, false);
-	updateWeapon(*move, false);
 	lastPlayerMove = *move;
 }
 
