@@ -49,8 +49,9 @@ void ScriptXTPlugin::hook_Player_getEyeTransform_140Check(CpuState &cs)
 
 void ScriptXTPlugin::hook_PlayerPSC_writePacket_checkThirdPerson(CpuState &cs)
 {
-	if (!cvars::pref::newThirdPerson)
-		cs.eflag.pf = true;
+	// Make the third person flag sent to the server accurately reflect getCameraTransform
+	const auto *psc = (PlayerPSC*)cs.reg.ebp;
+	cs.eflag.pf = !cvars::pref::newThirdPerson || psc->camDist < 0.01f;
 }
 
 bool ScriptXTPlugin::hook_PlayerPSC_processQuery(PlayerPSC *psc, edx_t, SimQuery *query)

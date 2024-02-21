@@ -17,6 +17,7 @@ public:
 	FIELD(0xA1, bool, isServer);
 	FIELD(0xA4, int, triggerCount);
 	FIELD(0xA8, int, prevTriggerCount);
+	FIELD(0xAC, float, camDist);
 	FIELD(0xB4, GameBase*, controlObject);
 	FIELD(0xB8, Player*, controlPlayer);
 	FIELD(0x3E0, int, firstMoveSeq);
