@@ -38,6 +38,15 @@ void ScriptXTPlugin::hook_Player_getCameraTransform_140Check(CpuState &cs)
 	cs.eflag.zf = cs.eflag.cf;
 }
 
+void ScriptXTPlugin::hook_Player_getEyeTransform_140Check(CpuState &cs)
+{
+	// Keep the protocol check here since this affects projectile aim
+	if (!cs.eflag.cf && !cs.eflag.zf) {
+		cs.eflag.cf = !cvars::pref::newThirdPerson;
+		cs.eflag.zf = cs.eflag.cf;
+	}
+}
+
 void ScriptXTPlugin::hook_PlayerPSC_writePacket_checkThirdPerson(CpuState &cs)
 {
 	if (!cvars::pref::newThirdPerson)

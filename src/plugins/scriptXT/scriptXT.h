@@ -38,6 +38,7 @@ private:
 	static void hook_TextFormat_formatControlString_imageWidth(CpuState &cs);
 
 	static void hook_Player_getCameraTransform_140Check(CpuState &cs);
+	static void hook_Player_getEyeTransform_140Check(CpuState &cs);
 
 	static void hook_PlayerPSC_writePacket_checkThirdPerson(CpuState &cs);
 
@@ -65,6 +66,7 @@ private:
 		struct {
 			// Allow swapping between old and 1.40 third person
 			x86Hook getCameraTransform_140Check = {hook_Player_getCameraTransform_140Check, 0x4ACBD3, 1};
+			x86Hook getEyeTransform_140Check = {hook_Player_getEyeTransform_140Check, 0x4ACE3A, 1};
 		} Player;
 		struct {
 			// Allow swapping between old and 1.40 third person
