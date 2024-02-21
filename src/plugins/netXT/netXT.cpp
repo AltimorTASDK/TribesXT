@@ -137,6 +137,19 @@ void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int i
 		player->clientFireImageProjectile(imageSlot);
 }
 
+void NetXTPlugin::hook_ItemImageData_pack(Player::ItemImageData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.Player.ItemImageData.pack.callOriginal(data, stream);
+	stream->write(data->accuFire);
+}
+
+void NetXTPlugin::hook_ItemImageData_unpack(Player::ItemImageData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.Player.ItemImageData.unpack.callOriginal(data, stream);
+	if (serverNetcodeVersion >= Netcode::XT::ItemImageDataSendAccuFire)
+		stream->read(&data->accuFire);
+}
+
 PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {
 	// Initialize new fields

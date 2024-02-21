@@ -68,6 +68,9 @@ private:
 
 	static void __fastcall hook_Player_fireImageProjectile(PlayerXT*, edx_t, int imageSlot);
 
+	static void __fastcall hook_ItemImageData_pack(Player::ItemImageData*, edx_t, BitStream *stream);
+	static void __fastcall hook_ItemImageData_unpack(Player::ItemImageData*, edx_t, BitStream *stream);
+
 	static PlayerPSCXT *__fastcall hook_PlayerPSC_ctor(PlayerPSCXT*, edx_t, bool in_isServer);
 
 	static bool __fastcall hook_PlayerPSC_writePacket(
@@ -160,6 +163,11 @@ private:
 			StaticCodePatch<0x4B4049, "\x90\x90\x90"> ignoreServerFire1;
 			StaticCodePatch<0x4B409E, "\x90\x90\x90"> ignoreServerFire2;
 			StaticCodePatch<0x4B40A5, "\x90\x90\x90\x90\x90"> ignoreServerFire3;
+			struct {
+				// Send accuFire
+				StaticJmpHook<0x4B0B20, hook_ItemImageData_pack> pack;
+				StaticJmpHook<0x4B0D60, hook_ItemImageData_unpack> unpack;
+			} ItemImageData;
 		} Player;
 		struct {
 			// Use PlayerPSCXT
