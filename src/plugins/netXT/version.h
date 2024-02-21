@@ -13,4 +13,5 @@ constexpr auto TracerInheritance = v100;
 constexpr auto ClockSync = v100;
 constexpr auto LagCompensation = v100;
 constexpr auto PrefDamageFlash = v100;
+constexpr auto ProjectileDataSendInheritance = v100;
 }

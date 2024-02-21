@@ -9,6 +9,7 @@
 #include "plugins/netXT/netXT.h"
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/playerPSCXT.h"
+#include "plugins/netXT/version.h"
 #include "util/math.h"
 #include <cmath>
 
@@ -276,7 +277,8 @@ void NetXTPlugin::hook_ProjectileData_pack(Projectile::ProjectileData *data, edx
 void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
 {
 	get()->hooks.Projectile.ProjectileData.unpack.callOriginal(data, stream);
-	stream->read(&data->inheritedVelocityScale);
+	if (serverNetcodeVersion >= Netcode::XT::ProjectileDataSendInheritance)
+		stream->read(&data->inheritedVelocityScale);
 }
 
 void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t in_currTime)
