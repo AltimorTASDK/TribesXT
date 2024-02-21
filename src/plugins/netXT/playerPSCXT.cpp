@@ -50,15 +50,13 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 	const auto subtick = (uint8_t)(startTime % TickMs);
 
 	// Preserve the subtick offset if the player holds the trigger across ticks
-	if (xt.pendingSubtickRecord.subtick == NoSubtick) {
-		if (xt.heldTriggerSubtick != NoSubtick) {
-			if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {
-				xt.pendingSubtickRecord = {
-					.subtick = xt.heldTriggerSubtick,
-					.pitch = curMove.pitch,
-					.yaw = curMove.turnRot
-				};
-			}
+	if (xt.pendingSubtickRecord.subtick == NoSubtick && xt.heldTriggerSubtick != NoSubtick) {
+		if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {
+			xt.pendingSubtickRecord = {
+				.subtick = xt.heldTriggerSubtick,
+				.pitch = curMove.pitch,
+				.yaw = curMove.turnRot
+			};
 		}
 	}
 
