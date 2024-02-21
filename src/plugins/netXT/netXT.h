@@ -222,10 +222,22 @@ private:
 		struct {
 			// Lag compensation
 			StaticJmpHook<0x4BF950, hook_Bullet_serverProcess> serverProcess;
+			// Remove unused pft/interp code
+			// jmp 0x4BFFF7
+			StaticCodePatch<0x4BFF94, "\xEB\x61"> onAdd_interp;
+			// jmp 0x4BEC4D
+			StaticCodePatch<0x4BEBA0, "\xE9\xA8\x00\x00\x00"> clientProcess_interp;
 		} Bullet;
 		struct {
 			// Lag compensation
 			StaticJmpHook<0x4CAB90, hook_RocketDumb_serverProcess> serverProcess;
+			// Remove unused pft/interp code
+			// jmp 0x4CBEF9
+			StaticCodePatch<0x4CBE96, "\xEB\x61"> onAdd_interp;
+			// jmp 0x4CB281
+			StaticCodePatch<0x4CB21E, "\xEB\x61"> unpackUpdate_interp;
+			// jmp 0x4CB7F8
+			StaticCodePatch<0x4CB470, "\xE9\x83\x03\x00\x00"> clientProcess_interp;
 		} RocketDumb;
 		struct {
 			// Lag compensation
