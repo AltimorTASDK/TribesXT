@@ -205,10 +205,8 @@ bool NetXTPlugin::hook_PlayerPSC_writePacket(
 void NetXTPlugin::hook_PlayerPSC_readPacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t currentTime)
 {
-	if (!psc->isServer) {
+	if (!psc->isServer)
 		psc->readClockSync(bstream);
-	} else if (psc->controlPlayer != nullptr) {
-	}
 
 	get()->hooks.PlayerPSC.readPacket.callOriginal(psc, bstream, currentTime);
 }
