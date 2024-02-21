@@ -55,10 +55,10 @@ public:
 	FIELD(0x350, Point3F, m_shooterVel);
 	FIELD(0x35C, Point3F, m_instTerminalVelocity);
 
-	// Reuse these fields on the server since Projectile is a base class
-	// and can't be easily extended
+	// Reuse these fields since Projectile is a base class and can't be easily extended
 	FIELD(0x2FC, uint32_t, subtickOffsetXT);
 	FIELD(0x300, uint32_t, lagCompensationOffsetXT);
+	FIELD(0x304, uint32_t, weaponUpdateCountXT);
 
 	void initProjectile(
 		const TMat3F &in_rTrans, const Point3F &in_rShooterVel, SimObjectId in_shooterId)

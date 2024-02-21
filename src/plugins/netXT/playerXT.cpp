@@ -246,6 +246,7 @@ void PlayerXT::updateWeapon(const PlayerMove &move)
 		return;
 
 	xt.lastWeaponProcessTime = lastProcessTime;
+	xt.weaponUpdateCount++;
 
 	if (xt.lastTrigger && !move.trigger)
 		setImageTriggerUp(0);
@@ -264,8 +265,11 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		return;
 
 	for (auto index = 0; index < moveCount; index++) {
-		if (updateDebt > 5)
-			break;
+		if (updateDebt > 5) {
+			// Keep weapon update count synced when moves are rejected
+			xt.weaponUpdateCount++;
+			continue;
+		}
 
 		updateDebt++;
 
@@ -442,6 +446,14 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 	projectile->initProjectile(muzzleTransform, getLinearVelocity(), getId());
 	projectile->netFlags.set(IsGhost);
 	projectile->subtickOffsetXT = xt.currentSubtick;
+	projectile->weaponUpdateCountXT = xt.weaponUpdateCount;
+
 	manager->addObject(projectile);
+	projectile->addToSet(ClientProjectileSetId);
+
+	Console->printf("added to set");
+	if (const auto *clientProjectileSet = (SimSet*)cg.manager->findObject(ClientProjectileSetId); clientProjectileSet != nullptr)
+		Console->printf("count %d", clientProjectileSet->objectList.size());
+
 	addPredictedProjectile(projectile, imageData.projectile.type);
 }

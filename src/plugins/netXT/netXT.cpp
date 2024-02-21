@@ -14,26 +14,80 @@
 #include "util/math.h"
 #include <cmath>
 
-static bool isOwnedProjectile(const Net::GhostManager *ghostManager, const Net::GhostInfo *info)
-{
-	if (!isProjectileTag(info->obj->getGhostTag()))
-		return false;
-
-	if (ghostManager->scopeObject == nullptr)
-		return false;
-
-	const auto *projectile = (Projectile*)info->obj;
-	return projectile->m_pShooter == ghostManager->scopeObject;
-}
-
 void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 {
 	const auto *ghostManager = (Net::GhostManager*)cs.reg.ebp;
 	const auto *info = (Net::GhostInfo*)cs.reg.esi;
 	auto *stream = *(BitStream**)(cs.reg.esp + 0x30);
 
-	if (!stream->writeFlag(isOwnedProjectile(ghostManager, info)))
+	if (!isProjectileTag(info->obj->getGhostTag()))
 		return;
+
+	const auto *projectile = (Projectile*)info->obj;
+	const auto *scopeObject = ghostManager->scopeObject;
+	const auto *shooter = projectile->m_pShooter;
+
+	Console->printf(CON_YELLOW, "scope 0x%08X shooter 0x%08X", scopeObject, shooter);
+	if (stream->writeFlag(scopeObject != nullptr && shooter == scopeObject))
+		stream->writeInt(projectile->weaponUpdateCountXT, 32);
+}
+
+Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag)
+{
+	if (serverNetcodeVersion >= Netcode::XT::ClientPredictedProjectiles) {
+		if (isProjectileTag(tag) && stream->readFlag()) {
+			const auto weaponUpdateCount = stream->readInt(32);
+
+			const auto *clientProjectileSet =
+				(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+
+			if (clientProjectileSet != nullptr) {
+				Console->printf("count %d (ghost read)", clientProjectileSet->objectList.size());
+				for (const auto object : clientProjectileSet->objectList) {
+					auto *projectile = (Projectile*)object.get();
+					Console->printf(CON_PINK, "%d vs %d", projectile->weaponUpdateCountXT, weaponUpdateCount);
+					if (projectile->weaponUpdateCountXT == weaponUpdateCount)
+						return projectile;
+				}
+			}
+		}
+	}
+
+	return Persistent::create(tag);
+}
+
+__declspec(naked) Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost_asm()
+{
+	__asm
+	{
+		push eax
+		push esi
+		call hook_GhostManager_readPacket_newGhost
+		add esp, 8
+		mov ecx, 0x519554
+		jmp ecx
+	}
+}
+
+void NetXTPlugin::hook_SimManager_registerObject(SimManager *manager, edx_t, SimObject *obj)
+{
+	// Don't re-add predicted projectiles when they get ghosted
+	if (obj->isProperlyAdded()) {
+		const auto *clientProjectileSet =
+			(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+
+		if (clientProjectileSet != nullptr) {
+			Console->printf("count %d (registerObject check)", clientProjectileSet->objectList.size());
+			for (const auto object : clientProjectileSet->objectList) {
+				if (object.get() == obj) {
+					obj->removeFromSet(clientProjectileSet->getId());
+					return;
+				}
+			}
+		}
+	}
+
+	get()->hooks.SimManager.registerObject.callOriginal(manager, obj);
 }
 
 void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
@@ -93,7 +147,8 @@ void NetXTPlugin::hook_Player_serverProcess_emptyMove(CpuState &cs)
 	auto *player = (PlayerXT*)cs.reg.ebp;
 	const auto &emptyMove = *(PlayerMove*)(cs.reg.esp + 0x14);
 	// Update weapon after move
-	player->updateWeapon(emptyMove);
+	for (auto i = 0; i < Player::MaxItemImages; i++)
+		player->updateImageState(i, 0.032f);
 }
 
  void NetXTPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)
@@ -141,6 +196,8 @@ void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
 		const auto offset = sg.currentTime - player->xt.currentLagCompensation;
 		projectile->lagCompensationOffsetXT = offset;
 	}
+
+	projectile->weaponUpdateCountXT = player->xt.weaponUpdateCount;
 }
 
 void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
@@ -301,6 +358,7 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	get()->hooks.Projectile.ctor.callOriginal(projectile, in_datFileId);
 	projectile->subtickOffsetXT = -1;
 	projectile->lagCompensationOffsetXT = -1;
+	projectile->weaponUpdateCountXT = 0;
 	return projectile;
 }
 
@@ -356,6 +414,7 @@ void NetXTPlugin::hook_Grenade_serverProcess(Grenade *projectile, edx_t, uint32_
 void NetXTPlugin::setUpWorld(SimManager *manager)
 {
 	manager->addObject(new SimSet(false), LagCompensatedSetId);
+	manager->addObject(new SimSet(false), ClientProjectileSetId);
 }
 
 void NetXTPlugin::init()

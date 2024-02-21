@@ -2,6 +2,7 @@
 
 #include "darkstar/Core/bitset.h"
 #include "darkstar/Core/encryptedPointer.h"
+#include "darkstar/Core/persist.h"
 #include "darkstar/Core/tVector.h"
 #include "darkstar/Sim/simEvDcl.h"
 #include "util/struct.h"
@@ -14,7 +15,7 @@ struct SimQuery {
 	int type;
 };
 
-class SimObject {
+class SimObject : public Persistent::VersionedBase {
 	friend class SimGroup;
 
 	enum Flag {
@@ -45,6 +46,23 @@ public:
 		return ((func_t)0x51C710)(this, name);
 	}
 
+	bool removeFromSet(uint32_t setId)
+	{
+		using func_t = bool(__thiscall*)(SimObject*, uint32_t);
+		return ((func_t)0x51C760)(this, setId);
+	}
+
+	bool removeFromSet(const char *name)
+	{
+		using func_t = bool(__thiscall*)(SimObject*, const char*);
+		return ((func_t)0x51C7B0)(this, name);
+	}
+
+	bool isProperlyAdded() const
+	{
+		return flags.test(Added);
+	}
+
 	bool isDeleted() const
 	{
 		return flags.test(Deleted);
@@ -58,6 +76,11 @@ public:
 	SimObjectId getId() const
 	{
 		return id;
+	}
+
+	SimManager *getManager() const
+	{
+		return manager;
 	}
 };
 

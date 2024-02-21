@@ -16,6 +16,7 @@ class RocketDumb;
 class SimManager;
 
 constexpr char LagCompensatedSetId[] = "LagCompensatedSet";
+constexpr char ClientProjectileSetId[] = "ClientProjectileSet";
 
 namespace cvars::net {
 // Offset for inserting server snapshots into the client interpolation buffer
@@ -37,6 +38,10 @@ public:
 
 private:
 	static void hook_GhostManager_writePacket_newGhost(CpuState &cs);
+	static Persistent::Base *hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag);
+	static Persistent::Base *hook_GhostManager_readPacket_newGhost_asm();
+
+	static void __fastcall hook_SimManager_registerObject(SimManager*, edx_t, SimObject *obj);
 
 	static void hook_FearGame_consoleCallback_newGame(CpuState &cs);
 
@@ -110,8 +115,13 @@ private:
 			struct {
 				// Handle networking projectiles to their owner
 				x86Hook writePacket_newGhost = {hook_GhostManager_writePacket_newGhost, 0x519262, 1};
+				StaticJmpHook<0x51954F, hook_GhostManager_readPacket_newGhost_asm> readPacket_newGhost;
 			} GhostManager;
 		} Net;
+		struct {
+			// Handle trying to double register client predicted projectiles
+			StaticJmpHook<0x51E120, hook_SimManager_registerObject> registerObject;
+		} SimManager;
 		struct {
 			// Fix client reading netcode version bytes backwards
 			StaticCodePatch<0x44341E, "\x54"> fixNetcodeVersionMajor;
