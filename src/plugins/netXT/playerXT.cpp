@@ -270,47 +270,41 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		const auto &subtickRecord = xt.subtickRecords[index];
 		const auto &lagCompensationRequest = xt.lagCompensationRequests[index];
 
-		float subtickPitch;
-		float subtickYaw;
-
-		// Clients shouldn't send more than MaxMovesXT moves, but are allowed to
-		if (index < MaxMovesXT) {
-			if (subtickRecord.subtick != NoSubtick) {
-				xt.currentSubtick = subtickRecord.subtick;
-				subtickPitch = viewPitch + subtickRecord.pitch;
-				subtickYaw = getRot().z + subtickRecord.yaw;
-			}
-
-			xt.currentLagCompensation = clamp(
-				lagCompensationRequest.time,
-				sg.currentTime - cvars::net::maxLagCompensation,
-				sg.currentTime);
-		}
+		xt.currentLagCompensation = clamp(
+			lagCompensationRequest.time,
+			sg.currentTime - cvars::net::maxLagCompensation,
+			sg.currentTime);
 
 		updateDamage(0.032f);
-		updateMove(&move, true);
+
+		if (subtickRecord.subtick != NoSubtick) {
+			const auto subtickTime = lastProcessTime + subtickRecord.subtick;
+			const auto subtickPitch = viewPitch + subtickRecord.pitch;
+			const auto subtickYaw = getRot().z + subtickRecord.yaw;
+			xt.currentSubtick = subtickRecord.subtick;
+
+			updateMove(&move, true);
+
+			// Update weapon with subtick state
+			loadSnapshotInterpolated(subtickTime);
+			setViewAnglesClamped(subtickPitch, subtickYaw);
+			updateWeapon(move);
+
+			// Restore
+			loadSnapshot(lastProcessTime);
+			xt.currentSubtick = NoSubtick;
+		} else {
+			updateMove(&move, true);
+			updateWeapon(move);
+		}
+
 		updateAnimation(0.032f);
 
+		// Beacons don't get subtick because they have to be synced with movement
 		if (move.useItem != -1) {
 			char buf[16];
 			sprintf_s(buf, "%d", move.useItem);
 			Console->executef(3, "remoteUseItem", scriptThis(), buf);
-		}
-
-		if (hasSubtick()) {
-			const auto tickStart = lastProcessTime - TickMs;
-			const auto subtickTime = tickStart + subtickRecord.subtick;
-			loadSnapshotInterpolated(subtickTime);
-			setViewAnglesClamped(subtickPitch, subtickYaw);
-		}
-
-		// Update weapon (with subtick state)
-		updateWeapon(move);
-
-		if (hasSubtick()) {
-			// Restore
-			loadSnapshot(lastProcessTime);
-			xt.currentSubtick = NoSubtick;
 		}
 
 		xt.currentLagCompensation = -1;
@@ -343,31 +337,26 @@ void PlayerXT::clientMove(uint32_t curTime)
 				break;
 
 			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
-			float subtickPitch;
-			float subtickYaw;
 
 			if (subtickRecord.subtick != NoSubtick) {
+				const auto subtickTime = lastProcessTime + subtickRecord.subtick;
+				const auto subtickPitch = viewPitch + subtickRecord.pitch;
+				const auto subtickYaw = getRot().z + subtickRecord.yaw;
 				xt.currentSubtick = subtickRecord.subtick;
-				subtickPitch = viewPitch + subtickRecord.pitch;
-				subtickYaw = getRot().z + subtickRecord.yaw;
-			}
 
-			updateMove(move, false);
+				updateMove(move, false);
 
-			if (hasSubtick()) {
-				const auto tickStart = lastProcessTime - TickMs;
-				const auto subtickTime = tickStart + subtickRecord.subtick;
+				// Update weapon with subtick state
 				loadSnapshotInterpolated(subtickTime);
 				setViewAnglesClamped(subtickPitch, subtickYaw);
-			}
+				updateWeapon(*move);
 
-			// Update weapon (with subtick state)
-			updateWeapon(*move);
-
-			if (hasSubtick()) {
 				// Restore
 				loadSnapshot(lastProcessTime);
 				xt.currentSubtick = NoSubtick;
+			} else {
+				updateMove(move, false);
+				updateWeapon(*move);
 			}
 
 			lastPlayerMove = *move;

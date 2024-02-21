@@ -1,4 +1,5 @@
 #include "darkstar/Core/bitstream.h"
+#include "darkstar/Sim/Net/ghostManager.h"
 #include "tribes/bullet.h"
 #include "tribes/grenade.h"
 #include "tribes/playerPSC.h"
@@ -171,6 +172,17 @@ void NetXTPlugin::hook_PlayerPSC_readPacket(
 		psc->readClockSync(bstream);
 
 	get()->hooks.PlayerPSC.readPacket.callOriginal(psc, bstream, currentTime);
+}
+
+void NetXTPlugin::hook_PlayerPSC_readPacket_checkReadMove(CpuState &cs)
+{
+	const auto *psc = (PlayerPSCXT*)cs.reg.ebx;
+
+	// Check if the client is trying to pack more moves than max
+	if (!cs.eflag.zf && psc->moves.size() >= PlayerPSC::MaxMoves) {
+		Net::setLastError("Too many moves.");
+		cs.eflag.zf = true;
+	}
 }
 
 void NetXTPlugin::hook_PlayerPSC_clientCollectInput(

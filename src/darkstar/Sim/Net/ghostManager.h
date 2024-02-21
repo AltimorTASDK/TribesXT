@@ -3,7 +3,9 @@
 #include "darkstar/Core/bitset.h"
 #include "darkstar/Sim/simNetObject.h"
 
-class Net::GhostManager {
+namespace Net {
+
+class GhostManager {
 public:
 	static constexpr auto MaxGhostCount = 1024u;
 
@@ -16,15 +18,15 @@ public:
 	};
 };
 
-struct Net::GhostInfo {
+struct GhostInfo {
 	enum Flags {
-		Valid                 = BIT(0),
-		InScope               = BIT(1),
-		ScopeAlways           = BIT(2),
-		NotYetGhosted         = BIT(3),
-		Ghosting              = BIT(4),
-		KillGhost             = BIT(5),
-		KillingGhost          = BIT(6),
+		Valid = BIT(0),
+		InScope = BIT(1),
+		ScopeAlways = BIT(2),
+		NotYetGhosted = BIT(3),
+		Ghosting = BIT(4),
+		KillGhost = BIT(5),
+		KillingGhost = BIT(6),
 		LastGhostAlwaysPacket = BIT(7),
 	};
 
@@ -38,3 +40,10 @@ struct Net::GhostInfo {
 	uint16_t ghostIndex;
 	uint16_t updateSkipCount;
 };
+
+void setLastError(const char *in_pErrorString)
+{
+	((decltype(setLastError)*)0x517EF0)(in_pErrorString);
+}
+
+} // namespace Net

@@ -76,6 +76,8 @@ private:
 	static void __fastcall hook_PlayerPSC_readPacket(
 		PlayerPSCXT*, edx_t, BitStream *bstream, uint32_t currentTime);
 
+	static void hook_PlayerPSC_readPacket_checkReadMove(CpuState &cs);
+
 	static void __fastcall hook_PlayerPSC_clientCollectInput(
 		PlayerPSCXT*, edx_t, uint32_t startTime, uint32_t endTime);
 
@@ -167,6 +169,8 @@ private:
 			StaticJmpHook<0x482E30, hook_PlayerPSC_writePacket> writePacket;
 			// Protocol extensions
 			StaticJmpHook<0x4854C0, hook_PlayerPSC_readPacket> readPacket;
+			// Limit the number of moves that can be sent in one packet
+			x86Hook readPacket_checkReadMove = {hook_PlayerPSC_readPacket_checkReadMove, 0x485621, 2};
 			// Collect subtick inputs and maintain client clock
 			StaticJmpHook<0x484E30, hook_PlayerPSC_clientCollectInput> clientCollectInput;
 			// Don't clamp IDACTION_PITCH
