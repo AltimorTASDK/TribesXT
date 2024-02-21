@@ -240,14 +240,16 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 	setViewAngles(clamp(pitch, -MaxPitch, MaxPitch), normalize_radians(yaw));
 }
 
-void PlayerXT::updateWeapon(const PlayerMove &move)
+void PlayerXT::updateWeapon(const PlayerMove &move, bool trigger)
 {
-	if (xt.lastTrigger && !move.trigger)
-		setImageTriggerUp(0);
-	else if (!xt.lastTrigger && move.trigger)
-		setImageTriggerDown(0);
+	if (trigger) {
+		if (xt.lastTrigger && !move.trigger)
+			setImageTriggerUp(0);
+		else if (!xt.lastTrigger && move.trigger)
+			setImageTriggerDown(0);
 
-	xt.lastTrigger = move.trigger;
+		xt.lastTrigger = move.trigger;
+	}
 
 	for (auto i = 0; i < MaxItemImages; i++)
 		updateImageState(i, 0.032f);
@@ -274,7 +276,6 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		// Clients shouldn't send more than MaxMovesXT moves, but are allowed to
 		if (index < MaxMovesXT) {
 			if (subtickRecord.subtick != NoSubtick) {
-				// Lets updateMove know not to update image states yet
 				xt.currentSubtick = subtickRecord.subtick;
 				subtickPitch = viewPitch + subtickRecord.pitch;
 				subtickYaw = getRot().z + subtickRecord.yaw;
@@ -301,10 +302,12 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 			const auto subtickTime = tickStart + subtickRecord.subtick;
 			loadSnapshotInterpolated(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
+		}
 
-			// Update weapon with subtick state
-			updateWeapon(move);
+		// Update weapon (with subtick state)
+		updateWeapon(move);
 
+		if (hasSubtick()) {
 			// Restore
 			loadSnapshot(lastProcessTime);
 			xt.currentSubtick = NoSubtick;
@@ -340,12 +343,10 @@ void PlayerXT::clientMove(uint32_t curTime)
 				break;
 
 			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
-
 			float subtickPitch;
 			float subtickYaw;
 
 			if (subtickRecord.subtick != NoSubtick) {
-				// Lets updateMove know not to update image states yet
 				xt.currentSubtick = subtickRecord.subtick;
 				subtickPitch = viewPitch + subtickRecord.pitch;
 				subtickYaw = getRot().z + subtickRecord.yaw;
@@ -358,10 +359,12 @@ void PlayerXT::clientMove(uint32_t curTime)
 				const auto subtickTime = tickStart + subtickRecord.subtick;
 				loadSnapshotInterpolated(subtickTime);
 				setViewAnglesClamped(subtickPitch, subtickYaw);
+			}
 
-				// Update weapon with subtick state
-				updateWeapon(*move);
+			// Update weapon (with subtick state)
+			updateWeapon(*move);
 
+			if (hasSubtick()) {
 				// Restore
 				loadSnapshot(lastProcessTime);
 				xt.currentSubtick = NoSubtick;
@@ -372,7 +375,9 @@ void PlayerXT::clientMove(uint32_t curTime)
 	}
 
 	loadSnapshotInterpolated(curTime);
-	applyAccumulatedAim();
+
+	if (hasFocus)
+		applyAccumulatedAim();
 }
 
 void PlayerXT::ghostSetMove(
@@ -410,6 +415,7 @@ void PlayerXT::ghostSetMove(
 
 	// State sent by server is from before the move, so simulate once
 	updateMove(move, false);
+	updateWeapon(*move, false);
 	lastPlayerMove = *move;
 }
 
@@ -444,6 +450,7 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 	auto *projectile = createProjectile(imageData.projectile);
 	projectile->initProjectile(muzzleTransform, getLinearVelocity(), getId());
 	projectile->netFlags.set(IsGhost);
+	projectile->subtickOffsetXT = xt.currentSubtick;
 	manager->addObject(projectile);
 	addPredictedProjectile(projectile, imageData.projectile.type);
 }

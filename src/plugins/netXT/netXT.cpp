@@ -59,12 +59,16 @@ void NetXTPlugin::hook_Player_ghostSetMove(
 void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *curMove, bool server)
 {
 	get()->hooks.Player.updateMove.callOriginal(player, curMove, server);
-
-	if (!player->hasSubtick())
-		player->updateWeapon(*curMove);
-
 	player->lastProcessTime += TickMs;
 	player->saveSnapshot(player->lastProcessTime);
+}
+
+void NetXTPlugin::hook_Player_serverProcess_emptyMove(CpuState &cs)
+{
+	auto *player = (PlayerXT*)cs.reg.ebp;
+	const auto &emptyMove = *(PlayerMove*)(cs.reg.esp + 0x14);
+	// Update weapon after move
+	player->updateWeapon(emptyMove);
 }
 
  void NetXTPlugin::hook_Player_clientProcess_move(PlayerXT *player, uint32_t curTime)
@@ -123,13 +127,13 @@ void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
 		anim = Player::ANIM_JUMPRUN;
 }
 
-/*void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int imageSlot)
+void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int imageSlot)
 {
 	get()->hooks.Player.fireImageProjectile.callOriginal(player, imageSlot);
 
 	if (player->isGhost())
 		player->clientFireImageProjectile(imageSlot);
-}*/
+}
 
 PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_isServer)
 {

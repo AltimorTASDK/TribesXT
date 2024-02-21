@@ -134,7 +134,7 @@ public:
 	void setViewAngles(float pitch, float yaw);
 	void setViewAnglesClamped(float pitch, float yaw);
 	
-	void updateWeapon(const PlayerMove &move);
+	void updateWeapon(const PlayerMove &move, bool trigger = true);
 	void serverUpdateMove(const PlayerMove *moves, int moveCount);
 	void clientMove(uint32_t curTime);
 

@@ -152,7 +152,8 @@ public:
 		int typeId;
 		int imageId;
 		int teamId;
-		std::byte pad010[0x18 - 0x10];
+		int nextId;
+		int nextTeam;
 		float delayTime;
 		int fireCount;
 		bool triggerDown;
