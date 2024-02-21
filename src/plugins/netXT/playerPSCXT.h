@@ -31,7 +31,6 @@ public:
 		// Client only
 		SubtickRecord subtickRecords[MaxMovesXT];
 		SubtickRecord pendingSubtickRecord;
-		int prevFrameTriggerCount = 0;
 		uint8_t heldTriggerSubtick = NoSubtick;
 
 		// Client only

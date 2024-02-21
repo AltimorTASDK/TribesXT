@@ -68,8 +68,6 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 
 		xt.pendingSubtickRecord.subtick = NoSubtick;
 	}
-
-	xt.prevFrameTriggerCount = triggerCount;
 }
 
 auto PlayerPSCXT::getSubtick(uint32_t time) -> const SubtickRecord&
