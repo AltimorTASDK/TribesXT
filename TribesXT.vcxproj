@@ -129,6 +129,7 @@
     <ClInclude Include="src\plugins\netXT\version.h" />
     <ClInclude Include="src\plugins\scriptXT\scriptXT.h" />
     <ClInclude Include="src\plugins\skiBugFix\skiBugFix.h" />
+    <ClInclude Include="src\plugins\sleepFix\sleepFix.h" />
     <ClInclude Include="src\plugins\tracerXT\tracerXT.h" />
     <ClInclude Include="src\plugins\wineFix\wineFix.h" />
     <ClInclude Include="src\tribes\bullet.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="src\darkstar\Core\encryptedPointer.h" />
     <ClInclude Include="src\tribes\dataBlockManager.h" />
     <ClInclude Include="src\tribes\fear.strings.h" />
+    <ClInclude Include="src\tribes\fearDcl.h" />
     <ClInclude Include="src\tribes\grenade.h" />
     <ClInclude Include="src\tribes\projectileFactory.h" />
     <ClInclude Include="src\tribes\rocketDumb.h" />

@@ -2,6 +2,7 @@
 
 #include "darkstar/Core/bitset.h"
 #include "darkstar/Sim/simNetObject.h"
+#include "util/struct.h"
 
 namespace Net {
 
@@ -16,6 +17,8 @@ public:
 		PacketObjectRef *nextRef;
 		PacketObjectRef *nextUpdateChain;
 	};
+
+	FIELD(0x8C, SimNetObject*, scopeObject);
 };
 
 struct GhostInfo {

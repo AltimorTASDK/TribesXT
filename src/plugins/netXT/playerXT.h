@@ -63,6 +63,9 @@ public:
 		// Timed by lastProcessTime
 		SnapshotBuffer snapshots;
 
+		// Server + client
+		uint32_t moveIndex = 0;
+
 		// Server only, timed by sg.currentTime
 		SnapshotBuffer lagCompensationSnapshots;
 		Snapshot lagCompensationTarget;

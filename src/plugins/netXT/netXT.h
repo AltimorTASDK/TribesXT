@@ -36,6 +36,8 @@ public:
 	}
 
 private:
+	static void hook_GhostManager_writePacket_newGhost(CpuState &cs);
+
 	static void hook_FearGame_consoleCallback_newGame(CpuState &cs);
 
 	static void __fastcall hook_FearGame_serverProcess(FearGame*);
@@ -104,6 +106,12 @@ private:
 	static void __fastcall hook_Grenade_serverProcess(Grenade*, edx_t, uint32_t in_currTime);
 
 	struct {
+		struct {
+			struct {
+				// Handle networking projectiles to their owner
+				x86Hook writePacket_newGhost = {hook_GhostManager_writePacket_newGhost, 0x519262, 1};
+			} GhostManager;
+		} Net;
 		struct {
 			// Fix client reading netcode version bytes backwards
 			StaticCodePatch<0x44341E, "\x54"> fixNetcodeVersionMajor;

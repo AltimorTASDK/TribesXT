@@ -1,6 +1,7 @@
 #include "darkstar/Core/bitstream.h"
 #include "darkstar/Sim/Net/ghostManager.h"
 #include "tribes/bullet.h"
+#include "tribes/fearDcl.h"
 #include "tribes/grenade.h"
 #include "tribes/playerPSC.h"
 #include "tribes/projectile.h"
@@ -12,6 +13,28 @@
 #include "plugins/netXT/version.h"
 #include "util/math.h"
 #include <cmath>
+
+static bool isOwnedProjectile(const Net::GhostManager *ghostManager, const Net::GhostInfo *info)
+{
+	if (!isProjectileTag(info->obj->getGhostTag()))
+		return false;
+
+	if (ghostManager->scopeObject == nullptr)
+		return false;
+
+	const auto *projectile = (Projectile*)info->obj;
+	return projectile->m_pShooter == ghostManager->scopeObject;
+}
+
+void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
+{
+	const auto *ghostManager = (Net::GhostManager*)cs.reg.ebp;
+	const auto *info = (Net::GhostInfo*)cs.reg.esi;
+	auto *stream = *(BitStream**)(cs.reg.esp + 0x30);
+
+	if (!stream->writeFlag(isOwnedProjectile(ghostManager, info)))
+		return;
+}
 
 void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
 {
@@ -182,8 +205,10 @@ bool NetXTPlugin::hook_PlayerPSC_writePacket(
 void NetXTPlugin::hook_PlayerPSC_readPacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t currentTime)
 {
-	if (!psc->isServer)
+	if (!psc->isServer) {
 		psc->readClockSync(bstream);
+	} else if (psc->controlPlayer != nullptr) {
+	}
 
 	get()->hooks.PlayerPSC.readPacket.callOriginal(psc, bstream, currentTime);
 }

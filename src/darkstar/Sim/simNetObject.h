@@ -54,6 +54,11 @@ public:
 		return netFlags.test(Ghostable) && !netFlags.test(ScopeAlways);
 	}
 
+	PersTag getGhostTag() const
+	{
+		return call_virtual<24, decltype(&SimNetObject::getGhostTag)>(this);
+	}
+
 	void setMaskBits(uint32_t orMask)
 	{
 		using func_t = to_static_function_t<decltype(&SimNetObject::setMaskBits)>;

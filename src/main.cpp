@@ -5,6 +5,7 @@
 #include "plugins/scriptXT/scriptXT.h"
 #include "plugins/tracerXT/tracerXT.h"
 #include "plugins/skiBugFix/skiBugFix.h"
+#include "plugins/sleepFix/sleepFix.h"
 #include "plugins/wineFix/wineFix.h"
 #include <Windows.h>
 
@@ -27,6 +28,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 	REGISTER_PLUGIN(ScriptXTPlugin);
 	REGISTER_PLUGIN(TracerXTPlugin);
 	REGISTER_PLUGIN(SkiBugFixPlugin);
+	REGISTER_PLUGIN(SleepFixPlugin);
 	REGISTER_PLUGIN(WineFixPlugin);
 
 	return TRUE;
