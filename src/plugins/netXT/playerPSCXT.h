@@ -6,6 +6,7 @@
 #include <bit>
 
 class BitStream;
+class PlayerXT;
 
 class PlayerPSCXT : public PlayerPSC {
 public:
@@ -45,6 +46,11 @@ public:
 	static constexpr size_t SIZEOF = PlayerPSC::SIZEOF + sizeof(DataXT);
 
 public:
+	PlayerXT *getPlayerXT() const
+	{
+		return (PlayerXT*)controlPlayer;
+	}
+
 	void preSimActionEvent(int action, float eventValue);
 	void collectSubtickInput(uint32_t startTime, uint32_t endTime);
 	const SubtickRecord &getSubtick(uint32_t time);

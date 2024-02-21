@@ -104,12 +104,9 @@ void PlayerPSCXT::readSubtick(BitStream *stream)
 			stream->read(&record.yaw);
 	}
 
-	if (moves.size() >= MaxMovesXT || controlPlayer == nullptr)
-		return;
-
 	// Pass to the player for serverUpdateMove
-	auto *player = (PlayerXT*)controlPlayer;
-	player->xt.subtickRecords[moves.size()] = record;
+	if (auto *player = getPlayerXT(); player != nullptr)
+		player->xt.subtickRecords[moves.size()] = record;
 }
 
 void PlayerPSCXT::writeLagCompensation(BitStream *stream, int moveIndex)
@@ -139,13 +136,9 @@ void PlayerPSCXT::writeLagCompensation(BitStream *stream, int moveIndex)
 void PlayerPSCXT::readLagCompensation(BitStream *stream)
 {
 	const auto lagCompensationTime = stream->readInt(32);
-
-	if (moves.size() >= MaxMovesXT || controlPlayer == nullptr)
-		return;
-
 	// Pass to the player for serverUpdateMove
-	auto *player = (PlayerXT*)controlPlayer;
-	player->xt.lagCompensationRequests[moves.size()].time = lagCompensationTime;
+	if (auto *player = getPlayerXT(); player != nullptr)
+		player->xt.lagCompensationRequests[moves.size()].time = lagCompensationTime;
 }
 
 void PlayerPSCXT::clientUpdateClock(uint32_t startTime, uint32_t endTime)
