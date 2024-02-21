@@ -39,6 +39,8 @@ private:
 
 	static void hook_Player_getCameraTransform_140Check(CpuState &cs);
 
+	static void hook_PlayerPSC_writePacket_checkThirdPerson(CpuState &cs);
+
 	static bool __fastcall hook_PlayerPSC_processQuery(PlayerPSC*, edx_t, SimQuery *query);
 
 	struct {
@@ -61,9 +63,12 @@ private:
 			StaticCodePatch<0x478E60, "\xC2\x08\x00"> parentResized_fixExtent;
 		} FearGuiFormattedText;
 		struct {
+			// Allow swapping between old and 1.40 third person
 			x86Hook getCameraTransform_140Check = {hook_Player_getCameraTransform_140Check, 0x4ACBD3, 1};
 		} Player;
 		struct {
+			// Allow swapping between old and 1.40 third person
+			x86Hook writePacket_checkThirdPerson = {hook_PlayerPSC_writePacket_checkThirdPerson, 0x483909, 2};
 			// Apply damage flash cvar
 			StaticJmpHook<0x484720, hook_PlayerPSC_processQuery> processQuery;
 		} PlayerPSC;
