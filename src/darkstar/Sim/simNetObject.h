@@ -54,7 +54,7 @@ public:
 		return netFlags.test(Ghostable) && !netFlags.test(ScopeAlways);
 	}
 
-	PersTag getGhostTag() const
+	uint32_t getGhostTag() const
 	{
 		return call_virtual<24, decltype(&SimNetObject::getGhostTag)>(this);
 	}

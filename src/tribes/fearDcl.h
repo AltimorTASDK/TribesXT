@@ -6,7 +6,7 @@ enum PersTag {
 	RocketDumbPersTag = 602,
 };
 
-inline bool isProjectileTag(PersTag tag)
+inline bool isProjectileTag(uint32_t tag)
 {
 	switch (tag) {
 	case BulletPersTag:
