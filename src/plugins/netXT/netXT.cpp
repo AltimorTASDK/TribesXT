@@ -255,6 +255,18 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	return projectile;
 }
 
+void NetXTPlugin::hook_ProjectileData_pack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.Projectile.ProjectileData.pack.callOriginal(data, stream);
+	stream->write(data->inheritedVelocityScale);
+}
+
+void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.Projectile.ProjectileData.unpack.callOriginal(data, stream);
+	stream->read(&data->inheritedVelocityScale);
+}
+
 void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t in_currTime)
 {
 	if (projectile->hasLagCompensation()) {

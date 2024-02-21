@@ -1,6 +1,7 @@
 #pragma once
 
 #include "darkstar/Sim/simConsolePlugin.h"
+#include "tribes/projectile.h"
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/playerPSCXT.h"
 #include "plugins/netXT/version.h"
@@ -11,7 +12,6 @@ class BitStream;
 class Bullet;
 class FearGame;
 class Grenade;
-class Projectile;
 class RocketDumb;
 class SimManager;
 
@@ -90,6 +90,9 @@ private:
 	static void hook_PacketStream_checkPacketSend_check_asm();
 
 	static Projectile *__fastcall hook_Projectile_ctor(Projectile*, edx_t, int in_datFileId);
+
+	static void __fastcall hook_ProjectileData_pack(Projectile::ProjectileData*, edx_t, BitStream *stream);
+	static void __fastcall hook_ProjectileData_unpack(Projectile::ProjectileData*, edx_t, BitStream *stream);
 
 	static void __fastcall hook_Bullet_serverProcess(Bullet*, edx_t, uint32_t in_currTime);
 	static void __fastcall hook_RocketDumb_serverProcess(RocketDumb*, edx_t, uint32_t in_currTime);
@@ -190,6 +193,11 @@ private:
 		struct {
 			// Initialize repurposed fields
 			StaticJmpHook<0x4C1300, hook_Projectile_ctor> ctor;
+			struct {
+				// Send inheritance
+				StaticJmpHook<0x4C0690, hook_ProjectileData_pack> pack;
+				StaticJmpHook<0x4C0870, hook_ProjectileData_unpack> unpack;
+			} ProjectileData;
 		} Projectile;
 		struct {
 			// Lag compensation
