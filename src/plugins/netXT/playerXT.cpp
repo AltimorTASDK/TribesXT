@@ -240,6 +240,15 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 	setViewAngles(clamp(pitch, -MaxPitch, MaxPitch), normalize_radians(yaw));
 }
 
+void PlayerXT::updateItem(const PlayerMove &move)
+{
+	if (move.useItem != -1) {
+		char buf[16];
+		sprintf_s(buf, "%d", move.useItem);
+		Console->executef(3, "remoteUseItem", scriptThis(), buf);
+	}
+}
+
 void PlayerXT::updateWeapon(const PlayerMove &move)
 {
 	if (lastProcessTime <= xt.lastWeaponProcessTime)
@@ -288,6 +297,9 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 
 			updateMove(&move, true);
 
+			// Beacons don't get subtick because they have to be synced with movement
+			updateItem(move);
+
 			// Update weapon with subtick state
 			loadSnapshotInterpolated(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
@@ -298,17 +310,11 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 			xt.currentSubtick = NoSubtick;
 		} else {
 			updateMove(&move, true);
+			updateItem(move);
 			updateWeapon(move);
 		}
 
 		updateAnimation(0.032f);
-
-		// Beacons don't get subtick because they have to be synced with movement
-		if (move.useItem != -1) {
-			char buf[16];
-			sprintf_s(buf, "%d", move.useItem);
-			Console->executef(3, "remoteUseItem", scriptThis(), buf);
-		}
 
 		xt.currentLagCompensation = -1;
 
