@@ -63,7 +63,7 @@ bool ScriptXTPlugin::hook_PlayerPSC_processQuery(PlayerPSC *psc, edx_t, SimQuery
 	auto *qp = (SimCameraQuery*)query;
 
 	// Only on XT servers
-	if (serverNetcodeVersion >= Netcode::XT::PrefDamageFlash)
+	if (Netcode::XT::PrefDamageFlash.check())
 		qp->cameraInfo.alphaBlend *= clamp(cvars::pref::damageFlash, 0.f, 1.f);
 
 	return true;

@@ -75,7 +75,7 @@ auto PlayerPSCXT::getSubtick(uint32_t time) -> const SubtickRecord&
 
 void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 {
-	if (serverNetcodeVersion < Netcode::XT::Subtick)
+	if (!Netcode::XT::Subtick.check())
 		return;
 
 	// Reverse of the index calc in getClientMove
@@ -111,7 +111,7 @@ void PlayerPSCXT::readSubtick(BitStream *stream)
 
 void PlayerPSCXT::writeLagCompensation(BitStream *stream, int moveIndex)
 {
-	if (serverNetcodeVersion < Netcode::XT::LagCompensation)
+	if (!Netcode::XT::LagCompensation.check())
 		return;
 
 	// Reverse of the index calc in getClientMove
@@ -143,7 +143,7 @@ void PlayerPSCXT::readLagCompensation(BitStream *stream)
 
 void PlayerPSCXT::clientUpdateClock(uint32_t startTime, uint32_t endTime)
 {
-	if (serverNetcodeVersion < Netcode::XT::ClockSync)
+	if (!Netcode::XT::ClockSync.check())
 		return;
 
 	xt.syncedClock += endTime - startTime;
@@ -178,7 +178,7 @@ void PlayerPSCXT::writeClockSync(BitStream *stream)
 
 void PlayerPSCXT::readClockSync(BitStream *stream)
 {
-	if (serverNetcodeVersion < Netcode::XT::ClockSync)
+	if (!Netcode::XT::ClockSync.check())
 		return;
 
 	xt.serverClock = ticksToMs(stream->readInt(ClockTickBits));

@@ -394,7 +394,7 @@ void PlayerXT::ghostSetMove(
 		setTransform(TMat3F(EulerF(rot), {0, 0, 0}) * mountTransform);
 	}
 
-	if (serverNetcodeVersion >= Netcode::XT::ClockSync && cg.psc != nullptr) {
+	if (Netcode::XT::ClockSync.check() && cg.psc != nullptr) {
 		// Translate the snapshot time to client time
 		const auto *psc = (PlayerPSCXT*)cg.psc;
 		const auto clockOffset = psc->xt.serverClock - psc->xt.syncedClock;

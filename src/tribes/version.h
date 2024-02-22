@@ -3,6 +3,9 @@
 #include <compare>
 #include <cstdint>
 
+inline auto &serverNetcodeVersion = *(struct NetcodeVersion*)0x6D0FF8;
+inline auto &ourNetcodeVersion    = *(struct NetcodeVersion*)0x6D0FFC;
+
 struct NetcodeVersion {
 	uint8_t major;
 	uint8_t minor;
@@ -16,12 +19,14 @@ struct NetcodeVersion {
 	{
 		return get() <=> other.get();
 	}
+
+	bool check() const
+	{
+		return serverNetcodeVersion >= *this;
+	}
 };
 
 namespace Netcode {
 constexpr auto Old = NetcodeVersion(1, 0);
 constexpr auto New = NetcodeVersion(1, 1); // 1.40
 }
-
-inline auto &serverNetcodeVersion = *(NetcodeVersion*)0x6D0FF8;
-inline auto &ourNetcodeVersion    = *(NetcodeVersion*)0x6D0FFC;

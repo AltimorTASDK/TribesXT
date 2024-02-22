@@ -34,21 +34,19 @@ void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 
 Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag)
 {
-	if (serverNetcodeVersion >= Netcode::XT::ClientPredictedProjectiles) {
-		if (isProjectileTag(tag) && stream->readFlag()) {
-			const auto weaponUpdateCount = stream->readInt(32);
+	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
+		const auto weaponUpdateCount = stream->readInt(32);
 
-			const auto *clientProjectileSet =
-				(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+		const auto *clientProjectileSet =
+			(SimSet*)cg.manager->findObject(ClientProjectileSetId);
 
-			if (clientProjectileSet != nullptr) {
-				Console->printf("count %d (ghost read)", clientProjectileSet->objectList.size());
-				for (const auto object : clientProjectileSet->objectList) {
-					auto *projectile = (Projectile*)object.get();
-					Console->printf(CON_PINK, "%d vs %d", projectile->weaponUpdateCountXT, weaponUpdateCount);
-					if (projectile->weaponUpdateCountXT == weaponUpdateCount)
-						return projectile;
-				}
+		if (clientProjectileSet != nullptr) {
+			Console->printf("count %d (ghost read)", clientProjectileSet->objectList.size());
+			for (const auto object : clientProjectileSet->objectList) {
+				auto *projectile = (Projectile*)object.get();
+				Console->printf(CON_PINK, "%d vs %d", projectile->weaponUpdateCountXT, weaponUpdateCount);
+				if (projectile->weaponUpdateCountXT == weaponUpdateCount)
+					return projectile;
 			}
 		}
 	}
@@ -226,7 +224,7 @@ void NetXTPlugin::hook_ItemImageData_pack(Player::ItemImageData *data, edx_t, Bi
 void NetXTPlugin::hook_ItemImageData_unpack(Player::ItemImageData *data, edx_t, BitStream *stream)
 {
 	get()->hooks.Player.ItemImageData.unpack.callOriginal(data, stream);
-	if (serverNetcodeVersion >= Netcode::XT::ItemImageDataSendAccuFire)
+	if (Netcode::XT::ItemImageDataSendAccuFire.check())
 		stream->read(&data->accuFire);
 }
 
@@ -371,7 +369,7 @@ void NetXTPlugin::hook_ProjectileData_pack(Projectile::ProjectileData *data, edx
 void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
 {
 	get()->hooks.Projectile.ProjectileData.unpack.callOriginal(data, stream);
-	if (serverNetcodeVersion >= Netcode::XT::ProjectileDataSendInheritance)
+	if (Netcode::XT::ProjectileDataSendInheritance.check())
 		stream->read(&data->inheritedVelocityScale);
 }
 

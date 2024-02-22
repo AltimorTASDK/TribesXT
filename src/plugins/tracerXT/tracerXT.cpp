@@ -71,7 +71,7 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	const auto position = bullet->m_spawnPosition + bullet->m_spawnVelocity * elapsedSecs;
 	bullet->setTransform({bullet->getRotation(), position});
 
-	if (serverNetcodeVersion >= Netcode::XT::TracerInheritance) {
+	if (Netcode::XT::TracerInheritance.check()) {
 		// Using Player::packUpdate velocity quantization
 		const auto shooterSpeed = stream->readInt(17) / 512.f;
 		const auto shooterDirection = stream->readNormalVector(10);
