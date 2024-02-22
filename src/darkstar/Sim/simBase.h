@@ -5,7 +5,10 @@
 #include "darkstar/Core/persist.h"
 #include "darkstar/Core/tVector.h"
 #include "darkstar/Sim/simEvDcl.h"
+#include "util/memory.h"
+#include "util/meta.h"
 #include "util/struct.h"
+#include <concepts>
 #include <cstddef>
 
 class SimGroup;
@@ -90,11 +93,32 @@ public:
 	}
 };
 
+template<typename T>
+class SimObjectListT : public Vector<EncryptedPointer<T>> {
+};
+
+using SimObjectList = SimObjectListT<SimObject>;
+
 class SimSet : public SimObject {
 public:
 	static constexpr size_t SIZEOF = 0x6C;
 
-	FIELD(0x54, Vector<EncryptedPointer<SimObject>>, objectList);
+	static const SimObjectList &iterate(SimObjectId id);
+	static const SimObjectList &iterate(const char *name);
+
+	template<std::derived_from<SimObject> T>
+	static const auto &iterate(SimObjectId id)
+	{
+		return (const SimObjectListT<T>&)iterate(id);
+	}
+
+	template<std::derived_from<SimObject> T>
+	static const auto &iterate(const char *name)
+	{
+		return (const SimObjectListT<T>&)iterate(name);
+	}
+
+	FIELD(0x54, SimObjectList, objectList);
 
 	static void *operator new(size_t count)
 	{

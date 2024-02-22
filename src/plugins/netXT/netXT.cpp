@@ -40,19 +40,14 @@ void NetXTPlugin::hook_GhostManager_readPacket(
 	if (!ghostManager->allowGhosts)
 		return;
 
-	const auto *clientProjectileSet =
-		(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+	// Copy for safe iteration
+	const auto &list = SimSet::iterate<Projectile>(ClientProjectileSetId);
+	const auto projectiles = std::vector(list.begin(), list.end());
 
-	if (clientProjectileSet != nullptr) {
-		// Copy for safe iteration
-		const auto &list = clientProjectileSet->objectList;
-		const auto projectiles = std::vector(list.begin(), list.end());
-
-		for (const auto object : clientProjectileSet->objectList) {
-			auto *projectile = (Projectile*)object.get();
-			if (projectile->predictionKeyXT < (uint32_t)cg.psc->firstMoveSeq)
-				projectile->deleteObject();
-		}
+	for (const auto projectile : projectiles) {
+		// Delete mispredicted projectiles
+		if (projectile->predictionKeyXT < (uint32_t)cg.psc->firstMoveSeq)
+			projectile->deleteObject();
 	}
 }
 
@@ -61,21 +56,11 @@ Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *
 	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
 		const auto predictionKey = stream->readInt(32);
 
-		const auto *clientProjectileSet =
-			(SimSet*)cg.manager->findObject(ClientProjectileSetId);
-
-		if (clientProjectileSet != nullptr) {
-			Console->printf("count %d (ghost read)", clientProjectileSet->objectList.size());
-			if (clientProjectileSet->objectList.size() == 0)
-				Console->printf(CON_PINK, "%d (nothing to compare)", predictionKey);
-
-			for (const auto object : clientProjectileSet->objectList) {
-				auto *projectile = (Projectile*)object.get();
-				Console->printf(CON_PINK, "%d vs %d", projectile->predictionKeyXT, predictionKey);
-				if (projectile->predictionKeyXT == predictionKey) {
-					projectile->removeFromSet(clientProjectileSet->getId());
-					return projectile;
-				}
+		for (const auto projectile : SimSet::iterate<Projectile>(ClientProjectileSetId)) {
+			Console->printf(CON_PINK, "%d vs %d", projectile->predictionKeyXT, predictionKey);
+			if (projectile->predictionKeyXT == predictionKey) {
+				projectile->removeFromSet(ClientProjectileSetId);
+				return projectile.get();
 			}
 		}
 	}

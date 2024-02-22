@@ -170,6 +170,7 @@
     <ClInclude Include="src\util\vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\darkstar\Sim\simBase.cpp" />
     <ClCompile Include="src\plugins\crashFix\crashFix.cpp" />
     <ClCompile Include="src\plugins\netXT\netXT.cpp" />
     <ClCompile Include="src\plugins\netXT\playerPSCXT.cpp" />

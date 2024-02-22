@@ -185,13 +185,8 @@ void PlayerXT::startLagCompensationAll(const SimObject *exclude, uint32_t time)
 	if (sg.manager == nullptr)
 		return;
 
-	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
-
-	if (lagCompensatedSet == nullptr)
-		return;
-
-	for (const auto object : lagCompensatedSet->objectList) {
-		if (auto *player = (PlayerXT*)object.get(); player != exclude)
+	for (const auto player : SimSet::iterate<PlayerXT>(LagCompensatedSetId)) {
+		if (player.get() != exclude)
 			player->startLagCompensation(time);
 	}
 }
@@ -201,13 +196,8 @@ void PlayerXT::endLagCompensationAll(const SimObject *exclude)
 	if (sg.manager == nullptr)
 		return;
 
-	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
-
-	if (lagCompensatedSet == nullptr)
-		return;
-
-	for (const auto object : lagCompensatedSet->objectList) {
-		if (auto *player = (PlayerXT*)object.get(); player != exclude)
+	for (const auto player : SimSet::iterate<PlayerXT>(LagCompensatedSetId)) {
+		if (player.get() != exclude)
 			player->endLagCompensation();
 	}
 }
@@ -217,15 +207,8 @@ void PlayerXT::saveLagCompensationSnapshotAll(uint32_t time)
 	if (sg.manager == nullptr)
 		return;
 
-	auto *lagCompensatedSet = (SimSet*)sg.manager->findObject(LagCompensatedSetId);
-
-	if (lagCompensatedSet == nullptr)
-		return;
-
-	for (const auto object : lagCompensatedSet->objectList) {
-		auto *player = (PlayerXT*)object.get();
+	for (const auto player : SimSet::iterate<PlayerXT>(LagCompensatedSetId))
 		player->saveLagCompensationSnapshot(time);
-	}
 }
 
 void PlayerXT::setViewAngles(float pitch, float yaw)
@@ -466,8 +449,6 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 	projectile->addToSet(ClientProjectileSetId);
 
 	Console->printf(CON_BLUE, "added to set %d", projectile->predictionKeyXT);
-	if (const auto *clientProjectileSet = (SimSet*)cg.manager->findObject(ClientProjectileSetId); clientProjectileSet != nullptr)
-		Console->printf("count %d", clientProjectileSet->objectList.size());
 
 	addPredictedProjectile(projectile, imageData.projectile.type);
 }
