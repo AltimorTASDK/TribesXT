@@ -50,10 +50,8 @@ void NetXTPlugin::hook_GhostManager_readPacket(
 
 		for (const auto object : clientProjectileSet->objectList) {
 			auto *projectile = (Projectile*)object.get();
-			if (projectile->predictionKeyXT < (uint32_t)cg.psc->firstMoveSeq) {
-				Console->printf(CON_YELLOW, "Removing mispredicted projectile %d", projectile->predictionKeyXT);
+			if (projectile->predictionKeyXT < (uint32_t)cg.psc->firstMoveSeq)
 				projectile->deleteObject();
-			}
 		}
 	}
 }
