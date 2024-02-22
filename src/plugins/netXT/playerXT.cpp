@@ -246,7 +246,6 @@ void PlayerXT::updateWeapon(const PlayerMove &move)
 		return;
 
 	xt.lastWeaponProcessTime = lastProcessTime;
-	xt.weaponUpdateCount++;
 
 	if (xt.lastTrigger && !move.trigger)
 		setImageTriggerUp(0);
@@ -265,11 +264,8 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		return;
 
 	for (auto index = 0; index < moveCount; index++) {
-		if (updateDebt > 5) {
-			// Keep weapon update count synced when moves are rejected
-			xt.weaponUpdateCount++;
+		if (updateDebt > 5)
 			continue;
-		}
 
 		updateDebt++;
 
@@ -317,6 +313,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		xt.currentLagCompensation = -1;
 
 		lastPlayerMove = move;
+		xt.moveCount++;
 	}
 
 	if (mount == nullptr || mountPoint != 1)
@@ -330,6 +327,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 {
 	if (lastProcessTime < curTime) {
 		loadSnapshot(lastProcessTime);
+
 		do {
 			if (!hasFocus) {
 				// Remote ghost
@@ -367,6 +365,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 			}
 
 			lastPlayerMove = *move;
+			xt.moveCount++;
 		} while (lastProcessTime < curTime);
 	}
 
@@ -414,6 +413,17 @@ void PlayerXT::ghostSetMove(
 	lastPlayerMove = *move;
 }
 
+void PlayerXT::initProjectileXT(Projectile *projectile)
+{
+	if (hasSubtick())
+		projectile->subtickOffsetXT = xt.currentSubtick;
+
+	if (hasLagCompensation())
+		projectile->lagCompensationOffsetXT = sg.currentTime - xt.currentLagCompensation;
+
+	projectile->predictionKeyXT = xt.moveCount;
+}
+
 void PlayerXT::addPredictedProjectile(Projectile *projectile, int type)
 {
 	const auto &data = *projectile->m_projectileData;
@@ -444,14 +454,13 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 
 	auto *projectile = createProjectile(imageData.projectile);
 	projectile->initProjectile(muzzleTransform, getLinearVelocity(), getId());
+	initProjectileXT(projectile);
 	projectile->netFlags.set(IsGhost);
-	projectile->subtickOffsetXT = xt.currentSubtick;
-	projectile->weaponUpdateCountXT = xt.weaponUpdateCount;
 
 	manager->addObject(projectile);
 	projectile->addToSet(ClientProjectileSetId);
 
-	Console->printf("added to set");
+	Console->printf(CON_BLUE, "added to set %d", projectile->predictionKeyXT);
 	if (const auto *clientProjectileSet = (SimSet*)cg.manager->findObject(ClientProjectileSetId); clientProjectileSet != nullptr)
 		Console->printf("count %d", clientProjectileSet->objectList.size());
 

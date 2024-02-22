@@ -79,7 +79,7 @@ public:
 
 		// Server + client
 		uint32_t lastWeaponProcessTime = 0;
-		uint32_t weaponUpdateCount = 0;
+		uint32_t moveCount = 0;
 		bool lastTrigger = false;
 	};
 
@@ -144,6 +144,7 @@ public:
 		PlayerMove *move, const Point3F &newPos, const Point3F &newVel,
 		bool newContact, float newRot, float newPitch, int skipCount, bool noInterp);
 
+	void initProjectileXT(Projectile *projectile);
 	void addPredictedProjectile(Projectile *projectile, int type);
 	void clientFireImageProjectile(int imageSlot);
 };

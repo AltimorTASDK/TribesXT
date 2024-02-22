@@ -20,6 +20,7 @@ public:
 	FIELD(0xAC, float, camDist);
 	FIELD(0xB4, GameBase*, controlObject);
 	FIELD(0xB8, Player*, controlPlayer);
+	FIELD(0x3DC, int, lastPlayerMove);
 	FIELD(0x3E0, int, firstMoveSeq);
 	FIELD(0x3E8, int, curGuiMode);
 	FIELD(0x3EE, bool, fInObserverMode);

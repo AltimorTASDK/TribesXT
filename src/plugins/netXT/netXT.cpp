@@ -27,25 +27,27 @@ void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 	const auto *scopeObject = ghostManager->scopeObject;
 	const auto *shooter = projectile->m_pShooter;
 
-	Console->printf(CON_YELLOW, "scope 0x%08X shooter 0x%08X", scopeObject, shooter);
 	if (stream->writeFlag(shooter != nullptr && shooter == scopeObject))
-		stream->writeInt(projectile->weaponUpdateCountXT, 32);
+		stream->writeInt(projectile->predictionKeyXT, 32);
 }
 
 Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag)
 {
 	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
-		const auto weaponUpdateCount = stream->readInt(32);
+		const auto predictionKey = stream->readInt(32);
 
 		const auto *clientProjectileSet =
 			(SimSet*)cg.manager->findObject(ClientProjectileSetId);
 
 		if (clientProjectileSet != nullptr) {
 			Console->printf("count %d (ghost read)", clientProjectileSet->objectList.size());
+			if (clientProjectileSet->objectList.size() == 0)
+				Console->printf(CON_PINK, "%d (nothing to compare)", predictionKey);
+
 			for (const auto object : clientProjectileSet->objectList) {
 				auto *projectile = (Projectile*)object.get();
-				Console->printf(CON_PINK, "%d vs %d", projectile->weaponUpdateCountXT, weaponUpdateCount);
-				if (projectile->weaponUpdateCountXT == weaponUpdateCount)
+				Console->printf(CON_PINK, "%d vs %d", projectile->predictionKeyXT, predictionKey);
+				if (projectile->predictionKeyXT == predictionKey)
 					return projectile;
 			}
 		}
@@ -186,16 +188,7 @@ void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
 {
 	auto *player = (PlayerXT*)cs.reg.esi;
 	auto *projectile = (Projectile*)cs.reg.edi;
-
-	if (player->hasSubtick())
-		projectile->subtickOffsetXT = player->xt.currentSubtick;
-
-	if (player->hasLagCompensation()) {
-		const auto offset = sg.currentTime - player->xt.currentLagCompensation;
-		projectile->lagCompensationOffsetXT = offset;
-	}
-
-	projectile->weaponUpdateCountXT = player->xt.weaponUpdateCount;
+	player->initProjectileXT(projectile);
 }
 
 void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
@@ -260,8 +253,12 @@ bool NetXTPlugin::hook_PlayerPSC_writePacket(
 void NetXTPlugin::hook_PlayerPSC_readPacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t currentTime)
 {
-	if (!psc->isServer)
+	if (psc->isServer) {
+		if (auto *player = psc->getPlayerXT(); player != nullptr)
+			player->xt.moveCount = psc->lastPlayerMove;
+	} else {
 		psc->readClockSync(bstream);
+	}
 
 	get()->hooks.PlayerPSC.readPacket.callOriginal(psc, bstream, currentTime);
 }
@@ -296,10 +293,12 @@ void NetXTPlugin::hook_clampAngleDelta(float *angle, float range)
 
 void NetXTPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 {
-	const auto *psc = (PlayerPSC*)cs.reg.ebx;
-	if (auto *player = (PlayerXT*)psc->controlPlayer; player != nullptr) {
+	const auto *psc = (PlayerPSCXT*)cs.reg.ebx;
+
+	if (auto *player = psc->getPlayerXT(); player != nullptr) {
 		player->invalidatePrediction(player->lastProcessTime);
 		player->saveSnapshot(player->lastProcessTime);
+		player->xt.moveCount = psc->firstMoveSeq;
 	}
 }
 
@@ -356,7 +355,7 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	get()->hooks.Projectile.ctor.callOriginal(projectile, in_datFileId);
 	projectile->subtickOffsetXT = -1;
 	projectile->lagCompensationOffsetXT = -1;
-	projectile->weaponUpdateCountXT = 0;
+	projectile->predictionKeyXT = 0;
 	return projectile;
 }
 

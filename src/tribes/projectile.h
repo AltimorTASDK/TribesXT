@@ -58,7 +58,7 @@ public:
 	// Reuse these fields since Projectile is a base class and can't be easily extended
 	FIELD(0x2FC, uint32_t, subtickOffsetXT);
 	FIELD(0x300, uint32_t, lagCompensationOffsetXT);
-	FIELD(0x304, uint32_t, weaponUpdateCountXT);
+	FIELD(0x304, uint32_t, predictionKeyXT);
 
 	void initProjectile(
 		const TMat3F &in_rTrans, const Point3F &in_rShooterVel, SimObjectId in_shooterId)
