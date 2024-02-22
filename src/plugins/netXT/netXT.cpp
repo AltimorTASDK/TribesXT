@@ -28,7 +28,7 @@ void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 	const auto *shooter = projectile->m_pShooter;
 
 	Console->printf(CON_YELLOW, "scope 0x%08X shooter 0x%08X", scopeObject, shooter);
-	if (stream->writeFlag(scopeObject != nullptr && shooter == scopeObject))
+	if (stream->writeFlag(shooter != nullptr && shooter == scopeObject))
 		stream->writeInt(projectile->weaponUpdateCountXT, 32);
 }
 
