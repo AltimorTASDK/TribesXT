@@ -72,9 +72,9 @@ __declspec(naked) Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_ne
 void NetXTPlugin::hook_SimManager_registerObject(SimManager *manager, edx_t, SimObject *obj)
 {
 	// Don't re-add predicted projectiles when they get ghosted
-	if (obj->isProperlyAdded()) {
+	if (obj->getManager() != nullptr) {
 		const auto *clientProjectileSet =
-			(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+			(SimSet*)manager->findObject(ClientProjectileSetId);
 
 		if (clientProjectileSet != nullptr) {
 			Console->printf("count %d (registerObject check)", clientProjectileSet->objectList.size());
