@@ -48,7 +48,10 @@ public:
 public:
 	PlayerXT *getPlayerXT() const
 	{
-		return (PlayerXT*)controlPlayer;
+		if (controlPlayer == controlObject)
+			return (PlayerXT*)controlPlayer;
+		else
+			return nullptr;
 	}
 
 	void preSimActionEvent(int action, float eventValue);
