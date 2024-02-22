@@ -146,6 +146,6 @@ public:
 		bool newContact, float newRot, float newPitch, int skipCount, bool noInterp);
 
 	void initProjectileXT(Projectile *projectile);
-	void addPredictedProjectile(Projectile *projectile, int type);
+	void initPredictedProjectile(Projectile *projectile, int type);
 	void clientFireImageProjectile(int imageSlot);
 };

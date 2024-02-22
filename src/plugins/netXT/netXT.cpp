@@ -60,10 +60,13 @@ Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *
 {
 	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
 		const auto predictionKey = stream->readInt(PredictionKeyBits);
+		Console->printf(CON_PINK, "key %d", predictionKey);
 
 		for (const auto projectile : SimSet::iterate<Projectile>(ClientProjectileSetId)) {
 			if ((projectile->predictionKeyXT & PredictionKeyMask) == predictionKey) {
 				projectile->removeFromSet(ClientProjectileSetId);
+				Console->printf(CON_GREEN, "difference %d", projectile->m_lastUpdated - projectile->spawnTimeXT);
+				projectile->m_lastUpdated = projectile->spawnTimeXT;
 				return projectile.get();
 			}
 		}
@@ -356,6 +359,7 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	projectile->subtickOffsetXT = -1;
 	projectile->lagCompensationOffsetXT = -1;
 	projectile->predictionKeyXT = -1;
+	projectile->spawnTimeXT = -1;
 	return projectile;
 }
 

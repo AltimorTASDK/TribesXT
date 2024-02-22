@@ -59,6 +59,7 @@ public:
 	FIELD(0x2FC, uint32_t, subtickOffsetXT);
 	FIELD(0x300, uint32_t, lagCompensationOffsetXT);
 	FIELD(0x304, uint32_t, predictionKeyXT);
+	FIELD(0x308, uint32_t, spawnTimeXT);
 
 	void initProjectile(
 		const TMat3F &in_rTrans, const Point3F &in_rShooterVel, SimObjectId in_shooterId)

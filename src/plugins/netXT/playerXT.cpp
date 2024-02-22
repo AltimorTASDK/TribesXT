@@ -410,9 +410,10 @@ void PlayerXT::initProjectileXT(Projectile *projectile)
 		projectile->lagCompensationOffsetXT = sg.currentTime - xt.currentLagCompensation;
 
 	projectile->predictionKeyXT = xt.moveCount;
+	projectile->spawnTimeXT = wg->currentTime;
 }
 
-void PlayerXT::addPredictedProjectile(Projectile *projectile, int type)
+void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 {
 	const auto &data = *projectile->m_projectileData;
 
@@ -422,6 +423,16 @@ void PlayerXT::addPredictedProjectile(Projectile *projectile, int type)
 	const auto velocity = baseVelocity + inheritedVelocity;
 	projectile->setLinearVelocity(velocity);
 	projectile->m_instTerminalVelocity = velocity;
+
+	// Match the passage of time on the server
+	projectile->spawnTimeXT = lastProcessTime - TickMs;
+
+	if (hasSubtick()) {
+		// Match visual to subtick lag compensation
+		projectile->spawnTimeXT += xt.currentSubtick;
+	}
+
+	projectile->m_lastUpdated = projectile->spawnTimeXT;
 }
 
 void PlayerXT::clientFireImageProjectile(int imageSlot)
@@ -442,13 +453,13 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 
 	auto *projectile = createProjectile(imageData.projectile);
 	projectile->initProjectile(muzzleTransform, getLinearVelocity(), getId());
-	initProjectileXT(projectile);
 	projectile->netFlags.set(IsGhost);
+	initProjectileXT(projectile);
 
 	manager->addObject(projectile);
 	projectile->addToSet(ClientProjectileSetId);
 
-	Console->printf(CON_BLUE, "added to set %d", projectile->predictionKeyXT);
+	Console->printf(CON_BLUE, "added to set %d %d", projectile->predictionKeyXT, projectile->predictionKeyXT & ~TickMask);
 
-	addPredictedProjectile(projectile, imageData.projectile.type);
+	initPredictedProjectile(projectile, imageData.projectile.type);
 }
