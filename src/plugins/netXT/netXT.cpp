@@ -12,8 +12,13 @@
 #include "plugins/netXT/playerPSCXT.h"
 #include "plugins/netXT/version.h"
 #include "util/math.h"
+#include <bit>
 #include <cmath>
 #include <vector>
+
+// Must uniquely identify any previously unacked move
+constexpr auto PredictionKeyMask = PlayerPSCXT::MaxMovesXT - 1;
+constexpr auto PredictionKeyBits = std::bit_width(PredictionKeyMask);
 
 void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 {
@@ -29,7 +34,7 @@ void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 	const auto *shooter = projectile->m_pShooter;
 
 	if (stream->writeFlag(shooter != nullptr && shooter == scopeObject))
-		stream->writeInt(projectile->predictionKeyXT, 32);
+		stream->writeInt(projectile->predictionKeyXT, PredictionKeyBits);
 }
 
 void NetXTPlugin::hook_GhostManager_readPacket(
@@ -54,11 +59,10 @@ void NetXTPlugin::hook_GhostManager_readPacket(
 Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag)
 {
 	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
-		const auto predictionKey = stream->readInt(32);
+		const auto predictionKey = stream->readInt(PredictionKeyBits);
 
 		for (const auto projectile : SimSet::iterate<Projectile>(ClientProjectileSetId)) {
-			Console->printf(CON_PINK, "%d vs %d", projectile->predictionKeyXT, predictionKey);
-			if (projectile->predictionKeyXT == predictionKey) {
+			if ((projectile->predictionKeyXT & PredictionKeyMask) == predictionKey) {
 				projectile->removeFromSet(ClientProjectileSetId);
 				return projectile.get();
 			}
