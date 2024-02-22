@@ -19,6 +19,7 @@ public:
 	};
 
 	FIELD(0x8C, SimNetObject*, scopeObject);
+	FIELD(0xC4, bool, allowGhosts);
 };
 
 struct GhostInfo {

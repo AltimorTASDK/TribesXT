@@ -58,6 +58,12 @@ public:
 		return ((func_t)0x51C7B0)(this, name);
 	}
 
+	void deleteObject()
+	{
+		using func_t = to_static_function_t<decltype(&SimObject::deleteObject)>;
+		return ((func_t)0x51E4F0)(this);
+	}
+
 	bool isProperlyAdded() const
 	{
 		return flags.test(Added);

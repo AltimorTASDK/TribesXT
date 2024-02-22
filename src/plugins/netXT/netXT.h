@@ -38,6 +38,8 @@ public:
 
 private:
 	static void hook_GhostManager_writePacket_newGhost(CpuState &cs);
+	static void __fastcall hook_GhostManager_readPacket(
+		Net::GhostManager*, edx_t, BitStream *bstream, uint32_t time);
 	static Persistent::Base *hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag);
 	static Persistent::Base *hook_GhostManager_readPacket_newGhost_asm();
 
@@ -115,6 +117,7 @@ private:
 			struct {
 				// Handle networking projectiles to their owner
 				x86Hook writePacket_newGhost = {hook_GhostManager_writePacket_newGhost, 0x519262, 1};
+				StaticJmpHook<0x519430, hook_GhostManager_readPacket> readPacket;
 				StaticJmpHook<0x51954F, hook_GhostManager_readPacket_newGhost_asm> readPacket_newGhost;
 			} GhostManager;
 		} Net;

@@ -13,6 +13,7 @@
 #include "plugins/netXT/version.h"
 #include "util/math.h"
 #include <cmath>
+#include <vector>
 
 void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 {
@@ -31,6 +32,32 @@ void NetXTPlugin::hook_GhostManager_writePacket_newGhost(CpuState &cs)
 		stream->writeInt(projectile->predictionKeyXT, 32);
 }
 
+void NetXTPlugin::hook_GhostManager_readPacket(
+	Net::GhostManager *ghostManager, edx_t, BitStream *bstream, uint32_t time)
+{
+	get()->hooks.Net.GhostManager.readPacket.callOriginal(ghostManager, bstream, time);
+
+	if (!ghostManager->allowGhosts)
+		return;
+
+	const auto *clientProjectileSet =
+		(SimSet*)cg.manager->findObject(ClientProjectileSetId);
+
+	if (clientProjectileSet != nullptr) {
+		// Copy for safe iteration
+		const auto &list = clientProjectileSet->objectList;
+		const auto projectiles = std::vector(list.begin(), list.end());
+
+		for (const auto object : clientProjectileSet->objectList) {
+			auto *projectile = (Projectile*)object.get();
+			if (projectile->predictionKeyXT < (uint32_t)cg.psc->firstMoveSeq) {
+				Console->printf(CON_YELLOW, "Removing mispredicted projectile %d", projectile->predictionKeyXT);
+				projectile->deleteObject();
+			}
+		}
+	}
+}
+
 Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag)
 {
 	if (Netcode::XT::ClientProjectiles.check() && isProjectileTag(tag) && stream->readFlag()) {
@@ -47,8 +74,10 @@ Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_newGhost(BitStream *
 			for (const auto object : clientProjectileSet->objectList) {
 				auto *projectile = (Projectile*)object.get();
 				Console->printf(CON_PINK, "%d vs %d", projectile->predictionKeyXT, predictionKey);
-				if (projectile->predictionKeyXT == predictionKey)
+				if (projectile->predictionKeyXT == predictionKey) {
+					projectile->removeFromSet(clientProjectileSet->getId());
 					return projectile;
+				}
 			}
 		}
 	}
@@ -72,22 +101,8 @@ __declspec(naked) Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_ne
 void NetXTPlugin::hook_SimManager_registerObject(SimManager *manager, edx_t, SimObject *obj)
 {
 	// Don't re-add predicted projectiles when they get ghosted
-	if (obj->getManager() != nullptr) {
-		const auto *clientProjectileSet =
-			(SimSet*)manager->findObject(ClientProjectileSetId);
-
-		if (clientProjectileSet != nullptr) {
-			Console->printf("count %d (registerObject check)", clientProjectileSet->objectList.size());
-			for (const auto object : clientProjectileSet->objectList) {
-				if (object.get() == obj) {
-					obj->removeFromSet(clientProjectileSet->getId());
-					return;
-				}
-			}
-		}
-	}
-
-	get()->hooks.SimManager.registerObject.callOriginal(manager, obj);
+	if (obj->getManager() == nullptr)
+		get()->hooks.SimManager.registerObject.callOriginal(manager, obj);
 }
 
 void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)
@@ -355,7 +370,7 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	get()->hooks.Projectile.ctor.callOriginal(projectile, in_datFileId);
 	projectile->subtickOffsetXT = -1;
 	projectile->lagCompensationOffsetXT = -1;
-	projectile->predictionKeyXT = 0;
+	projectile->predictionKeyXT = -1;
 	return projectile;
 }
 
