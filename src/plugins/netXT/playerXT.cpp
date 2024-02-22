@@ -327,7 +327,6 @@ void PlayerXT::clientMove(uint32_t curTime)
 {
 	if (lastProcessTime < curTime) {
 		loadSnapshot(lastProcessTime);
-
 		do {
 			if (!hasFocus) {
 				// Remote ghost
