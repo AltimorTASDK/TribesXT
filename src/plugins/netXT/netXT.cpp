@@ -88,11 +88,13 @@ __declspec(naked) Persistent::Base *NetXTPlugin::hook_GhostManager_readPacket_ne
 	}
 }
 
-void NetXTPlugin::hook_SimManager_registerObject(SimManager *manager, edx_t, SimObject *obj)
+bool NetXTPlugin::hook_SimManager_registerObject(SimManager *manager, edx_t, SimObject *obj)
 {
 	// Don't re-add predicted projectiles when they get ghosted
-	if (obj->getManager() == nullptr)
-		get()->hooks.SimManager.registerObject.callOriginal(manager, obj);
+	if (obj->getManager() != nullptr)
+		return true;
+
+	return get()->hooks.SimManager.registerObject.callOriginal(manager, obj);
 }
 
 void NetXTPlugin::hook_FearGame_consoleCallback_newGame(CpuState &cs)

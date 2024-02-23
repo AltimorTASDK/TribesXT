@@ -43,7 +43,7 @@ private:
 	static Persistent::Base *hook_GhostManager_readPacket_newGhost(BitStream *stream, uint32_t tag);
 	static Persistent::Base *hook_GhostManager_readPacket_newGhost_asm();
 
-	static void __fastcall hook_SimManager_registerObject(SimManager*, edx_t, SimObject *obj);
+	static bool __fastcall hook_SimManager_registerObject(SimManager*, edx_t, SimObject *obj);
 
 	static void hook_FearGame_consoleCallback_newGame(CpuState &cs);
 
