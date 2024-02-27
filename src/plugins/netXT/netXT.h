@@ -258,6 +258,13 @@ private:
 			StaticCodePatch<0x4CB21E, "\xEB\x61"> unpackUpdate_interp;
 			// jmp 0x4CB7F8
 			StaticCodePatch<0x4CB470, "\xE9\x83\x03\x00\x00"> clientProcess_interp;
+			// Remove broken acceleration code
+			StaticCodePatch<0x4CBD99, "\x90\x90"> onAdd_accel1;
+			StaticCodePatch<0x4CBD9F, "\x90"> onAdd_accel2;
+			StaticCodePatch<0x4CBDA2, "\x90\x90\x90\x90\x90"> onAdd_accel3;
+			StaticCodePatch<0x4CBDCB, "\x90\x90"> onAdd_accel4;
+			// jmp 0x4CB947
+			StaticCodePatch<0x4CB847, "\xE9\xFB\x00\x00\x00"> clientProcess_accel;
 		} RocketDumb;
 		struct {
 			// Lag compensation
