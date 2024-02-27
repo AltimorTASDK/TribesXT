@@ -113,6 +113,7 @@
     <ClInclude Include="src\darkstar\Core\streamio.h" />
     <ClInclude Include="src\darkstar\Core\tVector.h" />
     <ClInclude Include="src\darkstar\Ml\processor.h" />
+    <ClInclude Include="src\darkstar\Ml\random.h" />
     <ClInclude Include="src\darkstar\SimObjects\fxRenderImage.h" />
     <ClInclude Include="src\darkstar\SimObjects\simWinConsolePlugin.h" />
     <ClInclude Include="src\darkstar\Sim\Net\ghostManager.h" />

@@ -16,4 +16,5 @@ constexpr auto PrefDamageFlash = v100;
 constexpr auto ProjectileDataSendInheritance = v100;
 constexpr auto ItemImageDataSendAccuFire = v100;
 constexpr auto ClientProjectiles = v100;
+constexpr auto ProjectileDataSendAimDeflection = v100;
 }

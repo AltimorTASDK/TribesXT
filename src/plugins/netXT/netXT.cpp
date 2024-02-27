@@ -1,4 +1,5 @@
 #include "darkstar/Core/bitstream.h"
+#include "darkstar/Ml/random.h"
 #include "darkstar/Sim/Net/ghostManager.h"
 #include "tribes/bullet.h"
 #include "tribes/fearDcl.h"
@@ -365,10 +366,27 @@ Projectile *NetXTPlugin::hook_Projectile_ctor(Projectile *projectile, edx_t, int
 	return projectile;
 }
 
+void NetXTPlugin::hook_Projectile_deflectProjectile(Projectile *projectile, edx_t, float deflection)
+{
+	if (deflection == 0.0f)
+		return;
+
+	// Used synced seed
+	auto random = Random(projectile->predictionKeyXT);
+
+	const auto spread = EulerF(
+		(random.getFloat() - 0.5f) * 2 * math::pi * deflection,
+		(random.getFloat() - 0.5f) * 2 * math::pi * deflection,
+		(random.getFloat() - 0.5f) * 2 * math::pi * deflection);
+
+	projectile->setLinearVelocity(projectile->getLinearVelocity() * RMat3F(spread));
+}
+
 void NetXTPlugin::hook_ProjectileData_pack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
 {
 	get()->hooks.Projectile.ProjectileData.pack.callOriginal(data, stream);
 	stream->write(data->inheritedVelocityScale);
+	stream->write(data->aimDeflection);
 }
 
 void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, edx_t, BitStream *stream)
@@ -376,6 +394,8 @@ void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, e
 	get()->hooks.Projectile.ProjectileData.unpack.callOriginal(data, stream);
 	if (Netcode::XT::ProjectileDataSendInheritance.check())
 		stream->read(&data->inheritedVelocityScale);
+	if (Netcode::XT::ProjectileDataSendAimDeflection.check())
+		stream->read(&data->aimDeflection);
 }
 
 void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t in_currTime)

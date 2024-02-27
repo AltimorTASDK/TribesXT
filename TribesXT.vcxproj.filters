@@ -198,6 +198,9 @@
     <ClInclude Include="src\darkstar\Core\persist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\darkstar\Ml\random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">

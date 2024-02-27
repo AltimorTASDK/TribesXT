@@ -105,6 +105,8 @@ private:
 
 	static Projectile *__fastcall hook_Projectile_ctor(Projectile*, edx_t, int in_datFileId);
 
+	static void __fastcall hook_Projectile_deflectProjectile(Projectile*, edx_t, float deflection);
+
 	static void __fastcall hook_ProjectileData_pack(Projectile::ProjectileData*, edx_t, BitStream *stream);
 	static void __fastcall hook_ProjectileData_unpack(Projectile::ProjectileData*, edx_t, BitStream *stream);
 
@@ -229,6 +231,8 @@ private:
 		struct {
 			// Initialize repurposed fields
 			StaticJmpHook<0x4C1300, hook_Projectile_ctor> ctor;
+			// Sync cg spread seed
+			StaticJmpHook<0x4C1120, hook_Projectile_deflectProjectile> deflectProjectile;
 			struct {
 				// Send inheritance
 				StaticJmpHook<0x4C0690, hook_ProjectileData_pack> pack;

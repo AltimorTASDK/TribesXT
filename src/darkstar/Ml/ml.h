@@ -89,13 +89,6 @@ struct TMat3F : RMat3F {
 		flags |= Matrix_HasTranslation;
 		return *this;
 	}
-
-	constexpr TMat3F operator*(const TMat3F &other) const
-	{
-		TMat3F result;
-		Processor::get()->m_TMat3F_TMat3F_mul(this, &other, &result);
-		return result;
-	}
 };
 
 struct RectF {
@@ -107,3 +100,24 @@ struct ColorF : color_rgb_f32 {
 	using color_rgb_f32::color_rgb_f32;
 	constexpr ColorF(const color_rgb_f32 &color) : color_rgb_f32(color) {}
 };
+
+constexpr Point3F operator*(const Point3F &p, const RMat3F &m)
+{
+	Point3F result;
+	Processor::get()->m_Point3F_RMat3F_mul(&p, &m, &result);
+	return result;
+}
+
+constexpr Point3F operator*(const Point3F &p, const TMat3F &m)
+{
+	Point3F result;
+	Processor::get()->m_Point3F_TMat3F_mul(&p, &m, &result);
+	return result;
+}
+
+constexpr TMat3F operator*(const TMat3F &a, const TMat3F &b)
+{
+	TMat3F result;
+	Processor::get()->m_TMat3F_TMat3F_mul(&a, &b, &result);
+	return result;
+}

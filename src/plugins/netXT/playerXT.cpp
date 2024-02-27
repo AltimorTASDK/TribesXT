@@ -424,7 +424,8 @@ void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 	const auto inheritedVelocity = projectile->m_shooterVel * data.inheritedVelocityScale;
 	const auto velocity = baseVelocity + inheritedVelocity;
 	projectile->setLinearVelocity(velocity);
-	projectile->m_instTerminalVelocity = velocity;
+	projectile->deflectProjectile(data.aimDeflection);
+	projectile->m_instTerminalVelocity = getLinearVelocity();
 
 	// Match the passage of time on the server
 	projectile->spawnTimeXT = lastProcessTime - TickMs;

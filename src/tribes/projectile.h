@@ -80,6 +80,12 @@ public:
 		((func_t)0x4C0EB0)(this, io_pGM, io_pStream);
 	}
 
+	void deflectProjectile(float in_deflection)
+	{
+		using func_t = to_static_function_t<decltype(&Projectile::deflectProjectile)>;
+		((func_t)0x4C1120)(this, in_deflection);
+	}
+
 	bool hasSubtick() const
 	{
 		return subtickOffsetXT != -1;
