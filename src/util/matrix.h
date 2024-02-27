@@ -13,15 +13,16 @@ public:
 
 	static constexpr auto row_count = N;
 	static constexpr auto col_count = M;
-	static constexpr auto elem_count = M * N;
+	static constexpr auto elem_count = N * M;
 
-	T elems[N * M];
+	T elems[elem_count];
 
 	constexpr matrix() : elems { 0 } {}
 
-	constexpr matrix(auto ...values) : elems { values... }
+	constexpr matrix(auto ...values)
+		requires (sizeof...(values) == elem_count)
+		: elems { values... }
 	{
-		static_assert(sizeof...(values) == N * M);
 	}
 
 	constexpr T &get(size_t i, size_t j)
