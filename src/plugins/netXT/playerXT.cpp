@@ -459,6 +459,8 @@ void PlayerXT::initProjectileXT(Projectile *projectile)
 
 void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 {
+	projectile->m_pShooter = this;
+
 	const auto &data = *projectile->m_projectileData;
 
 	const auto direction = Point3F(projectile->getTransform().row<1>());
