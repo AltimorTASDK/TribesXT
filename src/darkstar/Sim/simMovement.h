@@ -1,5 +1,6 @@
 #pragma once
 
+#include "darkstar/Core/bitset.h"
 #include "darkstar/Ml/ml.h"
 #include "darkstar/Sim/simContainer.h"
 #include "util/struct.h"
@@ -7,14 +8,21 @@
 
 class SimMovement : public SimContainer {
 protected:
-	enum Flags : uint32_t {
-		AtRest = 1 << 7
+	enum Flags {
+		UseFriction         = BIT(0),
+		UseAngulerVelocity  = BIT(1),
+		UseElasticity       = BIT(2),
+		UseCurrent          = BIT(3),
+		UseDrag             = BIT(4),
+		TrackContacts       = BIT(5),
+		RotateBoundingBox   = BIT(6),
+		AtRest              = BIT(7),
+		AlwaysCalcAVelocity = BIT(8),
 	};
-
 private:
 	FIELD(0xA0, TMat3F, transform);
 	FIELD(0xD4, TMat3F, invTransform);
-	FIELD(0x178, uint32_t, flags);
+	FIELD(0x178, BitSet32, flags);
 	FIELD(0x19C, Point3F, lPosition);
 	FIELD(0x1A8, Point3F, lVelocity);
 protected:
@@ -33,7 +41,7 @@ public:
 	void setLinearVelocity(const Point3F &vel)
 	{
 		lVelocity = vel;
-		flags &= ~AtRest;
+		flags.clear(AtRest);
 	}
 
 	void setTransform(const TMat3F &mat)
