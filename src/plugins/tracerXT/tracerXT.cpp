@@ -54,12 +54,8 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 
 	stream->read(&bullet->m_spawnPosition);
 
-	// Work around the poor calculation from vanilla servers
-	const auto elapsedMs = std::max(stream->readUInt(15), TickMs) - TickMs;
-	const auto elapsedSecs = msToSecs(elapsedMs);
-
-	// Start tracer from initial position
-	bullet->m_spawnTime = cg.currentTime - elapsedMs;
+	[[maybe_unused]]
+	const auto elapsedMs = stream->readUInt(15);
 
 	bullet->m_spawnDirection = stream->readNormalVector(20);
 	bullet->m_renderImage.faceDirection(bullet->m_spawnDirection);
@@ -68,8 +64,7 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	bullet->m_spawnVelocity = bullet->m_spawnDirection * bullet->m_spawnVelocityLen;
 	bullet->setLinearVelocity(bullet->m_spawnVelocity);
 
-	const auto position = bullet->m_spawnPosition + bullet->m_spawnVelocity * elapsedSecs;
-	bullet->setTransform({bullet->getRotation(), position});
+	bullet->setTransform({bullet->getRotation(), bullet->m_spawnPosition});
 
 	if (Netcode::XT::TracerInheritance.check()) {
 		// Using Player::packUpdate velocity quantization

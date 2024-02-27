@@ -1,4 +1,6 @@
 #include "darkstar/console/console.h"
+#include "tribes/bullet.h"
+#include "tribes/fearDcl.h"
 #include "tribes/playerPSC.h"
 #include "tribes/projectile.h"
 #include "tribes/worldGlobals.h"
@@ -429,10 +431,18 @@ void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 
 	if (hasSubtick()) {
 		// Match visual to subtick lag compensation
-		projectile->spawnTimeXT += xt.currentSubtick;
+		projectile->spawnTimeXT += xt.currentSubtick - TickMs;
 	}
 
 	projectile->m_lastUpdated = projectile->spawnTimeXT;
+
+	if (projectile->getGhostTag() == BulletPersTag) {
+		auto *bullet = (Bullet*)projectile;
+		bullet->m_spawnTime = bullet->spawnTimeXT;
+		bullet->m_spawnVelocity = velocity;
+		bullet->m_spawnVelocityLen = velocity.length();
+		bullet->m_spawnPosition = projectile->getLinearPosition();
+	}
 }
 
 void PlayerXT::clientFireImageProjectile(int imageSlot)
