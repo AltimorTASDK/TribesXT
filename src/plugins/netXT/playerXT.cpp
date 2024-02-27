@@ -275,7 +275,8 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 		updateDamage(0.032f);
 
 		if (subtickRecord.subtick != NoSubtick) {
-			const auto subtickTime = lastProcessTime + subtickRecord.subtick;
+			const auto lastTickTime = lastProcessTime - TickMs;
+			const auto subtickTime = lastTickTime + subtickRecord.subtick;
 			const auto subtickPitch = viewPitch + subtickRecord.pitch;
 			const auto subtickYaw = getRot().z + subtickRecord.yaw;
 			xt.currentSubtick = subtickRecord.subtick;
@@ -334,7 +335,8 @@ void PlayerXT::clientMove(uint32_t curTime)
 			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
 
 			if (subtickRecord.subtick != NoSubtick) {
-				const auto subtickTime = lastProcessTime + subtickRecord.subtick;
+				const auto lastTickTime = lastProcessTime - TickMs;
+				const auto subtickTime = lastTickTime + subtickRecord.subtick;
 				const auto subtickPitch = viewPitch + subtickRecord.pitch;
 				const auto subtickYaw = getRot().z + subtickRecord.yaw;
 				xt.currentSubtick = subtickRecord.subtick;
@@ -440,8 +442,8 @@ void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 	if (projectile->getGhostTag() == BulletPersTag) {
 		auto *bullet = (Bullet*)projectile;
 		bullet->m_spawnTime = bullet->spawnTimeXT;
-		bullet->m_spawnVelocity = velocity;
-		bullet->m_spawnVelocityLen = velocity.length();
+		bullet->m_spawnVelocity = getLinearVelocity();
+		bullet->m_spawnVelocityLen = getLinearVelocity().length();
 		bullet->m_spawnPosition = projectile->getLinearPosition();
 	}
 }
