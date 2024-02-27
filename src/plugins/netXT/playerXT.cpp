@@ -281,9 +281,8 @@ void PlayerXT::updateWeapon(const PlayerMove &move)
 
 	xt.lastTrigger = move.trigger;
 
-	for (auto i = 0; i < MaxItemImages; i++) {
+	for (auto i = 0; i < MaxItemImages; i++)
 		updateImageState(i, 0.032f);
-	}
 }
 
 void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
@@ -486,6 +485,7 @@ void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 		bullet->m_spawnVelocity = getLinearVelocity();
 		bullet->m_spawnVelocityLen = getLinearVelocity().length();
 		bullet->m_spawnPosition = projectile->getLinearPosition();
+		bullet->setSearchBoundaries();
 	}
 }
 
