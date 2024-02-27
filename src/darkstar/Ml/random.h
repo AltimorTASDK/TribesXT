@@ -1,6 +1,5 @@
 #pragma once
 
-#include "util/memory.h"
 #include "util/meta.h"
 #include "util/struct.h"
 #include <cstdint>
