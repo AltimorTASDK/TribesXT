@@ -17,6 +17,7 @@ public:
 	public:
 		FIELD(0x18, Point3F, m_endPoint);
 		FIELD(0x24, Point3F, m_startPoint);
+		FIELD(0x30, float, m_factor);
 	};
 
 	FIELD(0x494, uint32_t, m_spawnTime);
