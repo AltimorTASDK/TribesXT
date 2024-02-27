@@ -78,7 +78,7 @@ public:
 		uint32_t currentLagCompensation = -1;
 
 		// Server + client
-		uint32_t lastWeaponProcessTime = 0;
+		uint32_t maxProcessTime = 0;
 		uint32_t moveCount = 0;
 		bool lastTrigger = false;
 	};
@@ -95,6 +95,11 @@ public:
 	bool hasLagCompensation() const
 	{
 		return xt.currentLagCompensation != -1;
+	}
+
+	bool isRollback() const
+	{
+		return isGhost() && lastProcessTime <= xt.maxProcessTime;
 	}
 
 	Snapshot createSnapshot(uint32_t time = 0) const;

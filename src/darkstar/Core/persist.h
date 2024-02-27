@@ -5,7 +5,16 @@
 
 namespace Persistent {
 
-class AbstractTaggedClass;
+class AbstractTaggedClass {
+public:
+	struct Field {
+		const char *fieldName;
+		int type;
+		int elementCount;
+		int offset;
+		int ranking;
+	};
+};
 
 class Base {
 };

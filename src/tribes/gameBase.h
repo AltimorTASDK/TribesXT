@@ -2,15 +2,32 @@
 
 #include "darkstar/Ml/ml.h"
 #include "darkstar/Sim/simMovement.h"
+#include "tribes/fearDynamicDataPlugin.h"
 #include "util/memory.h"
 #include "util/struct.h"
 #include <cstddef>
 #include <cstdint>
 
+class ResourceObject;
+
 class GameBase : public SimMovement {
 public:
 	struct GameBaseData {
-		std::byte padding00[0x34];
+		const char *dbmDatFileName;
+	private:
+		std::byte padding04[0x10 - 0x04];
+	public:
+		FearDynamicDataPlugin::DataBlockClass *pluginClass;
+		const char *className;
+		int mapFilter;
+		const char *mapIcon;
+		const char *description;
+		ResourceObject *iconBmp[2];
+		bool visibleToSensor;
+		bool validateShape;
+		bool validateMaterials;
+	private:
+		std::byte padding2F[0x34 - 0x2F];
 	};
 
 	static constexpr uint8_t SensorPingedBase = 24;

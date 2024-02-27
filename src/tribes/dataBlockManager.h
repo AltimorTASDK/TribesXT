@@ -25,4 +25,12 @@ public:
 
 		return nullptr;
 	}
+
+	const char *lookupBlockName(int blockId, int groupId)
+	{
+		if (const auto *data = lookupDataBlock(blockId, groupId); data != nullptr)
+			return data->dbmDatFileName;
+
+		return nullptr;
+	}
 };

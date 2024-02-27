@@ -25,6 +25,15 @@ public:
 	virtual void consoleCallback(CMDConsole*, const char *consoleLine) = 0;
 };
 
+class CMDDataManager {
+public:
+	virtual void declareDataBlock(const char *className, const char *objectName) = 0;
+	virtual const char *getDataField(const char *objectName, const char *slotName, const char *array) = 0;
+	virtual void setDataField(const char *objectName, const char *slotName, const char *array, int argc, const char **argv) = 0;
+	virtual void beginObject(const char *className, const char *objectName) = 0;
+	virtual void endObject() = 0;
+};
+
 class CMDConsole : public CMDCallback {
 public:
 	enum Type {

@@ -4,6 +4,7 @@
 #include "tribes/gameBase.h"
 #include "util/memory.h"
 #include "util/struct.h"
+#include <cstddef>
 
 class ShapeBase : public GameBase {
 protected:
@@ -12,6 +13,12 @@ protected:
 		OrientationMask = BIT(13),
 	};
 
+public:
+	struct ShapeBaseData : GameBase::GameBaseData {
+		std::byte padding34[0x68 - 0x34];
+	};
+
+protected:
 	FIELD(0x258, Point3F, rotation);
 public:
 	FIELD(0x740, float, energy);

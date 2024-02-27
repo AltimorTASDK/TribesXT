@@ -113,6 +113,18 @@ void NetXTPlugin::hook_FearGame_serverProcess(FearGame *game)
 		PlayerXT::saveLagCompensationSnapshotAll(sg.currentTime);
 }
 
+void NetXTPlugin::hook_GameBaseData_pack(GameBase::GameBaseData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.GameBase.GameBaseData.pack.callOriginal(data, stream);
+	stream->writeString(data->className);
+}
+void NetXTPlugin::hook_GameBaseData_unpack(GameBase::GameBaseData *data, edx_t, BitStream *stream)
+{
+	get()->hooks.GameBase.GameBaseData.unpack.callOriginal(data, stream);
+	if (Netcode::XT::GameBaseDataSendClassName.check())
+		data->className = stream->readSTString();
+}
+
 PlayerXT *NetXTPlugin::hook_Player_ctor(PlayerXT *player)
 {
 	// Initialize new fields
@@ -214,6 +226,23 @@ void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int i
 
 	if (player->isGhost())
 		player->clientFireImageProjectile(imageSlot);
+}
+
+void NetXTPlugin::hook_Player_updateImageState(PlayerXT *player, edx_t, int imageSlot, float dt)
+{
+	// Update ammo state on the client
+	auto *itemImage = &player->itemImageList[imageSlot];
+
+	if (itemImage->imageId != -1 && player->isGhost()) {
+		const auto &imageData = *player->getItemImageData(itemImage->imageId);
+
+		if (imageData.ammoType == -1)
+			itemImage->ammo = player->energy > imageData.minEnergy;
+		else
+			itemImage->ammo = cg.psc->itemCount(imageData.ammoType) > 0;
+	}
+
+	get()->hooks.Player.updateImageState.callOriginal(player, imageSlot, dt);
 }
 
 void NetXTPlugin::hook_ItemImageData_pack(Player::ItemImageData *data, edx_t, BitStream *stream)

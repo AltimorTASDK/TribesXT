@@ -20,6 +20,7 @@ public:
 	FIELD(0xAC, float, camDist);
 	FIELD(0xB4, GameBase*, controlObject);
 	FIELD(0xB8, Player*, controlPlayer);
+	ARRAY_FIELD(0xBC, int[Player::MaxItemTypes], itemTypeCount);
 	FIELD(0x3DC, int, lastPlayerMove);
 	FIELD(0x3E0, int, firstMoveSeq);
 	FIELD(0x3E8, int, curGuiMode);
@@ -30,5 +31,12 @@ public:
 	{
 		using func_t = to_static_function_t<decltype(&PlayerPSC::getClientMove)>;
 		return ((func_t)0x482DF0)(this, time);
+	}
+
+	int itemCount(int item) const
+	{
+		if (item >= 0 && item < Player::MaxItemTypes)
+			return itemTypeCount[item];
+		return 0;
 	}
 };

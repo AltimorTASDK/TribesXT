@@ -140,9 +140,12 @@
     <ClInclude Include="src\tribes\dataBlockManager.h" />
     <ClInclude Include="src\tribes\fear.strings.h" />
     <ClInclude Include="src\tribes\fearDcl.h" />
+    <ClInclude Include="src\tribes\fearDynamicDataPlugin.h" />
     <ClInclude Include="src\tribes\grenade.h" />
+    <ClInclude Include="src\tribes\item.h" />
     <ClInclude Include="src\tribes\projectileFactory.h" />
     <ClInclude Include="src\tribes\rocketDumb.h" />
+    <ClInclude Include="src\tribes\staticBase.h" />
     <ClInclude Include="src\tribes\version.h" />
     <ClInclude Include="src\tribes\fearPlugin.h" />
     <ClInclude Include="src\tribes\projectile.h" />

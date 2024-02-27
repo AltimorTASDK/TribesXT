@@ -1,6 +1,7 @@
 #pragma once
 
 #include "darkstar/Sim/simConsolePlugin.h"
+#include "tribes/gameBase.h"
 #include "tribes/projectile.h"
 #include "plugins/netXT/playerXT.h"
 #include "plugins/netXT/playerPSCXT.h"
@@ -49,6 +50,9 @@ private:
 
 	static void __fastcall hook_FearGame_serverProcess(FearGame*);
 
+	static void __fastcall hook_GameBaseData_pack(GameBase::GameBaseData*, edx_t, BitStream *stream);
+	static void __fastcall hook_GameBaseData_unpack(GameBase::GameBaseData*, edx_t, BitStream *stream);
+
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT*);
 
 	static bool __fastcall hook_Player_onAdd(PlayerXT*);
@@ -76,6 +80,8 @@ private:
 	static void hook_Player_updateMove_landAnim(CpuState &cs);
 
 	static void __fastcall hook_Player_fireImageProjectile(PlayerXT*, edx_t, int imageSlot);
+
+	static void __fastcall hook_Player_updateImageState(PlayerXT*, edx_t, int imageSlot, float dt);
 
 	static void __fastcall hook_ItemImageData_pack(Player::ItemImageData*, edx_t, BitStream *stream);
 	static void __fastcall hook_ItemImageData_unpack(Player::ItemImageData*, edx_t, BitStream *stream);
@@ -141,6 +147,13 @@ private:
 			StaticJmpHook<0x4E8EE0, hook_FearGame_serverProcess> serverProcess;
 		} FearGame;
 		struct {
+			struct {
+				// Send className
+				StaticJmpHook<0x492E00, hook_GameBaseData_pack> pack;
+				StaticJmpHook<0x492E40, hook_GameBaseData_unpack> unpack;
+			} GameBaseData;
+		} GameBase;
+		struct {
 			// Use PlayerXT
 			StaticCodePatch<0x42F7D9, PlayerXT::SIZEOF> allocationSize1;
 			StaticCodePatch<0x4AE8D7, PlayerXT::SIZEOF> allocationSize2;
@@ -183,12 +196,15 @@ private:
 			StaticCodePatch<0x4B422E, "\x90\x90"> updateWeaponOnClient6;
 			// Predict shots on the client
 			StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
-			// Don't rely on the server for trigger/fire state
+			// Update ammo on the client
+			StaticJmpHook<0x4B3B50, hook_Player_updateImageState> updateImageState;
+			// Don't rely on the server for trigger/fire/ammo state
 			StaticCodePatch<0x4B4049, "\x90\x90\x90"> ignoreServerFire1;
-			StaticCodePatch<0x4B409E, "\x90\x90\x90"> ignoreServerFire2;
-			StaticCodePatch<0x4B40A5, "\x90\x90\x90\x90\x90"> ignoreServerFire3;
+			StaticCodePatch<0x4B4084, "\x90\x90\x90"> ignoreServerFire2;
+			StaticCodePatch<0x4B409E, "\x90\x90\x90"> ignoreServerFire3;
+			StaticCodePatch<0x4B40A5, "\x90\x90\x90\x90\x90"> ignoreServerFire4;
 			// jmp 0x4B40FB
-			StaticCodePatch<0x4B40AA, "\xEB\x4F"> ignoreServerFire4;
+			StaticCodePatch<0x4B40AA, "\xEB\x4F"> ignoreServerFire5;
 			struct {
 				// Send accuFire
 				StaticJmpHook<0x4B0B20, hook_ItemImageData_pack> pack;

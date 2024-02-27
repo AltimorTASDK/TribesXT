@@ -227,19 +227,52 @@ void PlayerXT::setViewAnglesClamped(float pitch, float yaw)
 
 void PlayerXT::updateItem(const PlayerMove &move)
 {
-	if (move.useItem != -1) {
+	const auto item = move.useItem;
+
+	if (item == -1)
+		return;
+
+	if (!isGhost()) {
 		char buf[16];
-		sprintf_s(buf, "%d", move.useItem);
+		sprintf_s(buf, "%d", item);
 		Console->executef(3, "remoteUseItem", scriptThis(), buf);
+		return;
 	}
+
+	if (isRollback())
+		return;
+
+	if (cg.psc->itemCount(item) == 0)
+		return;
+
+	const auto *data = getItemData(item);
+
+	if (data == nullptr)
+		return;
+
+	const auto *className = data->className;
+
+	// Must be a weapon
+	if (className == nullptr || _stricmp(className, "Weapon") != 0)
+		return;
+
+	const auto *image = getItemImageData(data->imageId);
+
+	if (image == nullptr)
+		return;
+
+	// Must have ammo or be an energy weapon
+	if (image->ammoType != -1 && cg.psc->itemCount(image->ammoType) <= 0)
+		return;
+
+	// Predict weapon swap
+	mountItem(item, 0, -1);
 }
 
 void PlayerXT::updateWeapon(const PlayerMove &move)
 {
-	if (lastProcessTime <= xt.lastWeaponProcessTime)
+	if (isRollback())
 		return;
-
-	xt.lastWeaponProcessTime = lastProcessTime;
 
 	if (xt.lastTrigger && !move.trigger)
 		setImageTriggerUp(0);
@@ -248,8 +281,9 @@ void PlayerXT::updateWeapon(const PlayerMove &move)
 
 	xt.lastTrigger = move.trigger;
 
-	for (auto i = 0; i < MaxItemImages; i++)
+	for (auto i = 0; i < MaxItemImages; i++) {
 		updateImageState(i, 0.032f);
+	}
 }
 
 void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
@@ -343,6 +377,9 @@ void PlayerXT::clientMove(uint32_t curTime)
 
 				updateMove(move, false);
 
+				// Beacons don't get subtick because they have to be synced with movement
+				updateItem(*move);
+
 				// Update weapon with subtick state
 				loadSnapshotInterpolated(subtickTime);
 				setViewAnglesClamped(subtickPitch, subtickYaw);
@@ -354,7 +391,11 @@ void PlayerXT::clientMove(uint32_t curTime)
 			} else {
 				updateMove(move, false);
 				updateWeapon(*move);
+				updateItem(*move);
 			}
+
+			if (lastProcessTime > xt.maxProcessTime)
+				xt.maxProcessTime = lastProcessTime;
 
 			lastPlayerMove = *move;
 			xt.moveCount++;

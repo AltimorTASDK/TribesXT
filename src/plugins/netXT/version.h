@@ -17,4 +17,5 @@ constexpr auto ProjectileDataSendInheritance = v100;
 constexpr auto ItemImageDataSendAccuFire = v100;
 constexpr auto ClientProjectiles = v100;
 constexpr auto ProjectileDataSendAimDeflection = v100;
+constexpr auto GameBaseDataSendClassName = v100;
 }

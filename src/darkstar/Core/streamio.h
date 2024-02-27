@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/memory.h"
+#include "util/meta.h"
 #include <cstdint>
 
 enum StreamCap {
@@ -43,6 +45,12 @@ public:
 
 	virtual void readString(char stringBuf[256]);
 	virtual void writeString(const char *stringBuf, int maxLen = 255);
+
+	const char *readSTString(bool casesens = false)
+	{
+		using func_t = to_static_function_t<decltype(&StreamIO::readSTString)>;
+		return ((func_t)0x416950)(this, casesens);
+	}
 
 	bool write(const auto &value)
 	{

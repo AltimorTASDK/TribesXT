@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tribes/dataBlockManager.h"
+#include "tribes/item.h"
 #include "tribes/projectileFactory.h"
 #include "tribes/shapeBase.h"
 #include "tribes/worldGlobals.h"
@@ -27,6 +28,7 @@ class Player : public ShapeBase {
 public:
 	static constexpr size_t SIZEOF = 0x323C;
 
+	static constexpr auto MaxItemTypes = 200;
 	static constexpr auto MaxItemImages = 8;
 	static constexpr auto MaxPitch = deg_to_rad(88);
 
@@ -147,6 +149,11 @@ public:
 
 	static_assert(sizeof(ItemImageData) == 0xD8);
 
+	struct ItemTypeEntry {
+		int count;
+		int imageSlot;
+	};
+
 	struct ItemImageEntry {
 		int state;
 		int typeId;
@@ -181,12 +188,19 @@ public:
 	FIELD(0x1050, int, mountPoint);
 	FIELD(0x1054, float, forwardAxisMovement);
 	FIELD(0x1058, float, sideAxisMovement);
+	ARRAY_FIELD(0x105C, ItemTypeEntry[MaxItemTypes], itemTypeList);
 	ARRAY_FIELD(0x169C, ItemImageEntry[MaxItemImages], itemImageList);
 
 	void setAnimation(uint32_t anim)
 	{
 		using func_t = to_static_function_t<decltype(&Player::setAnimation)>;
 		((func_t)0x4AD1D0)(this, anim);
+	}
+
+	bool mountItem(int type, int imageSlot, int team)
+	{
+		using func_t = to_static_function_t<decltype(&Player::mountItem)>;
+		return ((func_t)0x4B3610)(this, type, imageSlot, team);
 	}
 
 	void updateImageState(int imageSlot, float dt)
@@ -230,6 +244,12 @@ public:
 		static char name[10];
 		sprintf_s(name, "%d", getId());
 		return name;
+	}
+
+	Item::ItemData *getItemData(int typeId) const
+	{
+		return (Item::ItemData*)wg->dbm->lookupDataBlock(
+			typeId, DataBlockManager::ItemDataType);
 	}
 
 	ItemImageData *getItemImageData(int imageId) const
