@@ -189,11 +189,12 @@ private:
 			x86Hook updateMove_landAnim = {hook_Player_updateMove_landAnim, 0x4BA7F1, 1};
 			// Run weapon update logic on the client
 			StaticCodePatch<0x4B2D68, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient1;
-			StaticCodePatch<0x4B3DC0, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient2;
-			StaticCodePatch<0x4B413A, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient3;
-			StaticCodePatch<0x4B4196, "\x90\x90"> updateWeaponOnClient4;
-			StaticCodePatch<0x4B41FA, "\x90\x90"> updateWeaponOnClient5;
-			StaticCodePatch<0x4B422E, "\x90\x90"> updateWeaponOnClient6;
+			StaticCodePatch<0x4B31DA, "\x90\x90"> updateWeaponOnClient2;
+			StaticCodePatch<0x4B3DC0, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient3;
+			StaticCodePatch<0x4B413A, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient4;
+			StaticCodePatch<0x4B4196, "\x90\x90"> updateWeaponOnClient5;
+			StaticCodePatch<0x4B41FA, "\x90\x90"> updateWeaponOnClient6;
+			StaticCodePatch<0x4B422E, "\x90\x90"> updateWeaponOnClient7;
 			// Predict shots on the client
 			StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
 			// Update ammo on the client
