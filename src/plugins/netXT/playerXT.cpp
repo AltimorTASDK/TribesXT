@@ -389,8 +389,8 @@ void PlayerXT::clientMove(uint32_t curTime)
 				xt.currentSubtick = NoSubtick;
 			} else {
 				updateMove(move, false);
-				updateWeapon(*move);
 				updateItem(*move);
+				updateWeapon(*move);
 			}
 
 			if (lastProcessTime > xt.maxProcessTime)
