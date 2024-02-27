@@ -484,9 +484,9 @@ void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
 	if (projectile->getGhostTag() == BulletPersTag) {
 		auto *bullet = (Bullet*)projectile;
 		bullet->m_spawnTime = bullet->spawnTimeXT;
-		bullet->m_spawnVelocity = getLinearVelocity();
-		bullet->m_spawnVelocityLen = getLinearVelocity().length();
-		bullet->m_spawnPosition = projectile->getLinearPosition();
+		bullet->m_spawnVelocity = bullet->getLinearVelocity();
+		bullet->m_spawnVelocityLen = bullet->getLinearVelocity().length();
+		bullet->m_spawnPosition = bullet->getLinearPosition();
 		bullet->setSearchBoundaries();
 	}
 }
