@@ -96,11 +96,35 @@ public:
 		((func_t)0x403640)(this, id, name, cb, privilegeLevel);
 	}
 
+	const char *getVariable(const char *name)
+	{
+		using func_t = to_static_function_t<decltype(&CMDConsole::getVariable)>;
+		return ((func_t)0x403400)(this, name);
+	}
+
+	bool getBoolVariable(const char *name, bool def = false)
+	{
+		using func_t = to_static_function_t<decltype(&CMDConsole::getBoolVariable)>;
+		return ((func_t)0x403460)(this, name, def);
+	}
+
+	int getIntVariable(const char *name, int def = 0)
+	{
+		using func_t = to_static_function_t<decltype(&CMDConsole::getIntVariable)>;
+		return ((func_t)0x403490)(this, name, def);
+	}
+
+	float getFloatVariable(const char *name, float def = 0.0f)
+	{
+		using func_t = to_static_function_t<decltype(&CMDConsole::getFloatVariable)>;
+		return ((func_t)0x4034C0)(this, name, def);
+	}
+
 	const char *evaluate(const char *string, bool echo = true,
 	                     const char *fileName = nullptr, int privilegeLevel = 0)
 	{
 		using func_t = to_static_function_t<decltype(&CMDConsole::evaluate)>;
-		((func_t)0x403640)(this, string, echo, fileName, privilegeLevel);
+		return ((func_t)0x403640)(this, string, echo, fileName, privilegeLevel);
 	}
 
 	void executef(int argc, auto &&...args)
