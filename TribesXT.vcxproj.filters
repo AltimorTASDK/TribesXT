@@ -210,6 +210,9 @@
     <ClInclude Include="src\tribes\staticBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\plugins\renderXT\renderXT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\util\memory.cpp">
@@ -255,6 +258,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\darkstar\Sim\simBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugins\renderXT\renderXT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

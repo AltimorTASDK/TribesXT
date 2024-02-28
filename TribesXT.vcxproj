@@ -57,7 +57,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
@@ -129,6 +129,7 @@
     <ClInclude Include="src\plugins\netXT\playerPSCXT.h" />
     <ClInclude Include="src\plugins\netXT\playerXT.h" />
     <ClInclude Include="src\plugins\netXT\version.h" />
+    <ClInclude Include="src\plugins\renderXT\renderXT.h" />
     <ClInclude Include="src\plugins\scriptXT\scriptXT.h" />
     <ClInclude Include="src\plugins\skiBugFix\skiBugFix.h" />
     <ClInclude Include="src\plugins\sleepFix\sleepFix.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="src\plugins\netXT\netXT.cpp" />
     <ClCompile Include="src\plugins\netXT\playerPSCXT.cpp" />
     <ClCompile Include="src\plugins\netXT\playerXT.cpp" />
+    <ClCompile Include="src\plugins\renderXT\renderXT.cpp" />
     <ClCompile Include="src\plugins\scriptXT\scriptXT.cpp" />
     <ClCompile Include="src\plugins\tracerXT\tracerXT.cpp" />
     <ClCompile Include="src\plugins\wineFix\wineFix.cpp" />
