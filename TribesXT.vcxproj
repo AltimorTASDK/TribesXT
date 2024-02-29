@@ -107,6 +107,12 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\gl\glcorearb.h" />
+    <ClInclude Include="include\gl\glext.h" />
+    <ClInclude Include="include\gl\glxext.h" />
+    <ClInclude Include="include\gl\wgl.h" />
+    <ClInclude Include="include\gl\wglext.h" />
+    <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="src\darkstar\Core\bitset.h" />
     <ClInclude Include="src\darkstar\Core\bitstream.h" />
     <ClInclude Include="src\darkstar\Core\persist.h" />
