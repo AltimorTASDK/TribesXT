@@ -45,9 +45,9 @@ const T scriptStringToType(const char *arg)
 template<std::same_as<bool> T>
 const T scriptStringToType(const char *arg)
 {
-	if (stricmp(arg, "True") == 0)
+	if (_stricmp(arg, "True") == 0)
 		return true;
-	if (stricmp(arg, "False") == 0)
+	if (_stricmp(arg, "False") == 0)
 		return false;
 	return atof(arg) != 0;
 }
@@ -160,7 +160,7 @@ template<string_literal Name, auto Handler>
 void addCommandXT(CMDConsole *console)
 {
 	console->addCommand(0, Name.value, []<typename R, typename ...Args>(R(*)(Args...)) {
-		return [](CMDConsole *console, int id, int argc, const char *argv[]) {
+		return +[](CMDConsole *console, int id, int argc, const char *argv[]) {
 			constexpr auto isRemote = Name.starts_with("remote");
 
 			if (argc != sizeof...(Args) + 1) {
@@ -175,5 +175,17 @@ void addCommandXT(CMDConsole *console)
 
 			return detail::callCommandHandler<isRemote, 1, Args...>(Handler, argv);
 		};
-	}(Handler));
+	}(+Handler));
+}
+
+template<string_literal Name, auto Handler>
+void addVariableXT(CMDConsole *console, const char *value = nullptr)
+{
+	console->addVariable(0, Name.value, []<typename T>(void(*)(T)) {
+		return +[](CMDConsole *console, int id, int argc, const char *argv[]) {
+			if (argc == 2)
+				Handler(detail::scriptStringToType<T>(argv[1]));
+			return (const char*)nullptr;
+		};
+	}(+Handler), value);
 }
