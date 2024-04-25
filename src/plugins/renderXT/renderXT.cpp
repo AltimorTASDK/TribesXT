@@ -43,8 +43,4 @@ void RenderXTPlugin::init()
 		}>(console);
 		wglSwapIntervalEXT(console->getBoolVariable("$pref::waitForVSync"));
 	}
-
-	auto maxAnisotropy = 0.0f;
-	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
-	console->printf(CON_PINK, "maxAnisotropy %f", maxAnisotropy);
 }

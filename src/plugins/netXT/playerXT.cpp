@@ -479,8 +479,6 @@ void PlayerXT::initProjectileXT(Projectile *projectile)
 
 	projectile->predictionKeyXT = xt.moveCount;
 	projectile->spawnTimeXT = wg->currentTime;
-
-	Console->printf(CON_BLUE, "%s projectile spawned at move %d", wg == &sg ? "sv" : "cl", xt.moveCount);
 }
 
 void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)
@@ -540,8 +538,6 @@ void PlayerXT::clientFireImageProjectile(int imageSlot)
 
 	manager->addObject(projectile);
 	projectile->addToSet(ClientProjectileSetId);
-
-	Console->printf(CON_BLUE, "added to set %d %d", projectile->predictionKeyXT, projectile->predictionKeyXT & ~TickMask);
 
 	initPredictedProjectile(projectile, imageData.projectile.type);
 }
