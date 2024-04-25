@@ -22,6 +22,11 @@ private:
 		// Set GL_TEXTURE_MAX_ANISOTROPY_EXT
 		//StaticJmpHook<glBindTexture, hook_glBindTexture> glBindTexture;
 		StaticJmpHook<glGenTextures, hook_glGenTextures> glGenTextures;
+		struct {
+			// Fix texture scaling
+			//StaticCodePatch<0x4F8B46+3, "\x18"> renderSurfacesOGL_fixScaleX;
+			//StaticCodePatch<0x4F8B79+3, "\x10"> renderSurfacesOGL_fixScaleY;
+		} ITRRender;
 	} hooks;
 
 public:
