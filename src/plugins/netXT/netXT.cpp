@@ -245,6 +245,14 @@ void NetXTPlugin::hook_Player_updateImageState(PlayerXT *player, edx_t, int imag
 	get()->hooks.Player.updateImageState.callOriginal(player, imageSlot, dt);
 }
 
+void NetXTPlugin::hook_Player_unpackItemImages_initial(CpuState &cs)
+{
+	// Initialize to Activate state if the server doesn't tell us to start in Fire
+	auto *image = (Player::ItemImageEntry*)(cs.reg.ebx - 0x1C);
+	image->state = cs.eflag.zf ? Player::ItemImageEntry::Activate
+	                           : Player::ItemImageEntry::Fire;
+}
+
 void NetXTPlugin::hook_ItemImageData_pack(Player::ItemImageData *data, edx_t, BitStream *stream)
 {
 	get()->hooks.Player.ItemImageData.pack.callOriginal(data, stream);

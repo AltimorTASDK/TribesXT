@@ -59,9 +59,41 @@ public:
 		const Snapshot &operator[](size_t index) const { return buffer[index]; }
 	};
 
+	struct ImageSnapshot {
+		uint32_t moveCount = -1;
+		struct {
+			int typeId;
+			float delayTime;
+			bool triggerDown;
+			bool ammo;
+		} images[MaxItemImages];
+
+		bool isValid() const
+		{
+			return moveCount != -1;
+		}
+
+		void invalidate()
+		{
+			moveCount = -1;
+		}
+	};
+
+	struct ImageSnapshotBuffer {
+		ImageSnapshot buffer[SnapHistory];
+
+		const ImageSnapshot *get(uint32_t moveCount) const;
+
+		ImageSnapshot &operator[](size_t index) { return buffer[index]; }
+		const ImageSnapshot &operator[](size_t index) const { return buffer[index]; }
+	};
+
 	struct DataXT {
 		// Timed by lastProcessTime
 		SnapshotBuffer snapshots;
+
+		// Timed by xt.moveCount
+		ImageSnapshotBuffer imageSnapshots;
 
 		// Server only, timed by sg.currentTime
 		SnapshotBuffer lagCompensationSnapshots;
@@ -134,6 +166,21 @@ public:
 	{
 		for (auto &snapshot : xt.snapshots.buffer) {
 			if (snapshot.time >= time)
+				snapshot.invalidate();
+		}
+	}
+
+	ImageSnapshot createImageSnapshot(uint32_t moveCount) const;
+
+	void saveItemImageSnapshot(uint32_t moveCount)
+	{
+		xt.imageSnapshots[moveCount % SnapHistory] = createImageSnapshot(moveCount);
+	}
+
+	void invalidateImagePrediction(uint32_t moveCount)
+	{
+		for (auto &snapshot : xt.imageSnapshots.buffer) {
+			if (snapshot.moveCount >= moveCount)
 				snapshot.invalidate();
 		}
 	}

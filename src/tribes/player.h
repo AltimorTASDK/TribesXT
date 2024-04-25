@@ -155,6 +155,19 @@ public:
 	};
 
 	struct ItemImageEntry {
+		enum State {
+			Reset,
+			Fire,
+			NoAmmo,
+			Idle,
+			Ready,
+			Reload,
+			SpinUp,
+			SpinDown,
+			Activate,
+			Deactivate
+		};
+
 		int state;
 		int typeId;
 		int imageId;

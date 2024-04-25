@@ -1,4 +1,5 @@
 #include "darkstar/console/console.h"
+#include "darkstar/Sim/Net/packetStream.h"
 #include "tribes/bullet.h"
 #include "tribes/fearDcl.h"
 #include "tribes/playerPSC.h"
@@ -20,25 +21,6 @@ auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float
 	snapshot.pitch = lerp(a.pitch, b.pitch, t);
 	snapshot.energy = lerp(a.energy, b.energy, t);
 	return snapshot;
-}
-
-auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
-{
-	return Snapshot {
-		.time = time,
-		.yaw = getRot().z,
-		.position = getLinearPosition(),
-		.velocity = getLinearVelocity(),
-		.pitch = viewPitch,
-		.energy = energy,
-		.traction = traction,
-		.lastContactCount = lastContactCount,
-		.jumpSurfaceLastContact = jumpSurfaceLastContact,
-		.pingStatus = getSensorPinged(),
-		.contact = contact,
-		.jetting = jetting,
-		.crouching = crouching
-	};
 }
 
 auto PlayerXT::SnapshotBuffer::get(uint32_t time) const -> const Snapshot*
@@ -71,6 +53,31 @@ auto PlayerXT::SnapshotBuffer::getPrev(uint32_t time) const -> const Snapshot*
 	}
 
 	return nullptr;
+}
+
+auto PlayerXT::ImageSnapshotBuffer::get(uint32_t moveCount) const -> const ImageSnapshot*
+{
+	const auto &snap = buffer[moveCount % SnapHistory];
+	return snap.moveCount == moveCount ? &snap : nullptr;
+}
+
+auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
+{
+	return {
+		.time = time,
+		.yaw = getRot().z,
+		.position = getLinearPosition(),
+		.velocity = getLinearVelocity(),
+		.pitch = viewPitch,
+		.energy = energy,
+		.traction = traction,
+		.lastContactCount = lastContactCount,
+		.jumpSurfaceLastContact = jumpSurfaceLastContact,
+		.pingStatus = getSensorPinged(),
+		.contact = contact,
+		.jetting = jetting,
+		.crouching = crouching
+	};
 }
 
 void PlayerXT::applyAccumulatedAim()
@@ -211,6 +218,21 @@ void PlayerXT::saveLagCompensationSnapshotAll(uint32_t time)
 
 	for (const auto player : SimSet::iterate<PlayerXT>(LagCompensatedSetId))
 		player->saveLagCompensationSnapshot(time);
+}
+
+auto PlayerXT::createImageSnapshot(uint32_t moveCount) const -> ImageSnapshot
+{
+	auto snapshot = ImageSnapshot{.moveCount = moveCount};
+
+	for (auto i = 0; i < MaxItemImages; i++) {
+		const auto &image = itemImageList[i];
+		snapshot.images[i].typeId = image.typeId;
+		snapshot.images[i].delayTime = image.delayTime;
+		snapshot.images[i].triggerDown = image.triggerDown;
+		snapshot.images[i].ammo = image.ammo;
+	}
+
+	return snapshot;
 }
 
 void PlayerXT::setViewAngles(float pitch, float yaw)
@@ -403,8 +425,10 @@ void PlayerXT::clientMove(uint32_t curTime)
 
 	loadSnapshotInterpolated(curTime);
 
-	if (hasFocus)
-		applyAccumulatedAim();
+	if (hasFocus && cg.packetStream != nullptr) {
+		if (cg.packetStream->streamMode != Net::PacketStream::PlaybackMode)
+			applyAccumulatedAim();
+	}
 }
 
 void PlayerXT::ghostSetMove(
@@ -455,6 +479,8 @@ void PlayerXT::initProjectileXT(Projectile *projectile)
 
 	projectile->predictionKeyXT = xt.moveCount;
 	projectile->spawnTimeXT = wg->currentTime;
+
+	Console->printf(CON_BLUE, "%s projectile spawned at move %d", wg == &sg ? "sv" : "cl", xt.moveCount);
 }
 
 void PlayerXT::initPredictedProjectile(Projectile *projectile, int type)

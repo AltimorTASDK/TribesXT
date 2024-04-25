@@ -83,6 +83,8 @@ private:
 
 	static void __fastcall hook_Player_updateImageState(PlayerXT*, edx_t, int imageSlot, float dt);
 
+	static void hook_Player_unpackItemImages_initial(CpuState &cs);
+
 	static void __fastcall hook_ItemImageData_pack(Player::ItemImageData*, edx_t, BitStream *stream);
 	static void __fastcall hook_ItemImageData_unpack(Player::ItemImageData*, edx_t, BitStream *stream);
 
@@ -199,6 +201,11 @@ private:
 			StaticJmpHook<0x4B3860, hook_Player_fireImageProjectile> fireImageProjectile;
 			// Update ammo on the client
 			StaticJmpHook<0x4B3B50, hook_Player_updateImageState> updateImageState;
+			// Set Activate image state on initial local ghost update if not firing right away
+			x86Hook unpackItemImages_initial = {hook_Player_unpackItemImages_initial, 0x4B40F2, 2};
+			// Always setImageState when local ghost is added to manager
+			// push dword ptr [ebx]
+			StaticCodePatch<0x4AF020, "\xFF\x33\x90\x90\x90\x90\x90"> initResources_setImageState;
 			// Don't rely on the server for trigger/fire/ammo state
 			StaticCodePatch<0x4B4049, "\x90\x90\x90"> ignoreServerFire1;
 			StaticCodePatch<0x4B4084, "\x90\x90\x90"> ignoreServerFire2;
