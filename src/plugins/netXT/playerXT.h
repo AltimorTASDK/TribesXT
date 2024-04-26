@@ -148,6 +148,7 @@ public:
 	void loadSnapshot(const Snapshot &snapshot);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
+	void loadSnapshotLagCompensation(const Snapshot &snapshot);
 
 	void saveLagCompensationSnapshot(uint32_t time)
 	{

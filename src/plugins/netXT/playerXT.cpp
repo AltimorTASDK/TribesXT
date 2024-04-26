@@ -82,6 +82,15 @@ auto PlayerXT::createSnapshot(uint32_t time) const -> Snapshot
 
 void PlayerXT::applyAccumulatedAim()
 {
+	if (!hasFocus)
+		return;
+
+	if (cg.packetStream == nullptr)
+		return;
+
+	if (cg.packetStream->streamMode == Net::PacketStream::PlaybackMode)
+		return;
+
 	// Use accumulated mouse input for local player
 	if (const auto *snap = xt.snapshots.get(lastProcessTime); snap != nullptr) {
 		const auto pitch = snap->pitch + cg.psc->curMove.pitch;
@@ -148,6 +157,16 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	return true;
 }
 
+void PlayerXT::loadSnapshotLagCompensation(const Snapshot &snapshot)
+{
+	setPos(snapshot.position);
+
+	if (mount != nullptr) {
+		const auto mountTransform = mount->getObjectMountTransform(mountPoint);
+		setTransform(TMat3F(EulerF(getRot()), {0, 0, 0}) * mountTransform);
+	}
+}
+
 void PlayerXT::startLagCompensation(uint32_t time)
 {
 	const auto *a = xt.lagCompensationSnapshots.getPrev(time);
@@ -159,20 +178,20 @@ void PlayerXT::startLagCompensation(uint32_t time)
 	xt.lagCompensationBackup = createSnapshot();
 
 	if (a != nullptr && (a->time == time || b == nullptr)) {
-		loadSnapshot(*a);
+		loadSnapshotLagCompensation(*a);
 		xt.lagCompensationTarget = *a;
 		return;
 	}
 	
 	if (b != nullptr && a == nullptr) {
-		loadSnapshot(*b);
+		loadSnapshotLagCompensation(*b);
 		xt.lagCompensationTarget = *b;
 		return;
 	}
 
 	const auto fraction = (float)(time - a->time) / (b->time - a->time);
 	const auto snapshot = Snapshot::interpolate(*a, *b, fraction);
-	loadSnapshot(snapshot);
+	loadSnapshotLagCompensation(snapshot);
 	xt.lagCompensationTarget = snapshot;
 }
 
@@ -181,10 +200,7 @@ void PlayerXT::endLagCompensation()
 	if (!xt.lagCompensationTarget.isValid())
 		return;
 
-	// Preserve any velocity change from explosions
-	const auto impulse = getLinearVelocity() - xt.lagCompensationTarget.velocity;
-	loadSnapshot(xt.lagCompensationBackup);
-	setLinearVelocity(getLinearVelocity() + impulse);
+	loadSnapshotLagCompensation(xt.lagCompensationBackup);
 
 	xt.lagCompensationTarget.invalidate();
 }
@@ -424,11 +440,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 	}
 
 	loadSnapshotInterpolated(curTime);
-
-	if (hasFocus && cg.packetStream != nullptr) {
-		if (cg.packetStream->streamMode != Net::PacketStream::PlaybackMode)
-			applyAccumulatedAim();
-	}
+	applyAccumulatedAim();
 }
 
 void PlayerXT::ghostSetMove(
