@@ -23,6 +23,11 @@ auto PlayerXT::Snapshot::interpolate(const Snapshot &a, const Snapshot &b, float
 	return snapshot;
 }
 
+auto PlayerXT::Snapshot::interpolateMs(const Snapshot &a, const Snapshot &b, uint32_t time) -> Snapshot
+{
+	return interpolate(a, b, (float)(time - a.time) / (b.time - a.time));
+}
+
 auto PlayerXT::SnapshotBuffer::get(uint32_t time) const -> const Snapshot*
 {
 	const auto &snap = buffer[msToTicks(time) % SnapHistory];
@@ -152,12 +157,30 @@ bool PlayerXT::loadSnapshotInterpolated(uint32_t time)
 	if (b == nullptr)
 		return false;
 
-	const auto fraction = (float)(time - a->time) / (b->time - a->time);
-	loadSnapshot(Snapshot::interpolate(*a, *b, fraction));
+	loadSnapshot(Snapshot::interpolateMs(*a, *b, time));
 	return true;
 }
 
-void PlayerXT::loadSnapshotLagCompensation(const Snapshot &snapshot)
+bool PlayerXT::loadSnapshotSubtick(uint32_t time)
+{
+	const auto *a = xt.snapshots.getPrev(time);
+	if (a == nullptr)
+		return false;
+
+	if (a->time == time) {
+		loadSnapshotPositionOnly(*a);
+		return true;
+	}
+
+	const auto *b = xt.snapshots.getNext(time);
+	if (b == nullptr)
+		return false;
+
+	loadSnapshotPositionOnly(Snapshot::interpolateMs(*a, *b, time));
+	return true;
+}
+
+void PlayerXT::loadSnapshotPositionOnly(const Snapshot &snapshot)
 {
 	setPos(snapshot.position);
 
@@ -178,20 +201,19 @@ void PlayerXT::startLagCompensation(uint32_t time)
 	xt.lagCompensationBackup = createSnapshot();
 
 	if (a != nullptr && (a->time == time || b == nullptr)) {
-		loadSnapshotLagCompensation(*a);
+		loadSnapshotPositionOnly(*a);
 		xt.lagCompensationTarget = *a;
 		return;
 	}
 	
 	if (b != nullptr && a == nullptr) {
-		loadSnapshotLagCompensation(*b);
+		loadSnapshotPositionOnly(*b);
 		xt.lagCompensationTarget = *b;
 		return;
 	}
 
-	const auto fraction = (float)(time - a->time) / (b->time - a->time);
-	const auto snapshot = Snapshot::interpolate(*a, *b, fraction);
-	loadSnapshotLagCompensation(snapshot);
+	const auto snapshot = Snapshot::interpolateMs(*a, *b, time);
+	loadSnapshotPositionOnly(snapshot);
 	xt.lagCompensationTarget = snapshot;
 }
 
@@ -200,7 +222,7 @@ void PlayerXT::endLagCompensation()
 	if (!xt.lagCompensationTarget.isValid())
 		return;
 
-	loadSnapshotLagCompensation(xt.lagCompensationBackup);
+	loadSnapshotPositionOnly(xt.lagCompensationBackup);
 
 	xt.lagCompensationTarget.invalidate();
 }
@@ -352,22 +374,22 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 			const auto subtickYaw = getRot().z + subtickRecord.yaw;
 			xt.currentSubtick = subtickRecord.subtick;
 
-			updateMove(&move, true);
-
 			// Beacons don't get subtick because they have to be synced with movement
 			updateItem(move);
 
+			updateMove(&move, true);
+
 			// Update weapon with subtick state
-			loadSnapshotInterpolated(subtickTime);
+			loadSnapshotSubtick(subtickTime);
 			setViewAnglesClamped(subtickPitch, subtickYaw);
 			updateWeapon(move);
 
 			// Restore
-			loadSnapshot(lastProcessTime);
+			loadSnapshotSubtick(lastProcessTime);
 			xt.currentSubtick = NoSubtick;
 		} else {
-			updateMove(&move, true);
 			updateItem(move);
+			updateMove(&move, true);
 			updateWeapon(move);
 		}
 
@@ -412,22 +434,22 @@ void PlayerXT::clientMove(uint32_t curTime)
 				const auto subtickYaw = getRot().z + subtickRecord.yaw;
 				xt.currentSubtick = subtickRecord.subtick;
 
-				updateMove(move, false);
-
 				// Beacons don't get subtick because they have to be synced with movement
 				updateItem(*move);
 
+				updateMove(move, false);
+
 				// Update weapon with subtick state
-				loadSnapshotInterpolated(subtickTime);
+				loadSnapshotSubtick(subtickTime);
 				setViewAnglesClamped(subtickPitch, subtickYaw);
 				updateWeapon(*move);
 
 				// Restore
-				loadSnapshot(lastProcessTime);
+				loadSnapshotSubtick(lastProcessTime);
 				xt.currentSubtick = NoSubtick;
 			} else {
-				updateMove(move, false);
 				updateItem(*move);
+				updateMove(move, false);
 				updateWeapon(*move);
 			}
 

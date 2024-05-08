@@ -22,6 +22,7 @@ public:
 	// Maps to Player::read/writePacketData fields
 	struct Snapshot {
 		static Snapshot interpolate(const Snapshot &a, const Snapshot &b, float t);
+		static Snapshot interpolateMs(const Snapshot &a, const Snapshot &b, uint32_t time);
 
 		uint32_t time = -1;
 		float yaw;
@@ -148,7 +149,8 @@ public:
 	void loadSnapshot(const Snapshot &snapshot);
 	bool loadSnapshot(uint32_t time);
 	bool loadSnapshotInterpolated(uint32_t time);
-	void loadSnapshotLagCompensation(const Snapshot &snapshot);
+	bool loadSnapshotSubtick(uint32_t time);
+	void loadSnapshotPositionOnly(const Snapshot &snapshot);
 
 	void saveLagCompensationSnapshot(uint32_t time)
 	{
