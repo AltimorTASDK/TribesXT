@@ -54,7 +54,6 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 
 	stream->read(&bullet->m_spawnPosition);
 
-	[[maybe_unused]]
 	const auto elapsedMs = stream->readUInt(15);
 
 	bullet->m_spawnDirection = stream->readNormalVector(20);
@@ -64,7 +63,15 @@ void TracerXTPlugin::hook_Bullet_readInitialPacket(
 	bullet->m_spawnVelocity = bullet->m_spawnDirection * bullet->m_spawnVelocityLen;
 	bullet->setLinearVelocity(bullet->m_spawnVelocity);
 
-	bullet->setTransform({bullet->getRotation(), bullet->m_spawnPosition});
+	if (bullet->wasPredicted()) {
+		bullet->setTransform({bullet->getRotation(), bullet->m_spawnPosition});
+	} else {
+		// Should always be at least a tick, but not always on vanilla servers
+		const auto adjustedMs = std::max(elapsedMs, TickMs) - TickMs;
+		const auto delta = bullet->m_spawnVelocity * msToSecs(adjustedMs);
+		bullet->setTransform({bullet->getRotation(), bullet->m_spawnPosition + delta});
+		bullet->m_spawnTime = cg.currentTime - adjustedMs;
+	}
 
 	if (Netcode::XT::TracerInheritance.check()) {
 		// Using Player::packUpdate velocity quantization

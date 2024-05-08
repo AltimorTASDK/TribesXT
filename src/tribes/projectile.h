@@ -95,4 +95,9 @@ public:
 	{
 		return lagCompensationOffsetXT != -1;
 	}
+
+	bool wasPredicted() const
+	{
+		return predictionKeyXT != -1;
+	}
 };
