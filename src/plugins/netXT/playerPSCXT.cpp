@@ -9,6 +9,12 @@
 #include <algorithm>
 #include <numeric>
 
+constexpr uint8_t msToSubtick(uint32_t ms)
+{
+	// 32 instead of 0, since that's when we finish interpolating
+	return (ms - 1) % TickMs + 1;
+}
+
 void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 {
 	switch (action) {
@@ -19,7 +25,7 @@ void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 			break;
 
 		// currentTime isn't updated yet, so it corresponds to startTime below
-		xt.heldTriggerSubtick = cg.currentTime % TickMs;
+		xt.heldTriggerSubtick = msToSubtick(cg.currentTime);
 
 		if (xt.pendingSubtickRecord.subtick == NoSubtick) {
 			xt.pendingSubtickRecord = {
@@ -36,11 +42,10 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 	// Matches clientCollectInput move timing
 	const auto startTick = msToTicks(startTime - 1);
 	const auto endTick = msToTicks(endTime - 1);
-	const auto subtick = (uint8_t)(startTime % TickMs);
 
 	// Preserve the subtick offset if the player holds the trigger across ticks
 	if (isTriggerHeld() && xt.pendingSubtickRecord.subtick == NoSubtick) {
-		if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {
+		if (endTick != startTick || msToSubtick(endTime) >= xt.heldTriggerSubtick) {
 			xt.pendingSubtickRecord = {
 				.subtick = xt.heldTriggerSubtick,
 				.pitch = curMove.pitch,
@@ -73,7 +78,7 @@ void PlayerPSCXT::writeSubtick(BitStream *stream, int moveIndex)
 	const auto &record = xt.subtickRecords[moveTick % MaxMovesXT];
 
 	if (stream->writeFlag(record.subtick != NoSubtick)) {
-		stream->writeInt(record.subtick, TickShift);
+		stream->writeInt(record.subtick - 1, TickShift);
 		if (stream->writeFlag(record.pitch != 0))
 			stream->write(record.pitch);
 		if (stream->writeFlag(record.yaw != 0))
@@ -86,7 +91,7 @@ void PlayerPSCXT::readSubtick(BitStream *stream)
 	auto record = SubtickRecord();
 
 	if (stream->readFlag()) {
-		record.subtick = stream->readInt(TickShift);
+		record.subtick = stream->readInt(TickShift) + 1;
 		if (stream->readFlag())
 			stream->read(&record.pitch);
 		if (stream->readFlag())
