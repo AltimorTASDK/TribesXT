@@ -11,34 +11,23 @@
 
 void PlayerPSCXT::preSimActionEvent(int action, float eventValue)
 {
-	// currentTime isn't updated yet, so it corresponds to startTime below
-	const auto subtick = (uint8_t)(cg.currentTime % TickMs);
-
 	switch (action) {
 	case IDACTION_FIRE1:
+	case IDACTION_BREAK1:
+		// Check for fresh trigger pull, including BREAK1 with trigger released
+		if (isTriggerHeld())
+			break;
+
+		// currentTime isn't updated yet, so it corresponds to startTime below
+		xt.heldTriggerSubtick = cg.currentTime % TickMs;
+
 		if (xt.pendingSubtickRecord.subtick == NoSubtick) {
 			xt.pendingSubtickRecord = {
-				.subtick = subtick,
+				.subtick = xt.heldTriggerSubtick,
 				.pitch = curMove.pitch,
 				.yaw = curMove.turnRot
 			};
 		}
-		xt.heldTriggerSubtick = subtick;
-		break;
-
-	case IDACTION_BREAK1:
-		// This counts as shooting if you weren't holding the trigger
-		if (!(triggerCount & 1)) {
-			if (xt.pendingSubtickRecord.subtick == NoSubtick) {
-				xt.pendingSubtickRecord = {
-					.subtick = subtick,
-					.pitch = curMove.pitch,
-					.yaw = curMove.turnRot
-				};
-			}
-		}
-		xt.heldTriggerSubtick = NoSubtick;
-		break;
 	}
 }
 
@@ -50,7 +39,7 @@ void PlayerPSCXT::collectSubtickInput(uint32_t startTime, uint32_t endTime)
 	const auto subtick = (uint8_t)(startTime % TickMs);
 
 	// Preserve the subtick offset if the player holds the trigger across ticks
-	if (xt.pendingSubtickRecord.subtick == NoSubtick && xt.heldTriggerSubtick != NoSubtick) {
+	if (isTriggerHeld() && xt.pendingSubtickRecord.subtick == NoSubtick) {
 		if (subtick >= xt.heldTriggerSubtick || endTick != startTick) {
 			xt.pendingSubtickRecord = {
 				.subtick = xt.heldTriggerSubtick,

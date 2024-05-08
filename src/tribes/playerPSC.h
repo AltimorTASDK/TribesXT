@@ -35,8 +35,11 @@ public:
 
 	int itemCount(int item) const
 	{
-		if (item >= 0 && item < Player::MaxItemTypes)
-			return itemTypeCount[item];
-		return 0;
+		return item >= 0 && item < Player::MaxItemTypes ? itemTypeCount[item] : 0;
+	}
+
+	bool isTriggerHeld() const
+	{
+		return triggerCount & 1;
 	}
 };
