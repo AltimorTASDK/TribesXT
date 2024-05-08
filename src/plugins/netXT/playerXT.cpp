@@ -400,8 +400,10 @@ void PlayerXT::clientMove(uint32_t curTime)
 			auto *psc = (PlayerPSCXT*)cg.psc;
 			auto *move = psc->getClientMove(lastProcessTime);
 
-			if (move == nullptr)
+			if (move == nullptr) {
+				Console->printf(CON_RED, "null move");
 				break;
+			}
 
 			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
 
@@ -471,13 +473,20 @@ void PlayerXT::ghostSetMove(
 		lastProcessTime = (cg.currentTime + cg.lastTime + 1) / 2;
 	}
 
-	// Adjust for time nudge and extra move tick
-	lastProcessTime += cvars::net::timeNudge - TickMs;
+	// Adjust for time nudge
+	lastProcessTime += cvars::net::timeNudge;
+
+	// Adjust for extra move tick
+	if (!Netcode::XT::SendCurrentPlayerState.check())
+		lastProcessTime -= TickMs;
+
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
 
 	// State sent by server is from before the move, so simulate once
-	updateMove(move, false);
+	if (!Netcode::XT::SendCurrentPlayerState.check())
+		updateMove(move, false);
+
 	lastPlayerMove = *move;
 }
 

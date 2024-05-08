@@ -72,9 +72,6 @@ private:
 	static void hook_Player_clientProcess_move(PlayerXT*, uint32_t curTime);
 	static void hook_Player_clientProcess_move_asm();
 
-	static uint32_t __fastcall hook_Player_packUpdate(
-		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
-
 	static void hook_Player_fireImageProjectile_init(CpuState &cs);
 
 	static void hook_Player_updateMove_landAnim(CpuState &cs);
@@ -179,8 +176,6 @@ private:
 			x86Hook serverProcess_emptyMove = {hook_Player_serverProcess_emptyMove, 0x4BC72E, 1};
 			// Predict/interpolate/extrapolate on the client
 			StaticJmpHook<0x4BC2B3, hook_Player_clientProcess_move_asm> clientProcess_move;
-			// Send player states from the previous move on the server
-			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
 			// Pass subtick + lag compensation data to projectile
 			x86Hook fireImageProjectile_init = {hook_Player_fireImageProjectile_init, 0x4B3985, 3};
 			x86Hook startImageFire_init      = {hook_Player_fireImageProjectile_init, 0x4B2223, 3};
@@ -239,6 +234,8 @@ private:
 			StaticCodePatch<0x483F1F, "\x18"> onSimActionEvent_noYawClamp2;
 			// Don't clamp move angle deltas on the server
 			StaticJmpHook<0x482A90, hook_clampAngleDelta> clampAngleDelta;
+			// Use most recent move index in server PSC packet
+			StaticCodePatch<0x482E8A, "\x90\x90\x90"> writePacket_useCurrentMove;
 			// Invalidate predicted snapshots after a rollback
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
 			// Read subtick

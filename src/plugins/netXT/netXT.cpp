@@ -189,19 +189,6 @@ __declspec(naked) void NetXTPlugin::hook_Player_clientProcess_move_asm()
 	}
 }
 
-uint32_t NetXTPlugin::hook_Player_packUpdate(
-	PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
-{
-	const auto snapshot = player->createSnapshot();
-
-	// Clients expect the state before the most recent move
-	player->loadSnapshot(player->lastProcessTime - TickMs);
-	const auto result = get()->hooks.Player.packUpdate.callOriginal(player, gm, mask, stream);
-	player->loadSnapshot(snapshot);
-
-	return result;
-}
-
 void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
 {
 	auto *player = (PlayerXT*)cs.reg.esi;
@@ -274,19 +261,8 @@ PlayerPSCXT *NetXTPlugin::hook_PlayerPSC_ctor(PlayerPSCXT *psc, edx_t, bool in_i
 bool NetXTPlugin::hook_PlayerPSC_writePacket(
 	PlayerPSCXT *psc, edx_t, BitStream *bstream, uint32_t &key)
 {
-	if (psc->isServer) {
+	if (psc->isServer)
 		psc->writeClockSync(bstream);
-
-		if (auto *player = psc->getPlayerXT(); player != nullptr) {
-			// Clients expect the state before the most recent move
-			const auto snapshot = player->createSnapshot();
-			player->loadSnapshot(player->lastProcessTime - TickMs);
-			const auto &hook = get()->hooks.PlayerPSC.writePacket;
-			const auto result = hook.callOriginal(psc, bstream, key);
-			player->loadSnapshot(snapshot);
-			return result;
-		}
-	}
 
 	return get()->hooks.PlayerPSC.writePacket.callOriginal(psc, bstream, key);
 }
@@ -337,6 +313,8 @@ void NetXTPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 	const auto *psc = (PlayerPSCXT*)cs.reg.ebx;
 
 	if (auto *player = psc->getPlayerXT(); player != nullptr) {
+		const auto tickEnd = roundMsUpToTick(cg.currentTime);
+		player->lastProcessTime = tickEnd - psc->moves.size() * TickMs;
 		player->invalidatePrediction(player->lastProcessTime);
 		player->saveSnapshot(player->lastProcessTime);
 		player->xt.moveCount = psc->firstMoveSeq;
