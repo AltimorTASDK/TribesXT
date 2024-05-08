@@ -300,7 +300,7 @@ void PlayerXT::updateItem(const PlayerMove &move)
 		return;
 	}
 
-	if (isRollback())
+	if (isRollbackPreMove())
 		return;
 
 	if (cg.psc->itemCount(item) == 0)
@@ -454,10 +454,8 @@ void PlayerXT::clientMove(uint32_t curTime)
 				updateWeapon(*move);
 			}
 
-			if (lastProcessTime > xt.maxProcessTime)
-				xt.maxProcessTime = lastProcessTime;
-
 			lastPlayerMove = *move;
+			xt.maxProcessTime = std::max(xt.maxProcessTime, lastProcessTime);
 			xt.moveCount++;
 		} while (lastProcessTime < curTime);
 	}
@@ -473,15 +471,16 @@ void PlayerXT::packUpdateXT(Net::GhostManager *gm, uint32_t mask, BitStream *str
 
 void PlayerXT::unpackUpdateXT(Net::GhostManager *gm, BitStream *stream)
 {
-	if (Netcode::XT::SendCurrentPlayerState.check()) {
-		const auto oldJumpCount = xt.jumpCount;
-		xt.jumpCount = stream->readInt(3);
+	if (!Netcode::XT::SendCurrentPlayerState.check())
+		return;
 
-		// Let the server drive ghost jump animations because we may not run the move
-		if (xt.jumpCount != oldJumpCount && !hasFocus) {
-			if (currentAnimation != ANIM_JUMPRUN && currentAnimation != ANIM_LAND)
-				setAnimation(ANIM_JUMPRUN);
-		}
+	const auto oldJumpCount = xt.jumpCount;
+	xt.jumpCount = stream->readInt(3);
+
+	// Let the server drive ghost jump animations because we may not run the move
+	if (xt.jumpCount != oldJumpCount && !hasFocus) {
+		if (currentAnimation != ANIM_JUMPRUN && currentAnimation != ANIM_LAND)
+			setAnimation(ANIM_JUMPRUN);
 	}
 }
 
@@ -523,9 +522,13 @@ void PlayerXT::ghostSetMove(
 	invalidatePrediction(lastProcessTime);
 	saveSnapshot(lastProcessTime);
 
-	// State sent by server is from before the move, so simulate once
-	if (!Netcode::XT::SendCurrentPlayerState.check())
+	if (Netcode::XT::SendCurrentPlayerState.check()) {
+		// Set fields that would've been set by updateMove
+		falling = newVel.z <= -10.f;
+	} else {
+		// State sent by server is from before the move, so simulate once
 		updateMove(move, false);
+	}
 
 	lastPlayerMove = *move;
 }

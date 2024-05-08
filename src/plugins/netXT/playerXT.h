@@ -138,6 +138,11 @@ public:
 		return isGhost() && lastProcessTime <= xt.maxProcessTime;
 	}
 
+	bool isRollbackPreMove() const
+	{
+		return isGhost() && lastProcessTime + TickMs <= xt.maxProcessTime;
+	}
+
 	Snapshot createSnapshot(uint32_t time = 0) const;
 
 	void saveSnapshot(uint32_t time)
