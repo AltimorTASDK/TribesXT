@@ -1,4 +1,5 @@
 #include "darkstar/console/console.h"
+#include "darkstar/Core/bitstream.h"
 #include "darkstar/Sim/Net/packetStream.h"
 #include "tribes/bullet.h"
 #include "tribes/fearDcl.h"
@@ -463,6 +464,25 @@ void PlayerXT::clientMove(uint32_t curTime)
 
 	loadSnapshotInterpolated(curTime);
 	applyAccumulatedAim();
+}
+
+void PlayerXT::packUpdateXT(Net::GhostManager *gm, uint32_t mask, BitStream *stream)
+{
+	stream->writeInt(xt.jumpCount, 3);
+}
+
+void PlayerXT::unpackUpdateXT(Net::GhostManager *gm, BitStream *stream)
+{
+	if (Netcode::XT::SendCurrentPlayerState.check()) {
+		const auto oldJumpCount = xt.jumpCount;
+		xt.jumpCount = stream->readInt(3);
+
+		// Let the server drive ghost jump animations because we may not run the move
+		if (xt.jumpCount != oldJumpCount && !hasFocus) {
+			if (currentAnimation != ANIM_JUMPRUN && currentAnimation != ANIM_LAND)
+				setAnimation(ANIM_JUMPRUN);
+		}
+	}
 }
 
 void PlayerXT::ghostSetMove(

@@ -67,6 +67,12 @@ private:
 	static void __fastcall hook_Player_updateMove(
 		PlayerXT*, edx_t, PlayerMove *curMove, bool server);
 
+	static uint32_t __fastcall hook_Player_packUpdate(
+		PlayerXT*, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream);
+
+	static void __fastcall hook_Player_unpackUpdate(
+		PlayerXT*, edx_t, Net::GhostManager *gm, BitStream *stream);
+
 	static void hook_Player_serverProcess_emptyMove(CpuState &cs);
 
 	static void hook_Player_clientProcess_move(PlayerXT*, uint32_t curTime);
@@ -74,7 +80,7 @@ private:
 
 	static void hook_Player_fireImageProjectile_init(CpuState &cs);
 
-	static void hook_Player_updateMove_landAnim(CpuState &cs);
+	static void hook_Player_updateMove_jumpAnim(CpuState &cs);
 
 	static void __fastcall hook_Player_fireImageProjectile(PlayerXT*, edx_t, int imageSlot);
 
@@ -167,11 +173,17 @@ private:
 			StaticJmpHook<0x4BBCA0, hook_Player_ghostSetMove> ghostSetMove;
 			// Run a single player move
 			StaticJmpHook<0x4BA640, hook_Player_updateMove> updateMove;
+			// Preserve the visuals by not interrupting the hard landing animation
+			// Also track the jump count for server updates
+			x86Hook updateMove_jumpAnim = {hook_Player_updateMove_jumpAnim, 0x4BA7F1, 1};
 			// Skip updateImageState calls and handle it ourselves
 			// jmp 0x4BA66C
 			StaticCodePatch<0x4BA653, "\xEB\x17"> updateMove_noImages;
 			// Allow remote players to jump during prediction
 			StaticCodePatch<0x4BA7DB, "\xEB"> updateMove_predictJump;
+			// Add fields to player update
+			StaticJmpHook<0x4BB760, hook_Player_packUpdate> packUpdate;
+			StaticJmpHook<0x4BC8C0, hook_Player_unpackUpdate> unpackUpdate;
 			// Handle forced moves for unresponsive clients
 			x86Hook serverProcess_emptyMove = {hook_Player_serverProcess_emptyMove, 0x4BC72E, 1};
 			// Predict/interpolate/extrapolate on the client
@@ -182,8 +194,6 @@ private:
 			// Remove the client's check for preventing jumps during hard landings
 			// It's fake because the server doesn't track animations
 			StaticCodePatch<0x4BA7C2, "\x90\x90\x90\x90\x90\x90"> noClientHardLandingCheck;
-			// Preserve the visuals by not interrupting the hard landing animation
-			x86Hook updateMove_landAnim = {hook_Player_updateMove_landAnim, 0x4BA7F1, 1};
 			// Run weapon update logic on the client
 			StaticCodePatch<0x4B2D68, "\x90\x90\x90\x90\x90\x90"> updateWeaponOnClient1;
 			StaticCodePatch<0x4B31DA, "\x90\x90"> updateWeaponOnClient2;

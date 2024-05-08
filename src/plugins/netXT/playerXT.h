@@ -114,6 +114,9 @@ public:
 		uint32_t maxProcessTime = 0;
 		uint32_t moveCount = 0;
 		bool lastTrigger = false;
+
+		// Server + client, not predicted by client
+		uint8_t jumpCount = 0;
 	};
 
 	FIELD(Player::SIZEOF, DataXT, xt);
@@ -195,6 +198,9 @@ public:
 	void updateWeapon(const PlayerMove &move);
 	void serverUpdateMove(const PlayerMove *moves, int moveCount);
 	void clientMove(uint32_t curTime);
+
+	void packUpdateXT(Net::GhostManager *gm, uint32_t mask, BitStream *stream);
+	void unpackUpdateXT(Net::GhostManager *gm, BitStream *stream);
 
 	void ghostSetMove(
 		PlayerMove *move, const Point3F &newPos, const Point3F &newVel,

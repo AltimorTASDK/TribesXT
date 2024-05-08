@@ -1,5 +1,6 @@
 #include "darkstar/Core/bitstream.h"
 #include "darkstar/Ml/random.h"
+#include "darkstar/Sim/simGame.h"
 #include "darkstar/Sim/Net/ghostManager.h"
 #include "tribes/bullet.h"
 #include "tribes/fearDcl.h"
@@ -160,10 +161,36 @@ void NetXTPlugin::hook_Player_updateMove(PlayerXT *player, edx_t, PlayerMove *cu
 	player->saveSnapshot(player->lastProcessTime);
 }
 
+void NetXTPlugin::hook_Player_updateMove_jumpAnim(CpuState &cs)
+{
+	// Track jump count so the server can drive the animation
+	if (auto *player = (PlayerXT*)cs.reg.ebp; !player->isGhost())
+		player->xt.jumpCount++;
+
+	// Prevent clients from interrupting ANIM_LAND with ANIM_JUMPRUN
+	// Vanilla clients normally believe they can't jump at all out of ANIM_LAND
+	if (cs.reg.eax == Player::ANIM_LAND)
+		cs.reg.eax = Player::ANIM_JUMPRUN;
+}
+
+uint32_t NetXTPlugin::hook_Player_packUpdate(
+	PlayerXT *player, edx_t, Net::GhostManager *gm, uint32_t mask, BitStream *stream)
+{
+	const auto retMask = get()->hooks.Player.packUpdate.callOriginal(player, gm, mask, stream);
+	player->packUpdateXT(gm, mask, stream);
+	return retMask;
+}
+
+void NetXTPlugin::hook_Player_unpackUpdate(
+	PlayerXT *player, edx_t, Net::GhostManager *gm, BitStream *stream)
+{
+	get()->hooks.Player.unpackUpdate.callOriginal(player, gm, stream);
+	player->unpackUpdateXT(gm, stream);
+}
+
 void NetXTPlugin::hook_Player_serverProcess_emptyMove(CpuState &cs)
 {
 	auto *player = (PlayerXT*)cs.reg.ebp;
-	const auto &emptyMove = *(PlayerMove*)(cs.reg.esp + 0x14);
 	// Update weapon after move
 	for (auto i = 0; i < Player::MaxItemImages; i++)
 		player->updateImageState(i, 0.032f);
@@ -194,15 +221,6 @@ void NetXTPlugin::hook_Player_fireImageProjectile_init(CpuState &cs)
 	auto *player = (PlayerXT*)cs.reg.esi;
 	auto *projectile = (Projectile*)cs.reg.edi;
 	player->initProjectileXT(projectile);
-}
-
-void NetXTPlugin::hook_Player_updateMove_landAnim(CpuState &cs)
-{
-	auto &anim = cs.reg.eax;
-	// Prevent clients from interrupting ANIM_LAND with ANIM_JUMPRUN
-	// Vanilla clients normally believe they can't jump at all out of ANIM_LAND
-	if (anim == Player::ANIM_LAND)
-		anim = Player::ANIM_JUMPRUN;
 }
 
 void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int imageSlot)
