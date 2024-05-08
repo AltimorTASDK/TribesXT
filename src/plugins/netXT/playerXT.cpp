@@ -400,10 +400,8 @@ void PlayerXT::clientMove(uint32_t curTime)
 			auto *psc = (PlayerPSCXT*)cg.psc;
 			auto *move = psc->getClientMove(lastProcessTime);
 
-			if (move == nullptr) {
-				Console->printf(CON_RED, "null move");
+			if (move == nullptr)
 				break;
-			}
 
 			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
 
