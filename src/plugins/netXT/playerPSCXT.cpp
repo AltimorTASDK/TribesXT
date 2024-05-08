@@ -113,16 +113,13 @@ void PlayerPSCXT::writeLagCompensation(BitStream *stream, int moveIndex)
 	const auto moveTick = msToTicks(cg.currentTime - 1) - movesBack;
 	const auto &subtickRecord = xt.subtickRecords[moveTick % MaxMovesXT];
 
-	const auto syncedTimeBase = xt.syncedClock - cvars::net::timeNudge;
-	const auto syncedTimeMove = syncedTimeBase - movesBack * TickMs;
-
-	uint32_t lagCompensationTime;
+	// Get the synced clock at the beginning of the tick, adjusted by timenudge
+	const auto syncedTickStart = xt.syncedClock - msToSubtick(cg.currentTime - 1);
+	auto lagCompensationTime = syncedTickStart - movesBack * TickMs - cvars::net::timeNudge;
 
 	// Adjust by subtick if possible
 	if (subtickRecord.subtick != NoSubtick)
-		lagCompensationTime = syncedTimeMove - TickMs + subtickRecord.subtick;
-	else
-		lagCompensationTime = syncedTimeMove;
+		lagCompensationTime += subtickRecord.subtick - TickMs;
 
 	stream->writeInt(lagCompensationTime, 32);
 }
