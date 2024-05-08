@@ -313,11 +313,11 @@ void NetXTPlugin::hook_PlayerPSC_readPacket_setTime(CpuState &cs)
 	const auto *psc = (PlayerPSCXT*)cs.reg.ebx;
 
 	if (auto *player = psc->getPlayerXT(); player != nullptr) {
-		const auto tickEnd = roundMsUpToTick(cg.currentTime);
-		player->lastProcessTime = tickEnd - psc->moves.size() * TickMs;
+		// Adjust for extra move kept in the buffer
+		player->lastProcessTime += TickMs;
 		player->invalidatePrediction(player->lastProcessTime);
 		player->saveSnapshot(player->lastProcessTime);
-		player->xt.moveCount = psc->firstMoveSeq;
+		player->xt.moveCount = psc->firstMoveSeq + 1;
 	}
 }
 

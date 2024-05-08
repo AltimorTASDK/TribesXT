@@ -234,8 +234,6 @@ private:
 			StaticCodePatch<0x483F1F, "\x18"> onSimActionEvent_noYawClamp2;
 			// Don't clamp move angle deltas on the server
 			StaticJmpHook<0x482A90, hook_clampAngleDelta> clampAngleDelta;
-			// Use most recent move index in server PSC packet
-			StaticCodePatch<0x482E8A, "\x90\x90\x90"> writePacket_useCurrentMove;
 			// Invalidate predicted snapshots after a rollback
 			x86Hook readPacket_setTime = {hook_PlayerPSC_readPacket_setTime, 0x485945, 1};
 			// Read subtick
