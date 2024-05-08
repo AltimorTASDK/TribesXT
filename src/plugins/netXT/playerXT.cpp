@@ -385,7 +385,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 			updateWeapon(move);
 
 			// Restore
-			loadSnapshotSubtick(lastProcessTime);
+			loadSnapshot(lastProcessTime);
 			xt.currentSubtick = NoSubtick;
 		} else {
 			updateItem(move);
@@ -445,7 +445,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 				updateWeapon(*move);
 
 				// Restore
-				loadSnapshotSubtick(lastProcessTime);
+				loadSnapshot(lastProcessTime);
 				xt.currentSubtick = NoSubtick;
 			} else {
 				updateItem(*move);
