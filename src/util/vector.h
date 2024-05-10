@@ -101,7 +101,6 @@ public:
 		return zip_apply(callable, elems(), tuples...);
 	}
 
-	template<typename ...Tuples>
 	constexpr auto foreach(auto &&callable, FixedTuple<elem_count> auto &&...tuples) const
 	{
 		return zip_apply(callable, elems(), tuples...);
