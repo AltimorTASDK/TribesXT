@@ -1,5 +1,6 @@
 #pragma once
 
+#include "darkstar/Core/color.h"
 #include "darkstar/Core/encryptedPointer.h"
 #include "darkstar/SimObjects/fxRenderImage.h"
 #include "tribes/gameBase.h"

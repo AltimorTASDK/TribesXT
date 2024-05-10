@@ -16,6 +16,11 @@ struct Point3F : vec3 {
 	constexpr Point3F(const vec3 &vec) : vec3(vec) {}
 };
 
+struct Point4F : vec4 {
+	using vec4::vec4;
+	constexpr Point4F(const vec4 &vec) : vec4(vec) {}
+};
+
 struct EulerF : vec3 {
 	using vec3::vec3;
 	constexpr EulerF(const vec3 &vec) : vec3(vec) {}
@@ -94,11 +99,6 @@ struct TMat3F : RMat3F {
 struct RectF {
 	Point2F upperL;
 	Point2F lowerR;
-};
-
-struct ColorF : color_rgb_f32 {
-	using color_rgb_f32::color_rgb_f32;
-	constexpr ColorF(const color_rgb_f32 &color) : color_rgb_f32(color) {}
 };
 
 constexpr Point3F operator*(const Point3F &p, const RMat3F &m)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "darkstar/Core/color.h"
 #include "darkstar/Ml/ml.h"
 #include "darkstar/Sim/simBase.h"
 #include "darkstar/Sim/simEvDcl.h"
