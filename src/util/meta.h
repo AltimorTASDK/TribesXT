@@ -203,11 +203,11 @@ constexpr auto slice_tuple(TupleLike auto &&tuple)
 
 	constexpr auto real_start = start >= 0
 		? std::min(start, size - 1)
-		: std::max(0z, size + start);
+		: std::max((ssize_t)0, size + start);
 
 	constexpr auto real_end = end >= 0
 		? std::min(end, size)
-		: std::max(0z, size + end);
+		: std::max((ssize_t)0, size + end);
 
 	return for_range<real_start, real_end>([&]<size_t ...I> {
 		return std::forward_as_tuple(get<I>(tuple)...);
