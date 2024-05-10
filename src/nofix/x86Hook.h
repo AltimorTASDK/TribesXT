@@ -61,6 +61,8 @@ struct CpuState
 
 extern "C" void CallStubHeader(void);
 extern "C" void CallStubFooter(void);
+extern "C" void CallStubHeaderFPU(void);
+extern "C" void CallStubFooterFPU(void);
 
 class x86Hook
 {

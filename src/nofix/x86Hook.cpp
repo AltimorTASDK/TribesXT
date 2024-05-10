@@ -77,16 +77,26 @@ bool x86Hook::BuildCallStub(void)
 		pStub += x86Copy(pStub, _pAddress, _nInstruction);  
 
 	// attach header
-	memcpy(pStub, CallStubHeader, 3);
-	pStub += 3;  
+	if (_opt & PRESERVEFPU) {
+		memcpy(pStub, CallStubHeaderFPU, 10);
+		pStub += 10;
+	} else {
+		memcpy(pStub, CallStubHeader, 3);
+		pStub += 3;
+	}
 
 	// attach hook call
 	pStub = WriteImmediate(pStub, 0xE8, 
 	                       PtrToLong(pStub), PtrToLong(_pFunction));
 	
 	// attach footer
-	memcpy(pStub, CallStubFooter, 5);
-	pStub += 5;
+	if (_opt & PRESERVEFPU) {
+		memcpy(pStub, CallStubFooterFPU, 12);
+		pStub += 12;
+	} else {
+		memcpy(pStub, CallStubFooter, 5);
+		pStub += 5;
+	}
 
 	// attach instructions from hooked function
 	if((_opt & BEFORE) && !(_opt & NOINSTRUCTION))
