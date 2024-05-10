@@ -96,12 +96,14 @@ public:
 	template<size_t N>
 	constexpr auto get() const { return std::get<N>(elems()); }
 
-	constexpr auto foreach(auto &&callable, FixedTuple<elem_count> auto &&...tuples)
+	template<FixedTuple<elem_count> ...Tuples>
+	constexpr auto foreach(auto &&callable, Tuples &&...tuples)
 	{
 		return zip_apply(callable, elems(), tuples...);
 	}
 
-	constexpr auto foreach(auto &&callable, FixedTuple<elem_count> auto &&...tuples) const
+	template<FixedTuple<elem_count> ...Tuples>
+	constexpr auto foreach(auto &&callable, Tuples &&...tuples) const
 	{
 		return zip_apply(callable, elems(), tuples...);
 	}
@@ -127,7 +129,7 @@ public:
 
 	// Create a new vector by applying a function to each component
 	template<VecImpl T = vec_impl>
-	constexpr T map(auto &&callable, FixedTuple<elem_count> auto &&...tuples) const
+	constexpr T map(auto &&callable, auto &&...tuples) const
 	{
 		return T(foreach(callable, tuples...));
 	}
