@@ -140,6 +140,12 @@ bool NetXTPlugin::hook_Player_onAdd(PlayerXT *player)
 	return true;
 }
 
+void NetXTPlugin::hook_Player_kill(PlayerXT *player)
+{
+	get()->hooks.Player.onAdd.callOriginal(player);
+	player->removeFromSet(LagCompensatedSetId);
+}
+
 void NetXTPlugin::hook_Player_serverUpdateMove(
 	PlayerXT *player, edx_t, PlayerMove *moves, int moveCount)
 {
@@ -431,7 +437,7 @@ void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, e
 
 void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->hasLagCompensation()) {
+	if (projectile->shouldLagCompensate()) {
 		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
 		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
 		get()->hooks.Bullet.serverProcess.callOriginal(projectile, in_currTime);
@@ -443,7 +449,7 @@ void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t 
 
 void NetXTPlugin::hook_RocketDumb_serverProcess(RocketDumb *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->hasLagCompensation()) {
+	if (projectile->shouldLagCompensate()) {
 		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
 		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
 		get()->hooks.RocketDumb.serverProcess.callOriginal(projectile, in_currTime);
@@ -455,7 +461,7 @@ void NetXTPlugin::hook_RocketDumb_serverProcess(RocketDumb *projectile, edx_t, u
 
 void NetXTPlugin::hook_Grenade_serverProcess(Grenade *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->hasLagCompensation()) {
+	if (projectile->shouldLagCompensate()) {
 		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
 		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
 		get()->hooks.Grenade.serverProcess.callOriginal(projectile, in_currTime);
@@ -476,6 +482,7 @@ void NetXTPlugin::init()
 	console->addVariable(0, "net::timeNudge",             CMDConsole::Int, &cvars::net::timeNudge);
 	console->addVariable(0, "net::clientClockCorrection", CMDConsole::Int, &cvars::net::clientClockCorrection);
 	console->addVariable(0, "net::maxLagCompensation",    CMDConsole::Int, &cvars::net::maxLagCompensation);
+	console->addVariable(0, "net::ghostTimeout",          CMDConsole::Int, &cvars::net::ghostTimeout);
 
 	// Set up already running worlds
 	if (cg.manager != nullptr)

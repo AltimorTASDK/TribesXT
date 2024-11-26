@@ -52,6 +52,7 @@ public:
 	FIELD(0x304, Point3F, m_interpFrom);
 	FIELD(0x310, Point3F, m_interpTo);
 	FIELD(0x31C, uint32_t, m_lastUpdated);
+	FIELD(0x32C, bool, m_projectileIsLive);
 	FIELD(0x344, ShapeBase*, m_pShooter);
 	FIELD(0x350, Point3F, m_shooterVel);
 	FIELD(0x35C, Point3F, m_instTerminalVelocity);
@@ -95,6 +96,11 @@ public:
 	bool hasLagCompensation() const
 	{
 		return lagCompensationOffsetXT != -1;
+	}
+
+	bool shouldLagCompensate() const
+	{
+		return m_projectileIsLive && hasLagCompensation();
 	}
 
 	bool wasPredicted() const

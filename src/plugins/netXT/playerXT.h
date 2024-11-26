@@ -110,6 +110,10 @@ public:
 		LagCompensationRequest lagCompensationRequests[MaxMovesXT];
 		uint32_t currentLagCompensation = -1;
 
+		// Client only
+		uint32_t lastGhostRecvTime = 0; // cg.currentTime at last ghostSetMove
+		uint32_t lastGhostProcessTime = 0; // lastProcessTime after last ghostSetMove
+
 		// Server + client
 		uint32_t maxProcessTime = 0;
 		uint32_t moveCount = 0;
@@ -202,6 +206,7 @@ public:
 	void updateItem(const PlayerMove &move);
 	void updateWeapon(const PlayerMove &move);
 	void serverUpdateMove(const PlayerMove *moves, int moveCount);
+	bool clientTickOnce(uint32_t curTime);
 	void clientMove(uint32_t curTime);
 
 	void packUpdateXT(Net::GhostManager *gm, uint32_t mask, BitStream *stream);

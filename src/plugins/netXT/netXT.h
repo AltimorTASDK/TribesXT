@@ -26,6 +26,8 @@ inline int timeNudge = 48;
 inline int clientClockCorrection = 8;
 // How far back in time to allow lag compensation to
 inline int maxLagCompensation = 250;
+// How long without an update before ghosts stop moving
+inline int ghostTimeout = 250;
 }
 
 class NetXTPlugin : public SimConsolePlugin {
@@ -56,6 +58,8 @@ private:
 	static PlayerXT *__fastcall hook_Player_ctor(PlayerXT*);
 
 	static bool __fastcall hook_Player_onAdd(PlayerXT*);
+
+	static void __fastcall hook_Player_kill(PlayerXT*);
 
 	static void __fastcall hook_Player_serverUpdateMove(
 		PlayerXT*, edx_t, PlayerMove *moves, int moveCount);
@@ -167,6 +171,8 @@ private:
 			StaticJmpHook<0x4ACE70, hook_Player_ctor> ctor;
 			// Add player to LagCompensatedSet
 			StaticJmpHook<0x4AB830, hook_Player_onAdd> onAdd;
+			// Remove player from LagCompensatedSet
+			StaticJmpHook<0x4ADAC0, hook_Player_kill> kill;
 			// Run client moves on server
 			StaticJmpHook<0x4BBB40, hook_Player_serverUpdateMove> serverUpdateMove;
 			// Interpolate/extrapolate remote player

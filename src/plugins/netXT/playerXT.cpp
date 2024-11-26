@@ -409,54 +409,67 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 }
 
 // clientProcess partial reimplementation
+bool PlayerXT::clientTickOnce(uint32_t curTime)
+{
+	if (!hasFocus) {
+		// Remote ghost
+		updateMove(&lastPlayerMove, false);
+		return true;
+	}
+
+	auto *psc = (PlayerPSCXT*)cg.psc;
+	auto *move = psc->getClientMove(lastProcessTime);
+
+	if (move == nullptr)
+		return false;
+
+	const auto &subtickRecord = psc->getSubtick(lastProcessTime);
+
+	if (subtickRecord.subtick != NoSubtick) {
+		const auto lastTickTime = lastProcessTime - TickMs;
+		const auto subtickTime = lastTickTime + subtickRecord.subtick;
+		const auto subtickPitch = viewPitch + subtickRecord.pitch;
+		const auto subtickYaw = getRot().z + subtickRecord.yaw;
+		xt.currentSubtick = subtickRecord.subtick;
+
+		// Beacons don't get subtick because they have to be synced with movement
+		updateItem(*move);
+
+		updateMove(move, false);
+
+		// Update weapon with subtick state
+		loadSnapshotSubtick(subtickTime);
+		setViewAnglesClamped(subtickPitch, subtickYaw);
+		updateWeapon(*move);
+
+		// Restore
+		loadSnapshot(lastProcessTime);
+		xt.currentSubtick = NoSubtick;
+	} else {
+		updateItem(*move);
+		updateMove(move, false);
+		updateWeapon(*move);
+	}
+
+	lastPlayerMove = *move;
+	xt.maxProcessTime = std::max(xt.maxProcessTime, lastProcessTime);
+	xt.moveCount++;
+	return true;
+}
+
 void PlayerXT::clientMove(uint32_t curTime)
 {
+	if (!hasFocus && curTime > xt.lastGhostRecvTime + cvars::net::ghostTimeout) {
+		// ghost timed out, snap back to last server position and stop moving
+		loadSnapshot(xt.lastGhostProcessTime);
+		return;
+	}
+
 	if (lastProcessTime < curTime) {
 		loadSnapshot(lastProcessTime);
 		do {
-			if (!hasFocus) {
-				// Remote ghost
-				updateMove(&lastPlayerMove, false);
-				continue;
-			}
-
-			auto *psc = (PlayerPSCXT*)cg.psc;
-			auto *move = psc->getClientMove(lastProcessTime);
-
-			if (move == nullptr)
+			if (!clientTickOnce(curTime))
 				break;
-
-			const auto &subtickRecord = psc->getSubtick(lastProcessTime);
-
-			if (subtickRecord.subtick != NoSubtick) {
-				const auto lastTickTime = lastProcessTime - TickMs;
-				const auto subtickTime = lastTickTime + subtickRecord.subtick;
-				const auto subtickPitch = viewPitch + subtickRecord.pitch;
-				const auto subtickYaw = getRot().z + subtickRecord.yaw;
-				xt.currentSubtick = subtickRecord.subtick;
-
-				// Beacons don't get subtick because they have to be synced with movement
-				updateItem(*move);
-
-				updateMove(move, false);
-
-				// Update weapon with subtick state
-				loadSnapshotSubtick(subtickTime);
-				setViewAnglesClamped(subtickPitch, subtickYaw);
-				updateWeapon(*move);
-
-				// Restore
-				loadSnapshot(lastProcessTime);
-				xt.currentSubtick = NoSubtick;
-			} else {
-				updateItem(*move);
-				updateMove(move, false);
-				updateWeapon(*move);
-			}
-
-			lastPlayerMove = *move;
-			xt.maxProcessTime = std::max(xt.maxProcessTime, lastProcessTime);
-			xt.moveCount++;
 		} while (lastProcessTime < curTime);
 	}
 
@@ -531,6 +544,9 @@ void PlayerXT::ghostSetMove(
 	}
 
 	lastPlayerMove = *move;
+
+	xt.lastGhostRecvTime = cg.currentTime;
+	xt.lastGhostProcessTime = lastProcessTime;
 }
 
 void PlayerXT::initProjectileXT(Projectile *projectile)

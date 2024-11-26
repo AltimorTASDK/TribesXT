@@ -32,7 +32,7 @@ BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, void *reserved)
 	REGISTER_PLUGIN(TracerXTPlugin);
 	REGISTER_PLUGIN(SkiBugFixPlugin);
 	REGISTER_PLUGIN(SleepFixPlugin);
-	REGISTER_PLUGIN(StarFixPlugin);
+	//REGISTER_PLUGIN(StarFixPlugin);
 	REGISTER_PLUGIN(WineFixPlugin);
 
 	return TRUE;
