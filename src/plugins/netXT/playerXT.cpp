@@ -409,7 +409,7 @@ void PlayerXT::serverUpdateMove(const PlayerMove *moves, int moveCount)
 }
 
 // clientProcess partial reimplementation
-bool PlayerXT::clientTickOnce(uint32_t curTime)
+bool PlayerXT::clientTickOnce()
 {
 	if (!hasFocus) {
 		// Remote ghost
@@ -468,7 +468,7 @@ void PlayerXT::clientMove(uint32_t curTime)
 	if (lastProcessTime < curTime) {
 		loadSnapshot(lastProcessTime);
 		do {
-			if (!clientTickOnce(curTime))
+			if (!clientTickOnce())
 				break;
 		} while (lastProcessTime < curTime);
 	}

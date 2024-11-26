@@ -206,7 +206,7 @@ public:
 	void updateItem(const PlayerMove &move);
 	void updateWeapon(const PlayerMove &move);
 	void serverUpdateMove(const PlayerMove *moves, int moveCount);
-	bool clientTickOnce(uint32_t curTime);
+	bool clientTickOnce();
 	void clientMove(uint32_t curTime);
 
 	void packUpdateXT(Net::GhostManager *gm, uint32_t mask, BitStream *stream);
