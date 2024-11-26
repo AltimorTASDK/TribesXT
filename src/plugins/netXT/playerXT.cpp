@@ -491,7 +491,7 @@ void PlayerXT::unpackUpdateXT(Net::GhostManager *gm, BitStream *stream)
 	xt.jumpCount = stream->readInt(3);
 
 	// Let the server drive ghost jump animations because we may not run the move
-	if (xt.jumpCount != oldJumpCount && !hasFocus) {
+	if (xt.jumpCount != oldJumpCount && !hasFocus && !dead) {
 		if (currentAnimation != ANIM_JUMPRUN && currentAnimation != ANIM_LAND)
 			setAnimation(ANIM_JUMPRUN);
 	}
