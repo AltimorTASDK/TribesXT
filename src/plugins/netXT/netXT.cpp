@@ -142,7 +142,7 @@ bool NetXTPlugin::hook_Player_onAdd(PlayerXT *player)
 
 void NetXTPlugin::hook_Player_kill(PlayerXT *player)
 {
-	get()->hooks.Player.onAdd.callOriginal(player);
+	get()->hooks.Player.kill.callOriginal(player);
 	player->removeFromSet(LagCompensatedSetId);
 }
 
