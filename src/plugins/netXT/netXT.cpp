@@ -44,7 +44,7 @@ void NetXTPlugin::hook_GhostManager_readPacket(
 {
 	get()->hooks.Net.GhostManager.readPacket.callOriginal(ghostManager, bstream, time);
 
-	if (!ghostManager->allowGhosts)
+	if (!Netcode::XT::ClientProjectiles.check() || !ghostManager->allowGhosts)
 		return;
 
 	// Copy for safe iteration
@@ -233,7 +233,7 @@ void NetXTPlugin::hook_Player_fireImageProjectile(PlayerXT *player, edx_t, int i
 {
 	get()->hooks.Player.fireImageProjectile.callOriginal(player, imageSlot);
 
-	if (player->isGhost())
+	if (Netcode::XT::ClientProjectiles.check() && player->isGhost())
 		player->clientFireImageProjectile(imageSlot);
 }
 
