@@ -113,9 +113,14 @@ public:
 	{
 	}
 
+	OriginalType getOriginal() const
+	{
+		return (OriginalType)original.get();
+	}
+
 	auto callOriginal(ArgTypes ...args) const
 	{
-		return ((OriginalType)original.get())(std::forward<ArgTypes>(args)...);
+		return getOriginal()(std::forward<ArgTypes>(args)...);
 	}
 };
 

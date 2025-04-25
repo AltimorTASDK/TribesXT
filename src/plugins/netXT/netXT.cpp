@@ -437,40 +437,45 @@ void NetXTPlugin::hook_ProjectileData_unpack(Projectile::ProjectileData *data, e
 		stream->read(&data->aimDeflection);
 }
 
+static void serverProcessWithLagCompensation(Projectile *projectile, uint32_t in_currTime, void *serverProcessPtr)
+{
+	auto *serverProcess = (void(__thiscall*)(Projectile*, uint32_t))serverProcessPtr;
+
+	if (projectile->shouldLagCompensate())
+	{
+		PlayerXT *shooter = (PlayerXT*)projectile->m_pShooter;
+		const auto lagCompensationTime = in_currTime - projectile->lagCompensationOffsetXT;
+		PlayerXT::startLagCompensationAll(shooter, lagCompensationTime);
+
+		if (projectile->hasSubtick()) {
+			// Shooter needs to be matched to projectile subtick for explosion impulse
+			const auto subtickAdjustTime = in_currTime - TickMs + projectile->subtickOffsetXT;
+			shooter->startLagCompensation(subtickAdjustTime);
+			serverProcess(projectile, in_currTime);
+			shooter->endLagCompensation();
+		} else {
+			serverProcess(projectile, in_currTime);
+		}
+
+		PlayerXT::endLagCompensationAll(shooter);
+	} else {
+		serverProcess(projectile, in_currTime);
+	}
+}
+
 void NetXTPlugin::hook_Bullet_serverProcess(Bullet *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->shouldLagCompensate()) {
-		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
-		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
-		get()->hooks.Bullet.serverProcess.callOriginal(projectile, in_currTime);
-		PlayerXT::endLagCompensationAll(projectile->m_pShooter);
-	} else {
-		get()->hooks.Bullet.serverProcess.callOriginal(projectile, in_currTime);
-	}
+	serverProcessWithLagCompensation(projectile, in_currTime, get()->hooks.Bullet.serverProcess.getOriginal());
 }
 
 void NetXTPlugin::hook_RocketDumb_serverProcess(RocketDumb *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->shouldLagCompensate()) {
-		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
-		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
-		get()->hooks.RocketDumb.serverProcess.callOriginal(projectile, in_currTime);
-		PlayerXT::endLagCompensationAll(projectile->m_pShooter);
-	} else {
-		get()->hooks.RocketDumb.serverProcess.callOriginal(projectile, in_currTime);
-	}
+	serverProcessWithLagCompensation(projectile, in_currTime, get()->hooks.RocketDumb.serverProcess.getOriginal());
 }
 
 void NetXTPlugin::hook_Grenade_serverProcess(Grenade *projectile, edx_t, uint32_t in_currTime)
 {
-	if (projectile->shouldLagCompensate()) {
-		const auto time = in_currTime - projectile->lagCompensationOffsetXT;
-		PlayerXT::startLagCompensationAll(projectile->m_pShooter, time);
-		get()->hooks.Grenade.serverProcess.callOriginal(projectile, in_currTime);
-		PlayerXT::endLagCompensationAll(projectile->m_pShooter);
-	} else {
-		get()->hooks.Grenade.serverProcess.callOriginal(projectile, in_currTime);
-	}
+	serverProcessWithLagCompensation(projectile, in_currTime, get()->hooks.Grenade.serverProcess.getOriginal());
 }
 
 void NetXTPlugin::setUpWorld(SimManager *manager)
